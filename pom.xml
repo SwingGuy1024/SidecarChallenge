@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.sidecar</groupId>
+	<artifactId>miguelmunoz.challenge</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>jar</packaging>
+
+	<name>miguelmunoz.challenge</name>
+	<description>Pizza Order Coding Challenge</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<springfox-version>2.7.0</springfox-version>
+	</properties>
+
+	<parent>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-parent</artifactId>
+		<version>1.5.10.RELEASE</version>
+		<relativePath/> <!-- lookup parent from repository -->
+	</parent>
+
+	<build>
+		<sourceDirectory>src/main/java</sourceDirectory>
+		<plugins>
+<!--			<plugin>-->
+<!--				<groupId>org.springframework.boot</groupId>-->
+<!--				<artifactId>spring-boot-maven-plugin</artifactId>-->
+<!--				<executions>-->
+<!--					<execution>-->
+<!--						<goals>-->
+<!--							<goal>repackage</goal>-->
+<!--						</goals>-->
+<!--					</execution>-->
+<!--				</executions>-->
+<!--			</plugin>-->
+
+			<!--Note: Because the generated code uses imports that I can't find in any library, I need to comment out
+			 the generator plugin once my code is generated. And I need to move the generated classes out of the target
+			 folder and into src. This is not very convenient, but it works. To generate additional classes uncomment 
+			 this generator plugin. -->
+
+			<!--<plugin>-->
+			<!--	<groupId>org.openapitools</groupId>-->
+			<!--	<artifactId>openapi-generator-maven-plugin</artifactId>-->
+			<!--	&lt;!&ndash; RELEASE_VERSION &ndash;&gt;-->
+			<!--	<version>5.0.0-SNAPSHOT</version>-->
+			<!--	&lt;!&ndash; /RELEASE_VERSION &ndash;&gt;-->
+			<!--	<executions>-->
+			<!--		<execution>-->
+			<!--			<goals>-->
+			<!--				<goal>generate</goal>-->
+			<!--			</goals>-->
+			<!--			<configuration>-->
+			<!--				<inputSpec>${project.basedir}/OpenApi.yaml</inputSpec>-->
+			<!--				<generatorName>spring</generatorName>-->
+			<!--				<groupId>neptunedreams</groupId>-->
+			<!--				<artifactId>pizzeria2</artifactId>-->
+			<!--				<artifactVersion>2.0</artifactVersion>-->
+			<!--				<library>spring-boot</library>-->
+			<!--				<configOptions>-->
+			<!--					<sourceFolder>src/gen/java/main</sourceFolder>-->
+			<!--					<bigDecimalAsString>true</bigDecimalAsString>-->
+			<!--					<dateLibrary>java8</dateLibrary>-->
+			<!--					<interfaceOnly>true</interfaceOnly>-->
+			<!--					<library>spring-boot</library>-->
+			<!--				</configOptions>-->
+			<!--			</configuration>-->
+			<!--		</execution>-->
+			<!--	</executions>-->
+			<!--</plugin>-->
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-jersey</artifactId>
+		</dependency>
+
+		<!--Because I can't launch a memory-only version of mysql, this library uses runtime scope, and the h2 in-memory
+		library uses test scope. -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!--SpringFox dependencies -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+
+		<!--&lt;!&ndash;For Java 9, according to-->
+		<!--https://stackoverflow.com/questions/43574426/how-to-resolve-java-lang-noclassdeffounderror-javax-xml-bind-jaxbexception-in-j&ndash;&gt;-->
+		<!--&lt;!&ndash;Another longer solution is provided for Java 11 in that same stackoverflow question.&ndash;&gt;-->
+		<!--<dependency>-->
+		<!--<groupId>javax.xml.bind</groupId>-->
+		<!--<artifactId>jaxb-api</artifactId>-->
+		<!--<version>2.3.0</version>-->
+		<!--</dependency>-->
+
+		<!--<dependency>-->
+		<!--<groupId>com.github.joschi.jackson</groupId>-->
+		<!--<artifactId>jackson-datatype-threetenbp</artifactId>-->
+		<!--<version>2.6.4</version>-->
+		<!--</dependency>-->
+
+		<!--		For JDK 11-->
+
+		<!-- API, java.xml.bind module -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+
+		<!-- Runtime, com.sun.xml.bind module -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+
+		<dependency>
+			<!--Handles serialization/deserialization of new Java Date/Time classes-->
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.10.1</version> <!-- Was 2.6.5-->
+		</dependency>
+
+		<!-- Bean Validation API support -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.10.1</version>
+		</dependency>
+
+		<!--	Security-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+			<version>2.3.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.9.1</version>
+		</dependency>
+
+		<!--Actuator-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-actuator-docs</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+	</dependencies>
+
+
+
+</project>

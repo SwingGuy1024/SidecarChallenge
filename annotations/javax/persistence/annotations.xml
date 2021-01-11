@@ -1,0 +1,8 @@
+<root>
+  <item name='javax.persistence.JoinColumn java.lang.String name()'>
+    <annotation name='org.jetbrains.annotations.NonNls'/>
+  </item>
+  <item name='javax.persistence.JoinTable java.lang.String name()'>
+    <annotation name='org.jetbrains.annotations.NonNls'/>
+  </item>
+</root>

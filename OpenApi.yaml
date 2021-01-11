@@ -1,0 +1,486 @@
+openapi: 3.0.0
+info:
+  description: System to keep track of customer orders
+  version: 1.0.0
+  title: Customer Orders API
+  contact:
+    email: SwingGuy1024@yahoo.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+paths:
+  /menuItem:
+    get:
+      summary: Get all menu items.
+      description: |
+        Retrieve all menu items
+      operationId: getAll
+      responses:
+        200:
+          description: Found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MenuItemDto'
+  /menuItem/{id}:
+    get:
+      summary: Gets a menuItem by ID
+      description: Gets a MenuItem by its ID.
+      operationId: getMenuItem
+      parameters:
+        - in: path
+          name: id
+          description: ID of menuItem to find
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MenuItemDto'
+        404:
+          description: NotFound
+  /admin/menuItem/add:
+    put:
+      summary: Add a MenuItem, with optional MenuItemOptions.
+      description: |
+        Add a MenuItem, complete with MenuItemOptions, to the database. Since MenuItemOptions are always linked to specific MenuItems, they are created, updated, and removed by using the MenuItem API. More options may be added later with the /MenuItem/addOption/ API.
+      operationId: addMenuItem
+      requestBody:
+        description: Complete MenuItem, with MenuItemOptions
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemDto'
+        required: true
+      responses:
+        201:
+          description: Menu Item Created
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+        400:
+          description: Bad Request
+  /admin/menuItem/addOption/{menuItemId}:
+    post:
+      summary: Add a menuItemOption
+      description: |
+        Add an existing MenuItemOption to a MenuItem.
+      operationId: addMenuItemOption
+      parameters:
+        - in: path
+          name: menuItemId
+          required: true
+          description: ID of the MenuItem getting the new option
+          schema:
+            type: integer
+            format: int32
+      requestBody:
+        description: MenuItemOption
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemOptionDto'
+      responses:
+        201:
+          description: MenuItemOption added
+          content:
+            application/json:
+              schema:
+                type: integer
+                format: int32
+        '400':
+          description: Bad Request
+  /admin/menuItem/deleteOption/{optionId}:
+    delete:
+      summary: Delete a MenuItemOption
+      description: Delete a MenuItemOption from a MenuItem.
+      operationId: deleteOption
+      parameters:
+        - in: path
+          name: optionId
+          required: true
+          description: ID of the MenuItemOpton to delete
+          schema:
+            type: integer
+            format: int32
+      responses:
+        200:
+          description: MenuItemOption deleted
+        400:
+          description: Bad Request
+  /login:
+    post:
+      summary: Log in to the system
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        200:
+          description: Successful Login
+          content:
+            applicaton/json:
+              schema:
+                type: string
+        401:
+          description: Unauthorized
+##  /logout:
+##    post:
+##      summary: Log out
+##      operationId: logout
+##      requestBody:
+##        content:
+##          application/json:
+##            schema:
+##              $ref: '#/components/schemas/UserDto'
+##      responses:
+##        200:
+##          description: logged out
+##        400:
+##          description: not found
+##  /register:
+##    post:
+##      summary: Register a new user
+##      operationId: register
+##      requestBody:
+##        content:
+##          application/json:
+##            schema:
+##              $ref: '#/components/schemas/UserDto'
+##      responses:
+##        201:
+##          description: Created
+##        409:
+##          description: email in use
+##
+#  /order:
+#    put:
+#      summary: Start a new order
+#      description: |
+#        Place an order of a MenuItem, with a list of MenuItemOptions. This creates a new ServerOrder, with a single CustomerOrder for a specific MenuItem, with no options yet.
+#      operationId: addOrder
+#      requestBody:
+#        description: The contents of the order
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/CustomerOrderDto'
+#        required: true
+#      responses:
+#        201:
+#          description: Order Placed
+#          content:
+#            application/json:
+#              schema:
+#                type: integer
+#                format: int32
+#        '400':
+#          description: Bad Request
+#    post:
+#      summary: Update an order
+#      description: |
+#        Update an order for a MenuItem, with a list of MenuItemOptions. This is one way to add items to an order. This may also be done with the /order/addMenuItemOption/ API.
+#      operationId: updateOrder
+#      requestBody:
+#        description: A CustomerOrderDto
+#        required: true
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/CustomerOrderDto'
+#      responses:
+#        202:
+#          description: Order Updated
+#        400:
+#          description: Bad Request
+#  /order/complete/{id}:
+#    post:
+#      summary: Mark an order completed
+#      description: |
+#        Mark a server order complete. A Complete server order is an order that has been delivered.
+#      operationId: completeOrder
+#      parameters:
+#        - in: path
+#          name: id
+#          description: The id of the completed order
+#          required: true
+#          schema:
+#            type: integer
+#            format: int32
+#      responses:
+#        202:
+#          description: Order Completed
+#        400:
+#          description: Bad Request
+#  /order/{id}:
+#    get:
+#      summary: search for an order by id
+#      description: |
+#        Retrieve an order by its ID.
+#      operationId: searchForOrder
+#      parameters:
+#        - in: path
+#          name: id
+#          description: id of the order to search for
+#          required: true
+#          schema:
+#            type: integer
+#            format: int32
+#      responses:
+#        200:
+#          description: search results found
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/CustomerOrderDto'
+#        404:
+#          description: Not found
+#        400:
+#          description: bad request
+#    delete:
+#      summary: delete an order
+#      description: |
+#        Delete an order. This is not the same as marking it complete. Canceled orders should be deleted. Delivered orders should be marked complete.
+#      operationId: deleteOrder
+#      parameters:
+#        - in: path
+#          name: id
+#          description: The id of the order to delete. Note that this does not mark it complete. Completed orders should not be deleted, but should be marked complete at /order/complete/.
+#          required: true
+#          schema:
+#            type: integer
+#            format: int32
+#      responses:
+#        202:
+#          description: Order Deleted
+#        400:
+#          description: Bad Request
+#  /order/addMenuItemOption/{customer_order_id}/{menu_option_id}:
+#    post:
+#      summary: Add a menuItemOption to a customer order.
+#      description: |
+#        Add a menu item option, taken from the Order's menu item, to the specified open order.
+#      operationId: addMenuItemOptionToCustomerOrder
+#      parameters:
+#        - in: path
+#          name: customer_order_id
+#          description: The id of the customer order
+#          required: true
+#          schema:
+#            type: integer
+#            format: int32
+#        - in: path
+#          name: menu_option_id
+#          description: The id of Menu Item Option to add
+#          required: true
+#          schema:
+#            type: integer
+#            format: int32
+#      responses:
+#        202:
+#          description: Addition successful
+#          content:
+#            application/json:
+#              schema:
+#                type: integer
+#                format: int32
+#        400:
+#          description: Bad Request
+#
+#  /order/search:
+#    get:
+#      summary: search for an order by completed status and order date, over a date range
+#      description: |
+#        Retrieve a server order by its completed status, with a date range. Returns an array of items. If you leave the starting date blank, it will default to the current date. If you leave the ending field blank, it will default to the start date. Both dates are inclusive, so searching for the same day in both fields will search for that day. Leaving the Complete field blank will cause it to search for all orders, regardless of their complete status. Formats for starting and ending dates are yyyy-MM-ddX or yyyy-MM-ddTHH:mmX for a specific time.
+#      operationId: searchByComplete
+#      parameters:
+#        - in: query
+#          name: complete
+#          schema:
+#            type: boolean
+#          required: false
+#          description: |
+#            If true, search for compete orders. If false, search for incomplete orders. If missing, returns both incomplete and complete in the date range.
+#        - in: query
+#          name: startingDate
+#          required: true
+#          description: |
+#            Start of the date range for the order date to search for, inclusive, or the current date if left blank. Format is yyyy-MM-dd or yyyy-MM-dd HH-mm for a specific time. Except the dash between HH and mm is supposed to be a colon, but I can't show it with the build software I'm using.
+#          schema:
+#            type: string
+#            format: date-time
+#        - in: query
+#          name: endingDate
+#          description: |
+#            End of the date range for the order date to search for, inclusive. If left blank, the current date is used. Format is yyyy-MM-ddX or yyyy-MM-ddTHH:mmX for a specific time
+#          schema:
+#            type: string
+#            format: date-time
+#          required: false
+#      responses:
+#        200:
+#          description: search results found
+#          content:
+#            application/json:
+#              schema:
+#                # I could return a ServerOrderDto or an array of CustomerOrderDtos
+#                # A ServerOrderDto is just an array.
+#                type: array
+#                items:
+#                  $ref: '#/components/schemas/CustomerOrderDto'
+#        404:
+#          description: Not found
+#        400:
+#          description: bad request
+components:
+  schemas:
+    MenuItemDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        name:
+          type: string
+        itemPrice:
+          type: number
+          description: Price. (BigDecimal)
+        parentId:
+          type: integer
+          format: int32
+        expired:
+          type: boolean
+        allowedOptions:
+           type: array
+           items:
+             $ref: '#/components/schemas/MenuItemOptionDto'
+      required:
+        - name
+        - itemPrice
+    MenuItemOptionDto:
+      type: object
+      description: Option for a MenuItem
+      properties:
+        name:
+          type: string
+        deltaPrice:
+          type: number
+          format: int32
+          description: Floating point price. Strings are easier to work with.
+        id:
+          type: integer
+          format: int32
+    CustomerOrderDto:
+      properties:
+        menuItem:
+          $ref: '#/components/schemas/MenuItemDto'
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItemDto'
+        customer:
+          $ref: '#/components/schemas/UserDto'
+        status:
+          type: string
+          description: Order complete
+          enum: [ PENDING, COMPLETE, CANCELLED ]
+        id:
+          type: integer
+          format: int32
+        orderTime:
+          type: string
+          format: date-time
+        completeTime:
+          type: string
+          format: date-time
+    OrderNodeDto:
+      properties:
+        id:
+          type: integer
+          format: int32
+        orderId:
+          type: integer
+          format: int32
+        parentTree:
+          $ref: '#/components/schemas/OrderNodeDto'
+        menuItemId:
+          type: integer
+          format: int32
+        options:
+           type: array
+           items:
+             $ref: '#/components/schemas/OrderNodeDto'
+    UserDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+        username:
+          type: string
+          description: username
+        password:
+          type: string
+          format: password
+          description: username
+        email:
+          type: string
+          description: username
+        mobilePhone:
+          type: string
+          description: username
+        role:
+          type: string
+          enum: [ CUSTOMER, ADMIN ]
+          description: username
+          # isAccountNonExpired:
+          #   type: boolean
+          #   description: username
+          # isAccountNonLocked:
+          #   type: boolean
+          #   description: username
+          # isCredentialNonExpired:
+          #   type: boolean
+          #   description: username
+          # isEnabled:
+          #   type: boolean
+          #   description: username
+          # Note on numbers:
+          #   type    format
+          #   ----    ------
+          #   integer int32     gives Integer
+          #   integer int64     gives Long
+          #   number            gives BigDecimal - Use this one
+          #   number  int32     gives BigDecimal
+          #   number  int64     gives BigDecimal
+          #   number  number    gives BigDecimal
+          #   number  double    gives Double
+          #   number  float     gives Float
+          #   string            gives String
+          #   string  byte      gives byte[ ] (base64 encoded characters)
+          #   string  binary    gives File
+          #   string  date      gives LocalDate
+          #   string  date-time gives OffsetDateTime
+          #   string  password  gives String
+          #   boolean           gives Boolean
+          # Undocumented:
+          #   integer byte      gives Integer
+          #   integer binary    gives Integer
+          #   integer date      gives Integer
+          #   integer decimal   gives Integer
+          #   string  int32     gives String
+          #   string  int64     gives String
+          # I don't know how to get BigInteger.

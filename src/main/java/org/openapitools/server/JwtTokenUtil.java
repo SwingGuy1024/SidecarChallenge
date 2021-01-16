@@ -1,4 +1,4 @@
-package org.openapitools.framework.util;
+package org.openapitools.server;
 
 
 import java.util.Date;
@@ -11,7 +11,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -31,10 +30,10 @@ public enum JwtTokenUtil {
     log.info("Getting JwtTokenUtil instance");
     return instance;
   }
-  public static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 Hours
+  public static final long JWT_TOKEN_VALIDITY_MILLIS = 5 * 60 * 60 * 1000; // 5 Hours in Milliseconds
 
-//  @Value("${jwt.secret}") //NON-NLS
-//  @Value("SPEAK FRIEND AND ENTER") //NON-NLS
+  //  @Value("${jwt.secret}") //NON-NLS // I set this in applications.properties, but it didn't work.
+  // There has to be a better way to do this. This is not suitable for production!
   private final String secret = "SPEAK FRIEND AND ENTER"; //NON-NLS
 
   public Claims getAllClaimsFromToken(String token) {
@@ -76,12 +75,16 @@ public enum JwtTokenUtil {
 //    System.out.printf("Claims = %s%n", claims); // NON-NLS
 //    System.out.printf("Subject = %s%n", subject); // NON-NLS
     final long now = System.currentTimeMillis();
+    return getToken(claims, subject, now);
+  }
+
+  private String getToken(final Map<String, Object> claims, final String subject, final long timeMillis) {
     return Jwts
         .builder()
         .setClaims(claims)
         .setSubject(subject)
-        .setIssuedAt(new Date(now))
-        .setExpiration(new Date(now + (JWT_TOKEN_VALIDITY * 1000)))
+        .setIssuedAt(new Date(timeMillis))
+        .setExpiration(new Date(timeMillis + (JWT_TOKEN_VALIDITY_MILLIS)))
         .signWith(SignatureAlgorithm.HS512, secret).compact();
   }
 
@@ -95,7 +98,7 @@ public enum JwtTokenUtil {
     Map<String, Object> claims = new HashMap<>();
     return doGenerateToken(claims, userDetails.getUsername());
   }
-
+  
   /**
    * Validate token
    *
@@ -106,5 +109,11 @@ public enum JwtTokenUtil {
   public boolean validateToken(String token, UserDetails userDetails) {
     final String username = getUsernameFromToken(token);
     return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+  }
+
+  // Test-only methods with package access only.
+  String generateTokenTestOnly(String username, long millis) {
+    Map<String, Object> claims = new HashMap<>();
+    return getToken(claims, username, millis);
   }
 }

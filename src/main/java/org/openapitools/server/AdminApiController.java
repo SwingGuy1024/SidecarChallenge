@@ -5,6 +5,7 @@ import org.openapitools.api.AdminApi;
 import org.openapitools.entity.MenuItem;
 import org.openapitools.entity.MenuItemOption;
 import org.openapitools.framework.PojoUtility;
+import org.openapitools.framework.ResponseUtility;
 import org.openapitools.framework.exception.BadRequest400Exception;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
@@ -75,8 +76,13 @@ public class AdminApiController implements AdminApi {
     }
 
     @Override
-    public ResponseEntity<Integer> addMenuItem(final MenuItemDto menuItemDto) {
+    public ResponseEntity<Integer> addMenuItem(final MenuItemDto dto) {
+        MenuItemDto revisedDto = dto;
+        if (revisedDto.getName() == null) {
+            revisedDto = ResponseUtility.getAlternativeDto(request, objectMapper, MenuItemDto.class);
+        }
         logHeaders(request, "AdminApiController addMenuItem");
+        final MenuItemDto menuItemDto = revisedDto; // Final, for lambda.
         return serveCreatedById(() -> {
             for (MenuItemOptionDto option : skipNull(menuItemDto.getAllowedOptions())) {
                 final String optionName = option.getName();

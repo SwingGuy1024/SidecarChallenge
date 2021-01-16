@@ -5,25 +5,27 @@
  */
 package org.openapitools.api;
 
+import java.util.Optional;
+import javax.validation.Valid;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
-import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.multipart.MultipartFile;
-import springfox.documentation.annotations.ApiIgnore;
 
-import javax.validation.Valid;
-import javax.validation.constraints.*;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-09T10:47:45.444934-08:00[America/Los_Angeles]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-14T22:05:57.338245-08:00[America/Los_Angeles]")
 @Validated
 @Api(value = "admin", description = "the admin API")
 public interface AdminApi {
@@ -40,13 +42,16 @@ public interface AdminApi {
      * @return Menu Item Created (status code 201)
      *         or Bad Request (status code 400)
      */
-    @ApiOperation(value = "Add a MenuItem, with optional MenuItemOptions.", nickname = "addMenuItem", notes = "Add a MenuItem, complete with MenuItemOptions, to the database. Since MenuItemOptions are always linked to specific MenuItems, they are created, updated, and removed by using the MenuItem API. More options may be added later with the /MenuItem/addOption/ API. ", response = Integer.class, tags={  })
+    @ApiOperation(value = "Add a MenuItem, with optional MenuItemOptions.", nickname = "addMenuItem", notes = "Add a MenuItem, complete with MenuItemOptions, to the database. Since MenuItemOptions are always linked to specific MenuItems, they are created, updated, and removed by using the MenuItem API. More options may be added later with the /MenuItem/addOption/ API. ", response = Integer.class, authorizations = {
+        
+        @Authorization(value = "bearerAuth")
+         }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "Menu Item Created", response = Integer.class),
         @ApiResponse(code = 400, message = "Bad Request") })
     @PutMapping(
         value = "/admin/menuItem/add",
-        produces = { "application/json" },
+        produces = { "application/text" },
         consumes = { "application/json" }
     )
     default ResponseEntity<Integer> addMenuItem(@ApiParam(value = "Complete MenuItem, with MenuItemOptions" ,required=true )  @Valid @RequestBody MenuItemDto menuItemDto) {
@@ -64,13 +69,16 @@ public interface AdminApi {
      * @return MenuItemOption added (status code 201)
      *         or Bad Request (status code 400)
      */
-    @ApiOperation(value = "Add a menuItemOption", nickname = "addMenuItemOption", notes = "Add an existing MenuItemOption to a MenuItem. ", response = Integer.class, tags={  })
+    @ApiOperation(value = "Add a menuItemOption", nickname = "addMenuItemOption", notes = "Add an existing MenuItemOption to a MenuItem. ", response = Integer.class, authorizations = {
+        
+        @Authorization(value = "bearerAuth")
+         }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 201, message = "MenuItemOption added", response = Integer.class),
         @ApiResponse(code = 400, message = "Bad Request") })
     @PostMapping(
         value = "/admin/menuItem/addOption/{menuItemId}",
-        produces = { "application/json" },
+        produces = { "application/text" },
         consumes = { "application/json" }
     )
     default ResponseEntity<Integer> addMenuItemOption(@ApiParam(value = "ID of the MenuItem getting the new option",required=true) @PathVariable("menuItemId") Integer menuItemId,@ApiParam(value = "MenuItemOption" ,required=true )  @Valid @RequestBody MenuItemOptionDto menuItemOptionDto) {
@@ -87,7 +95,10 @@ public interface AdminApi {
      * @return MenuItemOption deleted (status code 200)
      *         or Bad Request (status code 400)
      */
-    @ApiOperation(value = "Delete a MenuItemOption", nickname = "deleteOption", notes = "Delete a MenuItemOption from a MenuItem.", tags={  })
+    @ApiOperation(value = "Delete a MenuItemOption", nickname = "deleteOption", notes = "Delete a MenuItemOption from a MenuItem.", authorizations = {
+        
+        @Authorization(value = "bearerAuth")
+         }, tags={  })
     @ApiResponses(value = { 
         @ApiResponse(code = 200, message = "MenuItemOption deleted"),
         @ApiResponse(code = 400, message = "Bad Request") })

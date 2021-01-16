@@ -1,11 +1,9 @@
 package org.openapitools.framework.util;
 
-import java.util.Collections;
-
 import org.junit.Test;
 import org.openapitools.entity.User;
 import org.openapitools.model.UserDto;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.openapitools.server.JwtTokenUtil;
 
 import static org.junit.Assert.*;
 

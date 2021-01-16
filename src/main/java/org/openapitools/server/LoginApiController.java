@@ -1,10 +1,8 @@
 package org.openapitools.server;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.api.LoginApi;
 import org.openapitools.framework.ResponseUtility;
-import org.openapitools.framework.util.JwtTokenUtil;
 import org.openapitools.model.UserDto;
 import org.openapitools.repositories.UserRepository;
 import org.slf4j.Logger;
@@ -56,18 +54,13 @@ public class LoginApiController implements LoginApi {
         return ResponseUtility.serveOK(() -> loginUser(userDto));
     }
 
-    private String loginUser(UserDto userDto) {
-        log.debug("LoginApiController.loginUser");
-        UserDto shouldBe = new UserDto();
-        shouldBe.setUsername("userNameField");
-        shouldBe.setPassword("passwordField");
-        log.info("Should be {}", shouldBe);
-        try {
-            log.info(objectMapper.writeValueAsString(shouldBe));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
+    private String loginUser(UserDto badUserDto) {
+        log.debug("LoginApiController.loginUser with {}", badUserDto);
+        UserDto userDto = badUserDto;
+        if (badUserDto.getUsername() == null) {
+            userDto = ResponseUtility.getAlternativeDto(request, objectMapper, UserDto.class); // Kludge! See method docs for why.
         }
-        log.info("Logging in {}", userDto);
+        log.debug("user DTO: {}", userDto);
         User user = makeUser(userDto);
         log.info("user: {} = {}", userDto.getUsername(), user.getUsername());
         User storedUser = userRepository.findByUsername(user.getUsername());
@@ -75,10 +68,7 @@ public class LoginApiController implements LoginApi {
         if (storedUser == null) {
             throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
         }
-        final String encoded = encoder.encode(userDto.getPassword());
-        log.info("Comparing {}", encoded);
-        log.info("       to {}", storedUser.getPassword());
-        if (!encoded.equals(storedUser.getPassword())) {
+        if (!encoder.matches(userDto.getPassword(), storedUser.getPassword())) {
             throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
         }
         final String token = JwtTokenUtil.getInstance().generateToken(user);
@@ -93,21 +83,27 @@ public class LoginApiController implements LoginApi {
     private void doDemoStartup() {
         long count = userRepository.count();
         log.info("Total users = {}", count);
-        if (count == 0) {
-            userRepository.save(makeUser("User1", UserDto.RoleEnum.CUSTOMER));
-            userRepository.save(makeUser("User2", UserDto.RoleEnum.CUSTOMER));
-            userRepository.save(makeUser("User3", UserDto.RoleEnum.CUSTOMER));
-            userRepository.save(makeUser("Admin1", UserDto.RoleEnum.ADMIN));
-            userRepository.save(makeUser("Admin2", UserDto.RoleEnum.ADMIN));
+        boolean create = count == 0;
+        makeUser("User1", UserDto.RoleEnum.CUSTOMER, create, userRepository);
+        makeUser("User2", UserDto.RoleEnum.CUSTOMER, create, userRepository);
+        makeUser("User3", UserDto.RoleEnum.CUSTOMER, create, userRepository);
+        makeUser("Admin1", UserDto.RoleEnum.ADMIN, create, userRepository);
+        makeUser("Admin2", UserDto.RoleEnum.ADMIN, create, userRepository);
+        for (int i=0; i<5; ++i) {
+            log.debug("Encoding password: {}", encoder.encode("password"));
         }
     }
 
-    private User makeUser(String userName, UserDto.RoleEnum role) {
+    private User makeUser(String userName, UserDto.RoleEnum role, boolean create, UserRepository repo) {
         User user = new User();
         user.setUsername(userName);
         user.setPassword(encoder.encode(userName));
         user.setRole(role);
         user.setEmail(userName + "@nobody.com");
+        log.debug("Creating user {} with password {}", user.getUsername(), user.getPassword());
+        if (create) {
+            userRepository.save(user);
+        }
         return user;
     }
 

@@ -42,10 +42,10 @@
 <!--				</executions>-->
 <!--			</plugin>-->
 
-			<!--Note: Because the generated code uses imports that I can't find in any library, I need to comment out
-			 the generator plugin once my code is generated. And I need to move the generated classes out of the target
-			 folder and into src. This is not very convenient, but it works. To generate additional classes uncomment 
-			 this generator plugin. -->
+			<!--Note: Because the generated code does not compile, (It overrides in interface incompletely) 
+			I need to comment out the generator plugin once my code is generated. And I need to move the generated 
+			classes out of the target folder and into src. This is not very convenient, but it works. To generate
+			additional classes you will need to uncomment this generator plugin. -->
 
 			<!--<plugin>-->
 			<!--	<groupId>org.openapitools</groupId>-->
@@ -69,7 +69,7 @@
 			<!--					<sourceFolder>src/gen/java/main</sourceFolder>-->
 			<!--					<bigDecimalAsString>true</bigDecimalAsString>-->
 			<!--					<dateLibrary>java8</dateLibrary>-->
-			<!--					<interfaceOnly>true</interfaceOnly>-->
+			<!--					<interfaceOnly>false</interfaceOnly>-->
 			<!--					<library>spring-boot</library>-->
 			<!--				</configOptions>-->
 			<!--			</configuration>-->
@@ -204,6 +204,14 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.7.0</version>
+			<scope>test</scope>
 		</dependency>
 
 	</dependencies>

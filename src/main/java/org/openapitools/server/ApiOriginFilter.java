@@ -9,6 +9,7 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.RequestFacade;
 import org.openapitools.framework.util.ReplaceChain;
@@ -30,8 +31,18 @@ public class ApiOriginFilter implements javax.servlet.Filter {
   public void doFilter(ServletRequest request, ServletResponse response,
                        FilterChain chain) throws IOException, ServletException {
     HttpServletResponse httpResponse = (HttpServletResponse) response;
-    Enumeration<String> aNames = request.getAttributeNames();
-    
+//    Enumeration<String> aNames = request.getAttributeNames();
+    log.debug("  req: class:     {}", request.getClass());
+//    log.debug("  req: Method:  {}", request.getMethod());
+    if (request instanceof HttpServletRequest) {
+      HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+      log.debug("req URI {}", httpServletRequest.getRequestURI());
+      log.debug("CtxPath {}", httpServletRequest.getContextPath());
+      log.debug("PthInfo {}", httpServletRequest.getPathInfo());
+      log.debug("LclName {}", httpServletRequest.getLocalName());
+      log.debug("LclAddr {}", httpServletRequest.getLocalAddr());
+    }
+
     if (log.isDebugEnabled()) {
       if (request instanceof RequestFacade) {
         RequestFacade facade = (RequestFacade) request;

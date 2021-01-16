@@ -43,7 +43,8 @@ public class JwtUserDetailsService implements UserDetailsService {
     }
     log.debug("password: {}", byUsername.getPassword());
     log.debug("    Role: {}", byUsername.getRole());
-    log.debug("{}: {}", username, encoder.encode(username));
     return byUsername;
   }
+  
+  public PasswordEncoder getEncoder() { return encoder; }
 }

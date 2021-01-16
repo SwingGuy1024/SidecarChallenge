@@ -8,6 +8,8 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: https://localhost:8080
 paths:
   /menuItem:
     get:
@@ -63,7 +65,7 @@ paths:
         201:
           description: Menu Item Created
           content:
-            application/json:
+            application/text:
               schema:
                 type: integer
                 format: int32
@@ -94,7 +96,7 @@ paths:
         201:
           description: MenuItemOption added
           content:
-            application/json:
+            application/text:
               schema:
                 type: integer
                 format: int32
@@ -132,7 +134,7 @@ paths:
         200:
           description: Successful Login
           content:
-            applicaton/json:
+            applicaton/text:
               schema:
                 type: string
         401:
@@ -183,7 +185,7 @@ paths:
 #        201:
 #          description: Order Placed
 #          content:
-#            application/json:
+#            application/text:
 #              schema:
 #                type: integer
 #                format: int32
@@ -293,7 +295,7 @@ paths:
 #        202:
 #          description: Addition successful
 #          content:
-#            application/json:
+#            application/text:
 #              schema:
 #                type: integer
 #                format: int32
@@ -345,7 +347,14 @@ paths:
 #          description: Not found
 #        400:
 #          description: bad request
+security:
+  - bearerAuth: [ ]
 components:
+  securitySchemes:
+    bearerAuth: # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     MenuItemDto:
       type: object
@@ -364,12 +373,9 @@ components:
         expired:
           type: boolean
         allowedOptions:
-           type: array
-           items:
-             $ref: '#/components/schemas/MenuItemOptionDto'
-      required:
-        - name
-        - itemPrice
+          type: array
+          items:
+            $ref: '#/components/schemas/MenuItemOptionDto'
     MenuItemOptionDto:
       type: object
       description: Option for a MenuItem
@@ -383,29 +389,29 @@ components:
         id:
           type: integer
           format: int32
-    CustomerOrderDto:
-      properties:
-        menuItem:
-          $ref: '#/components/schemas/MenuItemDto'
-        options:
-          type: array
-          items:
-            $ref: '#/components/schemas/MenuItemDto'
-        customer:
-          $ref: '#/components/schemas/UserDto'
-        status:
-          type: string
-          description: Order complete
-          enum: [ PENDING, COMPLETE, CANCELLED ]
-        id:
-          type: integer
-          format: int32
-        orderTime:
-          type: string
-          format: date-time
-        completeTime:
-          type: string
-          format: date-time
+    # CustomerOrderDto:
+    #   properties:
+    #     menuItem:
+    #       $ref: '#/components/schemas/MenuItemDto'
+    #     options:
+    #       type: array
+    #       items:
+    #         $ref: '#/components/schemas/MenuItemDto'
+    #     customer:
+    #       $ref: '#/components/schemas/UserDto'
+    #     status:
+    #       type: string
+    #       description: Order complete
+    #       enum: [ PENDING, COMPLETE, CANCELLED ]
+    #     id:
+    #       type: integer
+    #       format: int32
+    #     orderTime:
+    #       type: string
+    #       format: date-time
+    #     completeTime:
+    #       type: string
+    #       format: date-time
     OrderNodeDto:
       properties:
         id:
@@ -420,9 +426,9 @@ components:
           type: integer
           format: int32
         options:
-           type: array
-           items:
-             $ref: '#/components/schemas/OrderNodeDto'
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderNodeDto'
     UserDto:
       type: object
       properties:

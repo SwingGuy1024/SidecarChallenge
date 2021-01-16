@@ -9,8 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.openapitools.OpenAPI2SpringBoot;
 import org.openapitools.entity.MenuItem;
 import org.openapitools.entity.MenuItemOption;
@@ -19,12 +21,15 @@ import org.openapitools.framework.exception.NotFound404Exception;
 import org.openapitools.framework.exception.ResponseException;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
+import org.openapitools.repositories.MenuItemOptionRepository;
+import org.openapitools.repositories.MenuItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.context.request.NativeWebRequest;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -36,7 +41,7 @@ import static org.junit.Assert.*;
  *
  * @author Miguel Mu\u00f1oz
  */
-@SuppressWarnings({"CallToNumericToString", "HardCodedStringLiteral", "MagicNumber"})
+@SuppressWarnings({"CallToNumericToString", "HardCodedStringLiteral", "MagicNumber", "RedundantSuppression"})
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OpenAPI2SpringBoot.class)
 @Component
@@ -65,14 +70,8 @@ public class AdminApiControllerTest {
   }
 
   @Test
-  public void testAddMenuItemGoodInput() throws ResponseException {
-    MenuItemOptionDto oliveOption = makeMenuItemOptionDto("olives", "0.30");
-    MenuItemOptionDto pepOption = makeMenuItemOptionDto("pepperoni", "0.40");
-
-    MenuItemDto menuItemDto = new MenuItemDto();
-    menuItemDto.setAllowedOptions(Arrays.asList(oliveOption, pepOption));
-    menuItemDto.setName("GoodItem");
-    menuItemDto.setItemPrice(new BigDecimal("0.50"));
+  public void testAddMenuItemGoodInput() {
+    MenuItemDto menuItemDto = makeMenuItem();
     ResponseEntity<Integer> responseEntity = adminApiController.addMenuItem(menuItemDto);
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
     Integer id = responseEntity.getBody();
@@ -90,6 +89,17 @@ public class AdminApiControllerTest {
       assertEquals(2, foodOptionSet.size());
     }
 
+  }
+
+  private static MenuItemDto makeMenuItem() {
+    MenuItemOptionDto oliveOption = makeMenuItemOptionDto("olives", "0.30");
+    MenuItemOptionDto pepOption = makeMenuItemOptionDto("pepperoni", "0.40");
+
+    MenuItemDto menuItemDto = new MenuItemDto();
+    menuItemDto.setAllowedOptions(Arrays.asList(oliveOption, pepOption));
+    menuItemDto.setName("GoodItem");
+    menuItemDto.setItemPrice(new BigDecimal("0.50"));
+    return menuItemDto;
   }
 
   private static MenuItemOptionDto makeMenuItemOptionDto(String name, String price) {

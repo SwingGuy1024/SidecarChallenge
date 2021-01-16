@@ -62,8 +62,7 @@ public class MenuItemDto   {
    * Get name
    * @return name
   */
-  @ApiModelProperty(required = true, value = "")
-  @NotNull
+  @ApiModelProperty(value = "")
 
 
   public String getName() {
@@ -83,8 +82,7 @@ public class MenuItemDto   {
    * Price. (BigDecimal)
    * @return itemPrice
   */
-  @ApiModelProperty(required = true, value = "Price. (BigDecimal)")
-  @NotNull
+  @ApiModelProperty(value = "Price. (BigDecimal)")
 
   @Valid
 

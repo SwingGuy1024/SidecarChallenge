@@ -134,7 +134,8 @@ public class User implements UserDetails {
   public static final class Authority implements GrantedAuthority {
     private final String authority;
     Authority(UserDto.RoleEnum role) {
-      authority = role.toString();
+      //noinspection HardCodedStringLiteral
+      authority = String.format("ROLE_%s", role);
     }
 
     @Override

@@ -96,6 +96,13 @@
 			<artifactId>spring-boot-starter-jersey</artifactId>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+
 		<!--Because I can't launch a memory-only version of mysql, this library uses runtime scope, and the h2 in-memory
 		library uses test scope. -->
 		<dependency>

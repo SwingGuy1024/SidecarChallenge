@@ -34,12 +34,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response,
                        AuthenticationException authException) throws IOException {
-    log.debug("JwtAuthenticationEntryPoint.commence");
-    log.debug("  Req: path <{}> -- {}", request.getContextPath(), request.getServletPath());
-    log.debug("  Req: AuthType {} -- {}", request.getContextPath(), request.getAuthType());
-    log.debug("  req: URI:     {}", request.getRequestURI());
-    log.debug("  req: Method:  {}", request.getMethod());
-    ResponseUtility.logHeaders(request, "EntryPoint");
+    log.debug("Error processing {}", ResponseUtility.getUriTail(request));
+    Throwable prior = null;
+    Throwable ex = authException;
+    //noinspection ObjectEquality
+    while ((ex != null) && (ex != prior)) {
+      log.debug("Error message from {}: {}", ex.getClass().getSimpleName(), authException.getLocalizedMessage());
+      prior = ex;
+      ex = ex.getCause();
+    }
     response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getLocalizedMessage());
   }
 }

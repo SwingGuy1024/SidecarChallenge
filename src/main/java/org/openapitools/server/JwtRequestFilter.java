@@ -53,15 +53,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       FilterChain chain
   ) throws ServletException, IOException {
     log.debug("JwtRequestFilter.doFilterInternal");
-    ResponseUtility.logHeaders(request, "jwtRequestFilter");
-    log.debug(request.getRequestURI());
+//    ResponseUtility.logHeaders(request, "jwtRequestFilter");
+    log.debug("Tail: {}", ResponseUtility.getUriTail(request));
 
     final String requestTokenHeader = request.getHeader(AUTHORIZATION);
 
     // JWT Token is in the form "Bearer token". Remove Bearer word and get only the Token
     if ((requestTokenHeader == null) || !requestTokenHeader.startsWith(BEARER_)) {
-      chain.doFilter(request, response);
       log.debug("No Bearer token");
+      chain.doFilter(request, response);
       return;
     }
     String jwtToken = requestTokenHeader.substring(BEARER_.length());

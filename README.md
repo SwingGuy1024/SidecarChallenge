@@ -1,5 +1,9 @@
 # Starting up
 
+Start Redis:
+
+    brew services start redis
+
 Create a mysql database called pizza
 Create a user called pizza, with password pizza
 Grant the user all rights on the pizza database

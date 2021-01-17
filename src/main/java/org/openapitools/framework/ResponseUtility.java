@@ -147,16 +147,28 @@ public enum ResponseUtility {
     logHeaders(request::getHeaderNames, request::getHeader);
   }
   
-  public static void logHeaders(Supplier<Iterator<String>> getNames, Function<String, String> getName) {
+  public static void logHeaders(Iterable<String> getNames, Function<String, String> getName) {
     if (log.isDebugEnabled()) {
-      Iterator<String> headerNames = getNames.get();
+      Iterator<String> headerNames = getNames.iterator();
       log.debug("{} headers", countTokens(headerNames));
-      headerNames = getNames.get();
+      headerNames = getNames.iterator();
       while (headerNames.hasNext()) {
         String hName = headerNames.next();
         log.debug("{}: {}", hName, getName.apply(hName));
       }
     }
+  }
+  
+  public static String getUriTail(HttpServletRequest request) {
+    String uri = request.getRequestURI();
+    if (uri == null) { // This may happen in unit tests, but not production.
+      return "";
+    }
+    String path = request.getContextPath();
+    if (uri.startsWith(path)) {
+      return uri.substring(path.length());
+    }
+    return uri;
   }
   
   private static <E> Iterator<E> asIterator(Enumeration<E> e) {

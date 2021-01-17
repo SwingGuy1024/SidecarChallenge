@@ -54,7 +54,7 @@ public class MenuItemApiController implements MenuItemApi {
 
   @Override
   public ResponseEntity<MenuItemDto> getMenuItem(final Integer id) {
-    logHeaders(request, "MenuItemApiController.getMenuItem(id)");
+//    logHeaders(request, "MenuItemApiController.getMenuItem(id)");
     return serveOK(() -> {
       MenuItem menuItem = menuItemRepository.findOne(id);
       confirmEntityFound(menuItem, id);
@@ -64,7 +64,7 @@ public class MenuItemApiController implements MenuItemApi {
 
   @Override
   public ResponseEntity<List<MenuItemDto>> getAll() {
-    logHeaders(request, "MenuItemApiController.getAll()");
+//    logHeaders(request, "MenuItemApiController.getAll()");
     return serveOK(this::getAllMenuItems);
   }
 

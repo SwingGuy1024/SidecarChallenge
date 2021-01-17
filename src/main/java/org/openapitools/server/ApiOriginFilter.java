@@ -8,6 +8,7 @@ import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,26 +32,15 @@ public class ApiOriginFilter implements javax.servlet.Filter {
   public void doFilter(ServletRequest request, ServletResponse response,
                        FilterChain chain) throws IOException, ServletException {
     HttpServletResponse httpResponse = (HttpServletResponse) response;
-//    Enumeration<String> aNames = request.getAttributeNames();
-    log.debug("  req: class:     {}", request.getClass());
-//    log.debug("  req: Method:  {}", request.getMethod());
-    if (request instanceof HttpServletRequest) {
-      HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-      log.debug("req URI {}", httpServletRequest.getRequestURI());
-      log.debug("CtxPath {}", httpServletRequest.getContextPath());
-      log.debug("PthInfo {}", httpServletRequest.getPathInfo());
-      log.debug("LclName {}", httpServletRequest.getLocalName());
-      log.debug("LclAddr {}", httpServletRequest.getLocalAddr());
-    }
-
+    log.debug("Request: class:     {}", request.getClass());
     if (log.isDebugEnabled()) {
       if (request instanceof RequestFacade) {
         RequestFacade facade = (RequestFacade) request;
-        final String requestURI = facade.getRequestURI();
-        // filter out calls to documentation
-        if (!requestURI.contains("springfox")) {
-          log.debug("Request URI: {}", charFilter(requestURI));
-        }
+        log.debug("Request URI: {}", charFilter(facade.getRequestURI()));
+      } else if (request instanceof ServletRequestWrapper && ((ServletRequestWrapper)request).getRequest() instanceof HttpServletRequest) {
+        final ServletRequest wrapped = ((ServletRequestWrapper) request).getRequest();
+        String uri = ((HttpServletRequest)wrapped).getRequestURI();
+        log.debug(charFilter(uri));
       } else {
         log.debug("Request of {}", request.getClass());
       }

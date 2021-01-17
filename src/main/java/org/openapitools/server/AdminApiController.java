@@ -1,5 +1,7 @@
 package org.openapitools.server;
 
+import java.util.Optional;
+import javax.validation.Valid;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.api.AdminApi;
 import org.openapitools.entity.MenuItem;
@@ -19,9 +21,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
-import java.util.Optional;
-
-import javax.validation.Valid;
 
 import static org.openapitools.framework.PojoUtility.*;
 import static org.openapitools.framework.ResponseUtility.*;
@@ -63,7 +62,7 @@ public class AdminApiController implements AdminApi {
 
     @Override
     public ResponseEntity<Integer> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
-        logHeaders(request, "AdminApiController addMenuItemOption");
+//        logHeaders(request, "AdminApiController addMenuItemOption");
         return serveCreatedById(() -> {
             confirmNotEmpty(optionDto.getName()); // throws ResponseException
             MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
@@ -81,7 +80,7 @@ public class AdminApiController implements AdminApi {
         if (revisedDto.getName() == null) {
             revisedDto = ResponseUtility.getAlternativeDto(request, objectMapper, MenuItemDto.class);
         }
-        logHeaders(request, "AdminApiController addMenuItem");
+//        logHeaders(request, "AdminApiController addMenuItem");
         final MenuItemDto menuItemDto = revisedDto; // Final, for lambda.
         return serveCreatedById(() -> {
             for (MenuItemOptionDto option : skipNull(menuItemDto.getAllowedOptions())) {
@@ -99,7 +98,7 @@ public class AdminApiController implements AdminApi {
 
     @Override
     public ResponseEntity<Void> deleteOption(final Integer optionId) {
-        logHeaders(request, "AdminApiController deleteOption");
+//        logHeaders(request, "AdminApiController deleteOption");
         return serveOK(() -> {
             log.debug("Deleting menuItemOption with id {}", optionId);
 

@@ -57,9 +57,9 @@ public class LoginApiController implements LoginApi {
     private String loginUser(UserDto badUserDto) {
         log.debug("LoginApiController.loginUser with {}", badUserDto);
         UserDto userDto = badUserDto;
-        if (badUserDto.getUsername() == null) {
-            userDto = ResponseUtility.getAlternativeDto(request, objectMapper, UserDto.class); // Kludge! See method docs for why.
-        }
+//        if (badUserDto.getUsername() == null) {
+//            userDto = ResponseUtility.getAlternativeDto(request, objectMapper, UserDto.class); // Kludge! See method docs for why.
+//        }
         log.debug("user DTO: {}", userDto);
         User user = makeUser(userDto);
         log.info("user: {} = {}", userDto.getUsername(), user.getUsername());

@@ -89,7 +89,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(final HttpSecurity http) throws Exception {
-    log.error("Configuring WebSecurityConfig");
+    log.debug("Configuring WebSecurityConfig");
     
     // The numerous matchers for permitAll() were a vain attempt to get the API Docs to work. The partly fixed the problem,
     // but the docs are still unavailable. However, this now assumes that all admin APIs will start with /admin, and all
@@ -107,7 +107,23 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 //          .anyRequest().permitAll()
         .antMatchers("/admin/**").hasRole(UserDto.RoleEnum.ADMIN.toString())
         .antMatchers("/order/**").hasRole(UserDto.RoleEnum.CUSTOMER.toString())
-        .antMatchers("/login", "/menuItem", "/**", "/home", "/swagger-ui.html", "/api-docs", "/configuration/**", "/swagger*/**", "/webjars/**", "/swagger-resources/**").permitAll()
+        .antMatchers(
+            "/login", 
+            "/menuItem",
+            "/**",
+            "/home",
+            "/swagger-ui.html",
+            "/api-docs",
+            "/configuration/**",
+            "/swagger*/**",
+            "/webjars/**",
+            "/swagger-resources/**",
+            "/css/**",
+            "/js/**",
+            "/images/**",
+            "/webjars/**",
+            "/**/favicon.ico"
+        ).permitAll()
         .and()
           .exceptionHandling()
           .authenticationEntryPoint(jwtAuthenticationEntryPoint)

@@ -18,12 +18,13 @@
 		<maven.compiler.source>${java.version}</maven.compiler.source>
 		<maven.compiler.target>${java.version}</maven.compiler.target>
 		<springfox-version>2.7.0</springfox-version>
+		<spring.framework.version>5.3.3</spring.framework.version>
 	</properties>
 
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.5.10.RELEASE</version>
+		<version>2.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 
@@ -90,6 +91,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>2.3.4.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -140,7 +142,7 @@
 		<!--<dependency>-->
 		<!--<groupId>javax.xml.bind</groupId>-->
 		<!--<artifactId>jaxb-api</artifactId>-->
-		<!--<version>2.3.0</version>-->
+		<!--<version>2.3.1</version>-->
 		<!--</dependency>-->
 
 		<!--<dependency>-->
@@ -207,10 +209,12 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-actuator-docs</artifactId>
+			<version>1.5.10.RELEASE</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+			<version>2.3.4.RELEASE</version>
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
@@ -221,8 +225,34 @@
 			<scope>test</scope>
 		</dependency>
 
+		<!-- https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#redis:connectors:lettuce -->
+		<dependency>
+			<groupId>io.lettuce</groupId>
+			<artifactId>lettuce-core</artifactId>
+			<version>6.0.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!--&lt;!&ndash; Remove me &ndash;&gt;-->
+		<!--<dependency>-->
+		<!--	<groupId>org.springframework.boot</groupId>-->
+		<!--	<artifactId>spring-boot-properties-migrator</artifactId>-->
+		<!--	<scope>runtime</scope>-->
+		<!--</dependency>-->
 	</dependencies>
 
-
+	<!-- https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#redis:setup -->
+	<repositories>
+		<repository>
+			<id>spring-milestone</id>
+			<name>Spring Maven MILESTONE Repository</name>
+			<url>https://repo.spring.io/libs-milestone</url>
+		</repository>
+	</repositories>
 
 </project>

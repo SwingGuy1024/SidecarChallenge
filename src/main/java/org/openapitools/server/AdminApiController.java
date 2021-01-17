@@ -66,7 +66,7 @@ public class AdminApiController implements AdminApi {
         return serveCreatedById(() -> {
             confirmNotEmpty(optionDto.getName()); // throws ResponseException
             MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
-            final MenuItem menuItem = menuItemRepository.findOne(menuItemId);
+            final MenuItem menuItem = menuItemRepository.getOne(menuItemId);
             confirmEntityFound(menuItem, menuItemId);
             menuItemOption.setMenuItem(menuItem);
             MenuItemOption savedOption = menuItemOptionRepository.save(menuItemOption);
@@ -77,9 +77,9 @@ public class AdminApiController implements AdminApi {
     @Override
     public ResponseEntity<Integer> addMenuItem(final MenuItemDto dto) {
         MenuItemDto revisedDto = dto;
-        if (revisedDto.getName() == null) {
-            revisedDto = ResponseUtility.getAlternativeDto(request, objectMapper, MenuItemDto.class);
-        }
+//        if (revisedDto.getName() == null) {
+//            revisedDto = ResponseUtility.getAlternativeDto(request, objectMapper, MenuItemDto.class);
+//        }
 //        logHeaders(request, "AdminApiController addMenuItem");
         final MenuItemDto menuItemDto = revisedDto; // Final, for lambda.
         return serveCreatedById(() -> {
@@ -102,7 +102,7 @@ public class AdminApiController implements AdminApi {
         return serveOK(() -> {
             log.debug("Deleting menuItemOption with id {}", optionId);
 
-            MenuItemOption itemToDelete = menuItemOptionRepository.findOne(optionId);
+            MenuItemOption itemToDelete = menuItemOptionRepository.getOne(optionId);
             PojoUtility.confirmEntityFound(itemToDelete, optionId);
 
             // Before I can successfully delete the menuItemOption, I first have to set its menuItem to null. If I don't

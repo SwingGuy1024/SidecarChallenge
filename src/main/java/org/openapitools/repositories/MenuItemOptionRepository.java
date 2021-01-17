@@ -31,8 +31,8 @@ public class MenuItemOptionRepository {
     return repository.save(option);
   }
   
-  public MenuItemOption findOne(Integer optionId) {
-    return repository.findOne(optionId);
+  public MenuItemOption getOne(Integer optionId) {
+    return repository.getOne(optionId);
   }
 
   @CacheEvict(cacheNames = MENU_ITEM_CACHE)

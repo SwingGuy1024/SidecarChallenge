@@ -188,37 +188,37 @@ public enum ResponseUtility {
     return count;
   }
 
-  /**
-   * This is a kludge to work around a strange bug. The UserDto that gets passed has only null values instead of the data sent
-   * by the client. I have no idea why. I know it has nothing to do with security, since I have seen it even without security
-   * installed.  However, this code can be used to extract the original DTO from the request. In my investigations, I found 
-   * that the original request, of class org.apache.coyote.Request, has the data in an InputBuffer. 
-   * It's wrapped inside a RequestFacade, which has it's own inputBuffer with no data. I don't know if this is the cause. I 
-   * know that this works around the problem.
-   * @param request The request, containing the original DTO
-   * @param objectMapper The ObjectMapper
-   * @param dtoClass The DTO class to create
-   * @param <D> The type of DTO
-   * @return The decoded DTO.
-   */
-  public static  <D> D getAlternativeDto(NativeWebRequest request, ObjectMapper objectMapper, Class<D> dtoClass) {
-    D dto;
-    HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
-    log.debug("Content length = {}", servletRequest.getContentLength());
-    StringBuilder builder = new StringBuilder();
-    String line = "";
-    try (BufferedReader reader = servletRequest.getReader()) {
-      while (line != null) {
-        builder.append(line);
-        line = reader.readLine();
-      }
-      final String json = builder.toString();
-      log.debug("Revised Data = {}", json);
-      dto = objectMapper.readValue(json, dtoClass);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-    return dto;
-  }
+//  /**
+//   * This is a kludge to work around a strange bug. The UserDto that gets passed has only null values instead of the data sent
+//   * by the client. I have no idea why. I know it has nothing to do with security, since I have seen it even without security
+//   * installed.  However, this code can be used to extract the original DTO from the request. In my investigations, I found 
+//   * that the original request, of class org.apache.coyote.Request, has the data in an InputBuffer. 
+//   * It's wrapped inside a RequestFacade, which has it's own inputBuffer with no data. I don't know if this is the cause. I 
+//   * know that this works around the problem.
+//   * @param request The request, containing the original DTO
+//   * @param objectMapper The ObjectMapper
+//   * @param dtoClass The DTO class to create
+//   * @param <D> The type of DTO
+//   * @return The decoded DTO.
+//   */
+//  public static  <D> D getAlternativeDto(NativeWebRequest request, ObjectMapper objectMapper, Class<D> dtoClass) {
+//    D dto;
+//    HttpServletRequest servletRequest = request.getNativeRequest(HttpServletRequest.class);
+//    log.debug("Content length = {}", servletRequest.getContentLength());
+//    StringBuilder builder = new StringBuilder();
+//    String line = "";
+//    try (BufferedReader reader = servletRequest.getReader()) {
+//      while (line != null) {
+//        builder.append(line);
+//        line = reader.readLine();
+//      }
+//      final String json = builder.toString();
+//      log.debug("Revised Data = {}", json);
+//      dto = objectMapper.readValue(json, dtoClass);
+//    } catch (IOException e) {
+//      throw new RuntimeException(e);
+//    }
+//    return dto;
+//  }
 
 }

@@ -56,7 +56,7 @@ public class MenuItemApiController implements MenuItemApi {
   public ResponseEntity<MenuItemDto> getMenuItem(final Integer id) {
 //    logHeaders(request, "MenuItemApiController.getMenuItem(id)");
     return serveOK(() -> {
-      MenuItem menuItem = menuItemRepository.findOne(id);
+      MenuItem menuItem = menuItemRepository.getOne(id);
       confirmEntityFound(menuItem, id);
       return objectMapper.convertValue(menuItem, MenuItemDto.class);
     });
@@ -79,7 +79,7 @@ public class MenuItemApiController implements MenuItemApi {
   ////// Package-level methods for unit tests only! //////
 
   MenuItemOption getMenuItemOptionTestOnly(int id) {
-    return menuItemOptionRepository.findOne(id);
+    return menuItemOptionRepository.getOne(id);
   }
 
   List<MenuItemOption> findAllOptionsTestOnly() {
@@ -87,7 +87,7 @@ public class MenuItemApiController implements MenuItemApi {
   }
 
   MenuItem getMenuItemTestOnly(int id) {
-    return menuItemRepository.findOne(id);
+    return menuItemRepository.getOne(id);
   }
 
 }

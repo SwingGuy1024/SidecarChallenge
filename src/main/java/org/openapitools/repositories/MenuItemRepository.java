@@ -31,11 +31,11 @@ public class MenuItemRepository {
     menuItemRepository = repository;
   }
 
-  public MenuItem findOne(Integer id) {
-    return menuItemRepository.findOne(id);
+  public MenuItem getOne(Integer id) {
+    return menuItemRepository.getOne(id);
   }
 
-  @Cacheable(cacheNames = MENU_ITEM_CACHE, key = "all")
+  @Cacheable(cacheNames = MENU_ITEM_CACHE)
   public List<MenuItem> findAll() {
     log.debug("getAll from cache");
     return menuItemRepository.findAll();

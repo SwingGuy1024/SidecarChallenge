@@ -134,6 +134,9 @@ public enum ResponseUtility {
     } catch (ResponseException e) {
       log.warn(e.getMessage(), e);
       throw e;
+    } catch (RuntimeException | Error e) {
+      log.error(e.getMessage(), e);
+      throw e;
     }
   }
   

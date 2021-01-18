@@ -23,6 +23,10 @@ This has been tested under Java 8. I'm not sure if it will work with later versi
 
 # Notes:
 
+**Assignment Part 1: Design Assignment**
+
+This design is in the same folder as this README.md file, called **Part 1 — Pizza Design.pdf**.
+
 ## 1. Implementation
 
 This doesn't exactly implement the Design I produced in the Part 1 of the assignment. The biggest change is the menu structure. The design calls for a tree structure of Menu Items. This implements MenuItems with separate MenuItemOptions, in a many-to-many relationship.
@@ -49,14 +53,17 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
     c. `/order` CUSTOMER role required. For placing orders (Not implemented)
 
     d. `/login` No authorization required.
+   
+    * Logging  in requires a dto with a few fields, but only the username and password are needed.
 1. Caching. The `menuItem` API, which returns the entire menu, is held in a Redis cache, backed by the MySql database. The cache gets cleared when the menu is updated.
 1. Mockito. One unit test ('JwtRequestFilterTest`) uses Mockito create mocks for testing.
+1. Authentication is done using JWT. 
 1. Actuator. A simple health check method is implemented.
 1. Logging. Lots of logging is done at the debug level.
 
 ## 3. What doesn't work:
 
-Swagger docs don't work. I will be investigating why. It was built using an openApi.yaml file which defined the API, and the worked when first generated, but they stopped working somewhere in the development process, and I haven't figured out why. I thought it was due to security, but I disabled security and they still didn't work.
+Swagger docs don't work. I will be investigating why over the next day or two. I built it using an interface specified in the `OpenApi.yaml` file which defined the API. It worked when I first generated it, but it stopped working somewhere in the development process, and I haven't figured out why. I thought it was due to security, but I disabled security and it still didn't work.
 However, you can still see the swagger docs. The docs folder has a separate project that will generate the swagger documentation that the project was first generated from.
 
 -- Miguel Muñoz

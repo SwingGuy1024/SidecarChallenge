@@ -55,16 +55,16 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
     d. `/login` No authorization required.
    
     * Logging  in requires a dto with a few fields, but only the username and password are needed.
+1. Authentication is done using JWT.
 1. Caching. The `menuItem` API, which returns the entire menu, is held in a Redis cache, backed by the MySql database. The cache gets cleared when the menu is updated.
 1. Mockito. One unit test ('JwtRequestFilterTest`) uses Mockito create mocks for testing.
-1. Authentication is done using JWT. 
 1. Actuator. A simple health check method is implemented.
 1. Logging. Lots of logging is done at the debug level.
 
 ## 3. What doesn't work:
 
 Swagger docs don't work. I will be investigating why over the next day or two. I built it using an interface specified in the `OpenApi.yaml` file which defined the API. It worked when I first generated it, but it stopped working somewhere in the development process, and I haven't figured out why. I thought it was due to security, but I disabled security and it still didn't work.
-However, you can still see the swagger docs. The docs folder has a separate project that will generate the swagger documentation that the project was first generated from.
+However, you can still see the swagger docs. The docs folder has a separate project that will generate the swagger documentation that the project was first generated from. (This is not a separate module of the main maven module. It's just a folder with an entirely separate maven project that's just the generated code.)
 
 -- Miguel Muñoz
 

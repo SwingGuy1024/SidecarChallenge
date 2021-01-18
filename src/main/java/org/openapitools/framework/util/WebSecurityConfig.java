@@ -99,8 +99,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     http
         .csrf()
           .disable()
-        .cors()
-          .disable()
+//        .cors()
+//          .disable() // I may need CORS to support swagger docs, but I'm not sure.
         .formLogin()
           .disable()
         .authorizeRequests()

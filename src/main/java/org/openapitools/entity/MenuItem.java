@@ -1,5 +1,6 @@
 package org.openapitools.entity;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -18,7 +19,7 @@ import javax.persistence.OneToMany;
  * @author Miguel Mu\u00f1oz
  */
 @Entity
-public class MenuItem {
+public class MenuItem implements Serializable {
   private Integer id;
   private String name;
   private BigDecimal itemPrice;

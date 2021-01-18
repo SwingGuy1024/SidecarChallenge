@@ -37,11 +37,10 @@ public class MenuItemRepository {
 
   @Cacheable(cacheNames = MENU_ITEM_CACHE)
   public List<MenuItem> findAll() {
-    log.debug("getAll from cache");
     return menuItemRepository.findAll();
   }
 
-  @CacheEvict(cacheNames = MenuItemRepository.MENU_ITEM_CACHE)
+  @CacheEvict(cacheNames = MenuItemRepository.MENU_ITEM_CACHE, allEntries = true)
   public <M extends MenuItem> M save(M menuItem) {
     return menuItemRepository.save(menuItem);
   }

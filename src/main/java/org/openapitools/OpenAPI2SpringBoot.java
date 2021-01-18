@@ -8,6 +8,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.hateoas.client.LinkDiscoverer;
@@ -19,7 +20,7 @@ import org.springframework.plugin.core.SimplePluginRegistry;
  * Caching Configuration Reference: https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis
  */
 
-//@EnableCaching()
+@EnableCaching()
 @SpringBootApplication
 @ComponentScan(basePackages = {
     "org.openapitools",

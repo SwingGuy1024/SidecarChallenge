@@ -26,7 +26,7 @@ public class MenuItemOptionRepository {
     repository = repo;
   }
   
-  @CacheEvict(cacheNames = MENU_ITEM_CACHE)
+  @CacheEvict(cacheNames = MENU_ITEM_CACHE, allEntries = true)
   public <MIO extends MenuItemOption> MIO save(MIO option) {
     return repository.save(option);
   }
@@ -35,7 +35,7 @@ public class MenuItemOptionRepository {
     return repository.getOne(optionId);
   }
 
-  @CacheEvict(cacheNames = MENU_ITEM_CACHE)
+  @CacheEvict(cacheNames = MENU_ITEM_CACHE, allEntries = true)
   public void delete(MenuItemOption optionToDelete) {
     repository.delete(optionToDelete);
   }

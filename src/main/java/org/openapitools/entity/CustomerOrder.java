@@ -17,7 +17,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.openapitools.entity.MenuItem;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -109,6 +108,7 @@ public class CustomerOrder {
     this.completeTime = completeTime;
   }
 
+  @SuppressWarnings("HardCodedStringLiteral")
   @OneToOne
   @JoinColumn(name = "menu_item_id")
   public MenuItem getMenuItem() {

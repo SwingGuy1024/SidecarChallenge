@@ -1,5 +1,6 @@
 package org.openapitools.entity;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -23,7 +24,7 @@ import org.hibernate.annotations.FetchMode;
  * @author Miguel Mu\u00f1oz
  */
 @Entity
-public class MenuItemOption {
+public class MenuItemOption implements Serializable {
   private Integer id;
   private MenuItem menuItem;
   private BigDecimal deltaPrice;
@@ -40,6 +41,7 @@ public class MenuItemOption {
     this.id = id;
   }
 
+  @SuppressWarnings("JpaDataSourceORMInspection")
   @JsonIgnore
   @ManyToOne(cascade = CascadeType.REMOVE)
   @JoinColumn(name="menu_item_id")
@@ -77,6 +79,7 @@ public class MenuItemOption {
    * @return Don't worry about it.
    * 
    */
+  @SuppressWarnings("HardCodedStringLiteral")
   @Fetch(value = FetchMode.SUBSELECT)
   @JsonIgnore
   @ManyToMany

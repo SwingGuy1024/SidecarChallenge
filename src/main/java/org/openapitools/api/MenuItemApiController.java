@@ -1,10 +1,9 @@
-package org.openapitools.server;
+package org.openapitools.api;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.openapitools.api.MenuItemApi;
 import org.openapitools.entity.MenuItem;
 import org.openapitools.entity.MenuItemOption;
 import org.openapitools.model.MenuItemDto;

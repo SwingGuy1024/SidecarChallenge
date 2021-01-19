@@ -2,7 +2,7 @@ package org.openapitools.framework.util;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  * @author Miguel Mu\u00f1oz
  */
 @Component
-public class WebUIConfig extends WebMvcConfigurerAdapter {
+public class WebUIConfig implements WebMvcConfigurer {
   @SuppressWarnings({"HardCodedStringLiteral", "HardcodedFileSeparator"})
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {

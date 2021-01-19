@@ -1,10 +1,10 @@
-package org.openapitools.server;
+package org.openapitools.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.openapitools.api.LoginApi;
 import org.openapitools.framework.ResponseUtility;
 import org.openapitools.model.UserDto;
 import org.openapitools.repositories.UserRepository;
+import org.openapitools.server.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

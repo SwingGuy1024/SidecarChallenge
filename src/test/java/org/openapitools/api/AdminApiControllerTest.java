@@ -1,4 +1,4 @@
-package org.openapitools.server;
+package org.openapitools.api;
 
 import java.math.BigDecimal;
 import java.util.Arrays;

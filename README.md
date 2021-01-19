@@ -19,7 +19,7 @@ If using MySQL version 8+, you'll need to say
     create user pizza identified WITH mysql_native_password by 'pizza';
 
 Launch the application and start by adding some menu items.
-This has been tested under Java 8. I'm not sure if it will work with later versions.
+This was developed under Java 8 and has been tested running under Java 8 and 12.
 
 # Notes:
 
@@ -40,7 +40,7 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
 2. Never catch a RuntimeException. If the code generates a RuntimeException, let it pass through. It will generate a 405 error response, which tells us we need to find the bug and fix it. If you need to say `catch (Exception e)`, first catch any RuntimeExceptions and rethrow them.
 3. Don't worry about logging Exceptions, unless you catch them and don't rethrow. The UncaughtExceptionHandler will log all Exceptions it sees.
 
-## 2. What works:
+## 2. Implemented Technologies
 
 1. Restful services
 1. JPA Crud operations will write to an underlying MySql database. Unit tests use an in-memory h2 database.
@@ -61,10 +61,6 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
 1. Actuator. A simple health check method is implemented.
 1. Logging. Lots of logging is done at the debug level.
 
-## 3. What doesn't work:
-
-Swagger docs don't work. I will be investigating why over the next day or two. I built it using an interface specified in the `OpenApi.yaml` file which defined the API. It worked when I first generated it, but it stopped working somewhere in the development process, and I haven't figured out why. I thought it was due to security, but I disabled security and it still didn't work.
-However, you can still see the swagger docs. The docs folder has a separate project that will generate the swagger documentation that the project was first generated from. (This is not a separate module of the main maven module. It's just a folder with an entirely separate maven project that's just the generated code.)
 
 -- Miguel Muñoz
 
@@ -87,7 +83,7 @@ This is an example of building a swagger-enabled server in Java using the Spring
 
 The underlying library integrating swagger to SpringBoot is [springfox](https://github.com/springfox/springfox)  
 
-Start your server as an simple java application.
+Start your server as a simple java application.
 
 This project requires Java 1.8 and Maven 3
 

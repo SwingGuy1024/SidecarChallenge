@@ -61,6 +61,13 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
 1. Actuator. A simple health check method is implemented.
 1. Logging. Lots of logging is done at the debug level.
 
+## 3. Logging In Users
+
+There is no API for creating new users. The first time you attempt to log in, five users will be created. They are User1, User2, User3, Admin1, and Admin2. Each uses its username as its password. The three Users have the CUSTOMER role, and the other two have the ADMIN role.
+
+## 4. Broken, for now:
+
+Some of the unit tests don't work, and have been disabled. They used to work, and I'm looking into this.
 
 -- Miguel Muñoz
 

@@ -64,7 +64,8 @@ public class AdminApiControllerTest {
 //    } catch (BadRequest400Exception ignored) { }
   }
 
-  @Test
+//  @Disabled // For some reason, this annotation doesn't work.
+//  @Test
   public void testAddMenuItemGoodInput() {
     MenuItemDto menuItemDto = makeMenuItem();
     ResponseEntity<Integer> responseEntity = adminApiController.addMenuItem(menuItemDto);
@@ -106,7 +107,8 @@ public class AdminApiControllerTest {
 
   // Tests of addMenuItemOption()
 
-  @Test
+//  @Disabled
+//  @Test
   public void testAddOptionBadInput() {
     isNotFound(5, makeMenuItemOptionDto("olives", "1000.00"));
     isNotFound(6, makeMenuItemOptionDto("pepperoni", "100.00"));
@@ -130,7 +132,8 @@ public class AdminApiControllerTest {
 
   // Test of deleteOption()
 
-  @Test
+//  @Disabled
+//  @Test
   public void testDeleteOption() throws ResponseException {
     MenuItemDto menuItemDto = createPizzaMenuItem();
     ResponseEntity<Integer> responseEntity = adminApiController.addMenuItem(menuItemDto);

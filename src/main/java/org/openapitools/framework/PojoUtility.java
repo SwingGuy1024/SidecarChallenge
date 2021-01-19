@@ -99,7 +99,7 @@ public enum PojoUtility {
     if (entity == null) {
       throw new NotFound404Exception(String.format("Missing entity at id %s", id));
     }
-    assert isEntityAssertion(entity) : "This method is only for entities. Use confirmNeverNull()";
+    assert isEntityAssertion(entity) : "This method is only for entities. Use confirmNeverNull() " + getEntityClass(entity);
     return entity;
   }
 
@@ -116,7 +116,7 @@ public enum PojoUtility {
     if (entity == null) {
       throw new NotFound404Exception("Missing object");
     }
-    assert isEntityAssertion(entity) : "This method is only for entities. Use confirmNeverNull()";
+    assert isEntityAssertion(entity) : "This method is only for entities. Use confirmNeverNull() " + getEntityClass(entity);
     return entity;
   }
 
@@ -132,16 +132,29 @@ public enum PojoUtility {
     if (object == null) {
       throw new BadRequest400Exception("Missing object");
     }
-    assert !isEntityAssertion(object) : String.format("This method is not for entity objects. Use confirmFound(): %s", object.getClass());
+    assert !isEntityAssertion(object) : String.format("This method is not for entity objects. Use confirmFound(): %s", getEntityClass(object));
     return object;
   }
-  
+
+//   This used to work. Now it sees classes of type org.openapitools.entity.MenuItem$HibernateProxy$iL2y68Mg
+//   I've modified it to repeatedly call the superclass until it finds the Entity class. It works for now, but
+//   I'm wondering if this is a bad idea. Fortunately, it's only executed in assertions.
   private static boolean isEntityAssertion(Object object) {
     Set<Annotation> annotationSet = new HashSet<>();
-    return Arrays.stream(object.getClass().getDeclaredAnnotations())
+    Class<?> objectClass = getEntityClass(object);
+    return Arrays.stream(objectClass.getDeclaredAnnotations())
         .anyMatch(a -> a.annotationType() == Entity.class);
   }
-  
+
+  private static Class<?> getEntityClass(final Object object) {
+    Class<?> objectClass = object.getClass();
+    Class<?> superClass = objectClass.getSuperclass();
+    while (superClass != Object.class) {
+      objectClass = superClass;
+      superClass = objectClass.getSuperclass(); }
+    return objectClass;
+  }
+
   public static <T> Set<T> asSet(T[] tArray) {
     return new HashSet<>(Arrays.asList(tArray));
   }

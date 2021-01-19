@@ -84,4 +84,14 @@ public class MenuItem implements Serializable {
   public int hashCode() {
     return (getId() != null) ? getId().hashCode() : 0;
   }
+
+  @Override
+  public String toString() {
+    return "MenuItem{" +
+        "id=" + id +
+        ", name='" + name + '\'' +
+        ", itemPrice=" + itemPrice +
+        ", allowedOptions=" + allowedOptions +
+        '}';
+  }
 }

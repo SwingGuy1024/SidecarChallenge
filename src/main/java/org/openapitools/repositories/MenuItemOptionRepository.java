@@ -3,6 +3,8 @@ package org.openapitools.repositories;
 import java.util.List;
 import org.openapitools.OpenAPI2SpringBoot;
 import org.openapitools.entity.MenuItemOption;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class MenuItemOptionRepository {
+  private static final Logger log = LoggerFactory.getLogger(MenuItemOptionRepository.class);
   private final MenuItemOptionUncachedRepository repository;
   private static final String MENU_ITEM_CACHE = OpenAPI2SpringBoot.MENU_ITEM_CACHE;
 
@@ -28,6 +31,7 @@ public class MenuItemOptionRepository {
   
   @CacheEvict(cacheNames = MENU_ITEM_CACHE, allEntries = true)
   public <MIO extends MenuItemOption> MIO save(MIO option) {
+    log.trace("Save menu item option {}", option);
     return repository.save(option);
   }
   

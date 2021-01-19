@@ -1,5 +1,7 @@
 package org.openapitools;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -7,7 +9,11 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.web.servlet.HandlerExceptionResolver;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * Caching Configuration Reference: https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis
@@ -49,4 +55,20 @@ public class OpenAPI2SpringBoot implements CommandLineRunner {
         }
 
     }
+
+    // This is not working, and I don't know why, especially since it used to work. The purpose is to 
+    // show stack traces for exceptions that get caught by Spring. I don't know why I don't see these exceptions, since my server code
+    // catches everything and logs it, with stack traces. I've found many things that worked fine under Spring-Boot version 1 that don't
+    // work under version 2.
+    @Bean
+    HandlerExceptionResolver customExceptionResolver() {
+        return new DefaultHandlerExceptionResolver() {
+            @Override
+            public ModelAndView resolveException(final HttpServletRequest request, final HttpServletResponse response, final Object handler, final Exception ex) {
+                final ModelAndView modelAndView = super.resolveException(request, response, handler, ex);
+                log.error("Exception: ", ex);
+                return modelAndView;
+            }
+        };
+    }  
 }

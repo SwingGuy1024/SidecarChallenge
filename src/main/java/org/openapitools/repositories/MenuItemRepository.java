@@ -42,6 +42,7 @@ public class MenuItemRepository {
 
   @CacheEvict(cacheNames = MenuItemRepository.MENU_ITEM_CACHE, allEntries = true)
   public <M extends MenuItem> M save(M menuItem) {
+    log.trace("Saving MenuItem {}", menuItem);
     return menuItemRepository.save(menuItem);
   }
 }

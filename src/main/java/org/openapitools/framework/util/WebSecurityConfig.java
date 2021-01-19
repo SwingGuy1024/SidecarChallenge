@@ -91,39 +91,38 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   protected void configure(final HttpSecurity http) throws Exception {
     log.debug("Configuring WebSecurityConfig");
     
-    // The numerous matchers for permitAll() were a vain attempt to get the API Docs to work. The partly fixed the problem,
-    // but the docs are still unavailable. However, this now assumes that all admin APIs will start with /admin, and all
-    // customer APIs requiring authentication will start with orders. I don't authenticate any other prefixes because I
-    // don't plan to have any, beyond menuItem, which does not require logging in. The menu is always available.
+    // The idea here is that the menu is accessible under /menuItem, which does not require authentication, so 
+    // potential customers may always look at a menu. Customer operations like placing an order require a 
+    // authentication with the CUSTOMER role. Administrative work, such as changing the menu, requires
+    // authentication with the ADMIN role.
     //noinspection HardcodedFileSeparator
     http
         .csrf()
           .disable()
-//        .cors()
-//          .disable() // I may need CORS to support swagger docs, but I'm not sure.
+        .cors()
+          .disable()
         .formLogin()
           .disable()
         .authorizeRequests()
-//          .anyRequest().permitAll()
-        .antMatchers("/admin/**").hasRole(UserDto.RoleEnum.ADMIN.toString())
-        .antMatchers("/order/**").hasRole(UserDto.RoleEnum.CUSTOMER.toString())
-        .antMatchers(
-            "/login", 
-            "/menuItem",
-            "/**",
-            "/home",
-            "/swagger-ui.html",
-            "/api-docs",
-            "/configuration/**",
-            "/swagger*/**",
-            "/webjars/**",
-            "/swagger-resources/**",
-            "/css/**",
-            "/js/**",
-            "/images/**",
-            "/webjars/**",
-            "/**/favicon.ico"
-        ).permitAll()
+          .antMatchers("/admin/**").hasRole(UserDto.RoleEnum.ADMIN.toString()) 
+          .antMatchers("/order/**").hasRole(UserDto.RoleEnum.CUSTOMER.toString())
+          .antMatchers(
+              "/login", 
+              "/menuItem",
+              "/**",
+//              "/css/**",
+//              "/js/**",
+//              "/images/**",
+//              "/**/favicon.ico",
+              "/home",
+              "/swagger-ui.html",
+              "/api-docs",
+              "/configuration/**",
+              "/swagger*/**",
+              "/webjars/**",
+              "/swagger-resources/**"
+          ).permitAll()
+          .anyRequest().authenticated()
         .and()
           .exceptionHandling()
           .authenticationEntryPoint(jwtAuthenticationEntryPoint)

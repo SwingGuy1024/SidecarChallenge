@@ -9,6 +9,7 @@ import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.framework.exception.ResponseException;
+import org.openapitools.model.CreatedResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -42,38 +43,15 @@ public enum ResponseUtility {
    * @see #serve(HttpStatus, Supplier) 
    * @see Supplier#get() 
    */
-  public static <T> ResponseEntity<T> serveCreated(Supplier<T> method) throws ResponseException {
+  public static ResponseEntity<CreatedResponse> serveCreated(Supplier<CreatedResponse> method) throws ResponseException {
     assert method != null;
     return serve(HttpStatus.CREATED, method);
   }
-
-  /**
-   * Serve the creation request, using HttpStatus.CREATED as the response if successful. This method delegates the work to serve().
-   *
-   * @param method A method that creates the resource and returns the id of the created resource as an Integer.
-   * @return A ResponseEntity that holds an Integer, which itself holds the id of the created resource.
-   * @throws ResponseException if the method fails
-   * @see #serve(HttpStatus, Supplier)
-   * @see Supplier#get()
-   */
-  public static ResponseEntity<Integer> serveCreatedById(Supplier<Integer> method) throws ResponseException {
-    assert method != null;
-    return serveCreated(method);
-  }
-
-  /**
-   * Serve the creation request, using the specified status as the response if successful. This method delegates the work to serve().
-   *
-   * @param successStatus The status to use if the ServiceMethod's doService() method (the lambda expression) completes successfully.
-   * @param method A method that creates the resource and returns the id of the created resource as an Integer.
-   * @return A ResponseEntity that holds a CreatedResponse, which itself holds the id of the created resource.
-   * @throws ResponseException if the method fails
-   * @see #serve(HttpStatus, Supplier)
-   * @see Supplier#get()
-   */
-  public static ResponseEntity<Integer> serveById(HttpStatus successStatus, Supplier<Integer> method) throws ResponseException {
-    assert method != null;
-    return serve(successStatus, method);
+  
+  public static CreatedResponse fromId(Integer id) {
+    CreatedResponse createdResponse = new CreatedResponse();
+    createdResponse.setId(id);
+    return createdResponse;
   }
 
   /**

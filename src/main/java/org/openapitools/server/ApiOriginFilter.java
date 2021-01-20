@@ -11,8 +11,10 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.RequestFacade;
+import org.openapitools.framework.ResponseUtility;
 import org.openapitools.framework.util.ReplaceChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,9 +39,13 @@ public class ApiOriginFilter implements javax.servlet.Filter {
       if (request instanceof RequestFacade) {
         RequestFacade facade = (RequestFacade) request;
         log.debug("Request URI: {}", charFilter(facade.getRequestURI()));
+      } else if (request instanceof HttpServletRequestWrapper) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) ((HttpServletRequestWrapper)request).getRequest();
+        log.debug(httpServletRequest.getRequestURI());
       } else if (request instanceof ServletRequestWrapper && ((ServletRequestWrapper)request).getRequest() instanceof HttpServletRequest) {
         final ServletRequest wrapped = ((ServletRequestWrapper) request).getRequest();
-        String uri = ((HttpServletRequest)wrapped).getRequestURI();
+        final HttpServletRequest hsr = (HttpServletRequest) wrapped;
+        String uri = hsr.getRequestURI();
         log.debug(charFilter(uri));
       } else {
         log.debug("Request of {}", request.getClass());

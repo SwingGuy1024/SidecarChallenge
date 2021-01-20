@@ -4,6 +4,7 @@ target/
 spring-server-generated/
 gen/
 src/freezer/
+docs/
 
 ### STS ###
 .apt_generated

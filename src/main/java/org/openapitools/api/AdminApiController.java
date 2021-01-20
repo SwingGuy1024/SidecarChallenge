@@ -7,6 +7,7 @@ import org.openapitools.entity.MenuItem;
 import org.openapitools.entity.MenuItemOption;
 import org.openapitools.framework.PojoUtility;
 import org.openapitools.framework.exception.BadRequest400Exception;
+import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
 import org.openapitools.repositories.MenuItemOptionRepository;
@@ -59,39 +60,47 @@ public class AdminApiController implements AdminApi {
     }
 
     @Override
-    public ResponseEntity<Integer> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
+    public ResponseEntity<CreatedResponse> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
 //        logHeaders(request, "AdminApiController addMenuItemOption");
-        return serveCreatedById(() -> {
+        return serveCreated(() -> {
             confirmNotEmpty(optionDto.getName()); // throws ResponseException
             MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
             final MenuItem menuItem = menuItemRepository.getOne(menuItemId);
             confirmEntityFound(menuItem, menuItemId);
             menuItemOption.setMenuItem(menuItem);
             MenuItemOption savedOption = menuItemOptionRepository.save(menuItemOption);
-            return savedOption.getId();
+            return fromId(savedOption.getId());
         });
     }
 
     @Override
-    public ResponseEntity<Integer> addMenuItem(final MenuItemDto dto) {
+    public ResponseEntity<CreatedResponse> addMenuItem(final MenuItemDto dto) {
         MenuItemDto revisedDto = dto;
+        log.trace("{}", dto);
 //        if (revisedDto.getName() == null) {
 //            revisedDto = ResponseUtility.getAlternativeDto(request, objectMapper, MenuItemDto.class);
 //        }
 //        logHeaders(request, "AdminApiController addMenuItem");
         final MenuItemDto menuItemDto = revisedDto; // Final, for lambda.
-        return serveCreatedById(() -> {
-            for (MenuItemOptionDto option : skipNull(menuItemDto.getAllowedOptions())) {
-                final String optionName = option.getName();
-                if ((optionName == null) || optionName.isEmpty()) {
-                    throw new BadRequest400Exception("Missing Food Option name for item");
-                }
-            }
-            MenuItem menuItem = convertMenuItem(menuItemDto);
-            MenuItem savedItem = menuItemRepository.save(menuItem);
-            return savedItem.getId();
+        return serveCreated(() -> {
+            return addMenuItemFromDto(menuItemDto);
         });
+    }
 
+    private CreatedResponse addMenuItemFromDto(final MenuItemDto menuItemDto) {
+        for (MenuItemOptionDto option : skipNull(menuItemDto.getAllowedOptions())) {
+            final String optionName = option.getName();
+            if ((optionName == null) || optionName.isEmpty()) {
+                throw new BadRequest400Exception("Missing Food Option name for item");
+            }
+        }
+        MenuItem menuItem = convertMenuItem(menuItemDto);
+        log.trace("MenuItem: {}", menuItem);
+        MenuItem savedItem = menuItemRepository.save(menuItem);
+        log.debug("added menuItem with id {}", savedItem.getId());
+        CreatedResponse createdResponse = new CreatedResponse();
+        createdResponse.setId(savedItem.getId());
+        return createdResponse;
     }
 
     @Override

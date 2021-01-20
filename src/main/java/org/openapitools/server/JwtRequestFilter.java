@@ -65,9 +65,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       return;
     }
     String jwtToken = requestTokenHeader.substring(BEARER_.length());
+    log.trace("Found token: {}", jwtToken);
 
     processFilter(request, jwtToken);
+    log.trace("filter processed");
     chain.doFilter(request, response);
+    log.trace("Filter chained");
   }
 
   private void processFilter(final HttpServletRequest request, final String jwtToken) {
@@ -82,6 +85,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       return;
     }
 
+    log.trace("Time remains on token");
     // Once we get the token validate it.
     final SecurityContext context = contextSupplier.get();
     if ((username != null) && (context.getAuthentication() == null)) {
@@ -91,6 +95,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       if (userDetails == null) {
         log.debug("User {} not found", username);
         return;
+      }
+      if (log.isTraceEnabled()) {
+        log.trace("user Found with {}", userDetails.getAuthorities().iterator().next());
       }
 
       // if token is valid configure Spring Security to manually set authentication
@@ -107,6 +114,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         // After setting the Authentication in the context, we specify that the current user is authenticated.
         // So it passes the Spring Security Configurations successfully.
         context.setAuthentication(usernamePasswordAuthenticationToken);
+      } else {
+        log.trace("Authentication failed");
       }
     }
   }

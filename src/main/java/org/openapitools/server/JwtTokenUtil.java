@@ -67,13 +67,11 @@ public enum JwtTokenUtil {
 
   private boolean isTokenExpired(String token) {
     final Date expiration = getExpirationDateFromToken(token);
+    log.trace("Expire at {}", expiration);
     return expiration.before(new Date());
   }
 
   private String doGenerateToken(Map<String, Object> claims, String subject) {
-//    System.out.printf("Secret = %s%n", secret);
-//    System.out.printf("Claims = %s%n", claims); // NON-NLS
-//    System.out.printf("Subject = %s%n", subject); // NON-NLS
     final long now = System.currentTimeMillis();
     return getToken(claims, subject, now);
   }

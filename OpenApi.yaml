@@ -65,10 +65,9 @@ paths:
         201:
           description: Menu Item Created
           content:
-            application/text:
+            application/json:
               schema:
-                type: integer
-                format: int32
+                $ref: '#/components/schemas/CreatedResponse'
         400:
           description: Bad Request
   /admin/menuItem/addOption/{menuItemId}:
@@ -96,10 +95,9 @@ paths:
         201:
           description: MenuItemOption added
           content:
-            application/text:
+            application/json:
               schema:
-                type: integer
-                format: int32
+                $ref: '#/components/schemas/CreatedResponse'
         '400':
           description: Bad Request
   /admin/menuItem/deleteOption/{optionId}:
@@ -376,6 +374,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/MenuItemOptionDto'
+      required:
+        - name
+        - itemPrice
     MenuItemOptionDto:
       type: object
       description: Option for a MenuItem
@@ -389,6 +390,9 @@ components:
         id:
           type: integer
           format: int32
+      required:
+        - name
+        - itemPrice
     # CustomerOrderDto:
     #   properties:
     #     menuItem:
@@ -452,6 +456,12 @@ components:
           type: string
           enum: [ CUSTOMER, ADMIN ]
           description: username
+    CreatedResponse:
+      type: object
+      properties: 
+        id:
+          type: integer
+          format: int32
           # isAccountNonExpired:
           #   type: boolean
           #   description: username

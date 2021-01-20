@@ -142,5 +142,10 @@ public class User implements UserDetails {
     public String getAuthority() {
       return authority;
     }
+
+    @Override
+    public String toString() {
+      return authority;
+    }
   }
 }

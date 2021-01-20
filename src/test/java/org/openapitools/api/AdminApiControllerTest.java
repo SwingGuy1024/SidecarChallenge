@@ -17,6 +17,7 @@ import org.openapitools.entity.MenuItemOption;
 import org.openapitools.framework.exception.BadRequest400Exception;
 import org.openapitools.framework.exception.NotFound404Exception;
 import org.openapitools.framework.exception.ResponseException;
+import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +60,7 @@ public class AdminApiControllerTest {
     menuItemDto.setName("BadItem");
     menuItemDto.setItemPrice(new BigDecimal("0.50"));
 //    try {
-      ResponseEntity<Integer> responseEntity = adminApiController.addMenuItem(menuItemDto);
+      ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
       fail(responseEntity.toString());
 //    } catch (BadRequest400Exception ignored) { }
   }
@@ -68,9 +69,11 @@ public class AdminApiControllerTest {
 //  @Test
   public void testAddMenuItemGoodInput() {
     MenuItemDto menuItemDto = makeMenuItem();
-    ResponseEntity<Integer> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-    Integer id = responseEntity.getBody();
+    final CreatedResponse body = responseEntity.getBody();
+    assertNotNull(body);
+    Integer id = body.getId();
 //    Integer id = body.getId();
     if (id != null) {
       MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
@@ -118,14 +121,14 @@ public class AdminApiControllerTest {
 
   private void isBadRequest(int id, MenuItemOptionDto optionDto) {
     try {
-      final ResponseEntity<Integer> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
+      final ResponseEntity<CreatedResponse> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
       fail(stringResponseEntity.toString());
     } catch (BadRequest400Exception ignored) { }
   }
 
   private void isNotFound(int id, MenuItemOptionDto optionDto) {
     try {
-      final ResponseEntity<Integer> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
+      final ResponseEntity<CreatedResponse> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
       fail(stringResponseEntity.toString());
     } catch (NotFound404Exception ignored) { }
   }
@@ -136,8 +139,10 @@ public class AdminApiControllerTest {
 //  @Test
   public void testDeleteOption() throws ResponseException {
     MenuItemDto menuItemDto = createPizzaMenuItem();
-    ResponseEntity<Integer> responseEntity = adminApiController.addMenuItem(menuItemDto);
-    Integer id = responseEntity.getBody();
+    ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    final CreatedResponse body = responseEntity.getBody();
+    assertNotNull(body);
+    Integer id = body.getId();
     System.out.printf("Body: <%s>%n", id);
     
     MenuItem item = menuItemApiController.getMenuItemTestOnly(id);

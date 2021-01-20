@@ -1,7 +1,9 @@
 package org.openapitools.server;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -10,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -76,6 +79,8 @@ public class JwtRequestFilterTest {
   private void runTest(final String user,  String bearerToken, int serviceCount, int contextCount) throws ServletException, IOException {
     UserDetails mockDetails = mock(UserDetails.class);
     when(mockDetails.getUsername()).thenReturn(user);
+    List authorityList = Collections.singletonList(fakeAuthority());
+    when(mockDetails.getAuthorities()).thenReturn(authorityList);
 
     UserDetailsService mockUserDetailService = mock(UserDetailsService.class);
     when(mockUserDetailService.loadUserByUsername(VALID_USER)).thenReturn(mockDetails);
@@ -102,6 +107,20 @@ public class JwtRequestFilterTest {
     verify(mockChain, times(1)).doFilter(any(), any());
     verify(mockUserDetailService, times(serviceCount)).loadUserByUsername(any());
     verify(mockContext, times(contextCount)).setAuthentication(any());
+  }
+  
+  private static GrantedAuthority fakeAuthority() {
+    return new GrantedAuthority() {
+      @Override
+      public String getAuthority() {
+        return "Dummy";
+      }
+
+      @Override
+      public String toString() {
+        return getAuthority();
+      }
+    };
   }
 
   private static class EmptyEnumeration<T> implements Enumeration<T> {

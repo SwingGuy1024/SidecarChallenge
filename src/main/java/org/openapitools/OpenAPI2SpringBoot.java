@@ -62,12 +62,30 @@ public class OpenAPI2SpringBoot implements CommandLineRunner {
     // work under version 2.
     @Bean
     HandlerExceptionResolver customExceptionResolver() {
+        log.debug("Installing DefaultHandlerExceptionResolver ****");
         return new DefaultHandlerExceptionResolver() {
             @Override
             public ModelAndView resolveException(final HttpServletRequest request, final HttpServletResponse response, final Object handler, final Exception ex) {
+                log.debug("resolveException: ", ex);
                 final ModelAndView modelAndView = super.resolveException(request, response, handler, ex);
                 log.error("Exception: ", ex);
                 return modelAndView;
+            }
+
+            @Override
+            protected String buildLogMessage(final Exception ex, final HttpServletRequest request) {
+                log.debug("build log message: " + ex.getStackTrace());
+                final String message = super.buildLogMessage(ex, request);
+                log.error("{}: {}", ex.getClass().getSimpleName(), ex.getLocalizedMessage(), ex);
+                return message;
+            }
+
+            @Override
+            protected ModelAndView doResolveException(final HttpServletRequest request, final HttpServletResponse response, final Object handler, final Exception ex) {
+                log.debug("doResolveException", ex);
+                ModelAndView result = super.doResolveException(request, response, handler, ex);
+                log.error("{}: {}", ex.getClass().getSimpleName(), ex.getLocalizedMessage(), ex);
+                return result;
             }
         };
     }  

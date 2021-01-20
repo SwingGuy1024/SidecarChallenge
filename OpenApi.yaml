@@ -100,6 +100,25 @@ paths:
                 $ref: '#/components/schemas/CreatedResponse'
         '400':
           description: Bad Request
+  /admin/menuItem/addOption:
+    put:
+      summary: Add a MenuItemOption
+      description: Add a new MenuItemOption
+      operationId: addNewMenuItemOption
+      requestBody:
+        description: MenuItemOption
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MenuItemOptionDto'
+        required: true
+      responses:
+        201:
+          description: Menu Item Option Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatedResponse'
   /admin/menuItem/deleteOption/{optionId}:
     delete:
       summary: Delete a MenuItemOption

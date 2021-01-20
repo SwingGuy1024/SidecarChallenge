@@ -24,7 +24,7 @@ import javax.validation.constraints.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-19T23:30:04.639861-08:00[America/Los_Angeles]")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-20T00:48:26.183425-08:00[America/Los_Angeles]")
 @Validated
 @Api(value = "admin", description = "the admin API")
 public interface AdminApi {
@@ -90,6 +90,39 @@ public interface AdminApi {
         consumes = { "application/json" }
     )
     default ResponseEntity<CreatedResponse> addMenuItemOption(@ApiParam(value = "ID of the MenuItem getting the new option",required=true) @PathVariable("menuItemId") Integer menuItemId,@ApiParam(value = "MenuItemOption" ,required=true )  @Valid @RequestBody MenuItemOptionDto menuItemOptionDto) {
+        getRequest().ifPresent(request -> {
+            for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
+                if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
+                    String exampleString = "{ \"id\" : 0 }";
+                    ApiUtil.setExampleResponse(request, "application/json", exampleString);
+                    break;
+                }
+            }
+        });
+        return new ResponseEntity<>(HttpStatus.NOT_IMPLEMENTED);
+
+    }
+
+
+    /**
+     * PUT /admin/menuItem/addOption : Add a MenuItemOption
+     * Add a new MenuItemOption
+     *
+     * @param menuItemOptionDto MenuItemOption (required)
+     * @return Menu Item Option Created (status code 201)
+     */
+    @ApiOperation(value = "Add a MenuItemOption", nickname = "addNewMenuItemOption", notes = "Add a new MenuItemOption", response = CreatedResponse.class, authorizations = {
+        
+        @Authorization(value = "bearerAuth")
+         }, tags={  })
+    @ApiResponses(value = { 
+        @ApiResponse(code = 201, message = "Menu Item Option Created", response = CreatedResponse.class) })
+    @PutMapping(
+        value = "/admin/menuItem/addOption",
+        produces = { "application/json" },
+        consumes = { "application/json" }
+    )
+    default ResponseEntity<CreatedResponse> addNewMenuItemOption(@ApiParam(value = "MenuItemOption" ,required=true )  @Valid @RequestBody MenuItemOptionDto menuItemOptionDto) {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {

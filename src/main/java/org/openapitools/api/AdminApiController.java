@@ -74,14 +74,7 @@ public class AdminApiController implements AdminApi {
     }
 
     @Override
-    public ResponseEntity<CreatedResponse> addMenuItem(final MenuItemDto dto) {
-        MenuItemDto revisedDto = dto;
-        log.trace("{}", dto);
-//        if (revisedDto.getName() == null) {
-//            revisedDto = ResponseUtility.getAlternativeDto(request, objectMapper, MenuItemDto.class);
-//        }
-//        logHeaders(request, "AdminApiController addMenuItem");
-        final MenuItemDto menuItemDto = revisedDto; // Final, for lambda.
+    public ResponseEntity<CreatedResponse> addMenuItem(final MenuItemDto menuItemDto) {
         return serveCreated(() -> {
             return addMenuItemFromDto(menuItemDto);
         });
@@ -97,9 +90,23 @@ public class AdminApiController implements AdminApi {
         MenuItem menuItem = convertMenuItem(menuItemDto);
         log.trace("MenuItem: {}", menuItem);
         MenuItem savedItem = menuItemRepository.save(menuItem);
-        log.debug("added menuItem with id {}", savedItem.getId());
-        CreatedResponse createdResponse = new CreatedResponse();
-        createdResponse.setId(savedItem.getId());
+        final Integer id = savedItem.getId();
+        log.debug("added menuItem with id {}", id);
+        return fromId(id);
+    }
+
+    @Override
+    public ResponseEntity<CreatedResponse> addNewMenuItemOption(@Valid final MenuItemOptionDto menuItemOptionDto) {
+        return serveCreated(() -> createNewOption(menuItemOptionDto));
+    }
+
+    private CreatedResponse createNewOption(final MenuItemOptionDto menuItemOptionDto) {
+        MenuItemOption menuItemOption = convertMenuItemOption(menuItemOptionDto);
+        log.trace("MenuItemOption: {}", menuItemOption);
+        MenuItemOption savedItem = menuItemOptionRepository.save(menuItemOption);
+        final Integer id = savedItem.getId();
+        log.debug("MenuItemOption added with id {}", id);
+        final CreatedResponse createdResponse = fromId(id);
         return createdResponse;
     }
 
@@ -124,7 +131,7 @@ public class AdminApiController implements AdminApi {
         });
     }
 
-    private MenuItem convertMenuItem(@RequestBody @Valid final MenuItemDto menuItemDto) {
+    private MenuItem convertMenuItem(final MenuItemDto menuItemDto) {
         final MenuItem menuItem = objectMapper.convertValue(menuItemDto, MenuItem.class);
 
         // objectMapper doesn't set the menuItems in the options, because it can't handle circular references, so we
@@ -134,6 +141,10 @@ public class AdminApiController implements AdminApi {
         }
 
         return menuItem;
+    }
+    
+    private MenuItemOption convertMenuItemOption(final MenuItemOptionDto menuItemOptionDto) {
+        return objectMapper.convertValue(menuItemOptionDto, MenuItemOption.class);
     }
 
 }

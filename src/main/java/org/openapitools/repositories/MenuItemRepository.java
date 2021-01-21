@@ -21,28 +21,23 @@ import org.springframework.stereotype.Component;
  * @author Miguel Mu\u00f1oz
  */
 @Component
-public class MenuItemRepository {
+public class MenuItemRepository extends RepositoryWrapper<MenuItem, Integer> {
   private static final Logger log = LoggerFactory.getLogger(MenuItemRepository.class);
-  private final MenuItemUncachedRepository menuItemRepository;
   private static final String MENU_ITEM_CACHE = OpenAPI2SpringBoot.MENU_ITEM_CACHE;
 
   @Autowired
   public MenuItemRepository(MenuItemUncachedRepository repository) {
-    menuItemRepository = repository;
-  }
-
-  public MenuItem getOne(Integer id) {
-    return menuItemRepository.getOne(id);
+    super(repository);
   }
 
   @Cacheable(cacheNames = MENU_ITEM_CACHE)
   public List<MenuItem> findAll() {
-    return menuItemRepository.findAll();
+    return getRepo().findAll();
   }
 
   @CacheEvict(cacheNames = MenuItemRepository.MENU_ITEM_CACHE, allEntries = true)
   public <M extends MenuItem> M save(M menuItem) {
     log.trace("Saving MenuItem {}", menuItem);
-    return menuItemRepository.save(menuItem);
+    return getRepo().save(menuItem);
   }
 }

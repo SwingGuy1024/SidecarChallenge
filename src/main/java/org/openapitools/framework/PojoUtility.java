@@ -36,7 +36,7 @@ public enum PojoUtility {
   public static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
   public static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
 
-  private static final Iterable<Object> emptyIterable = Collections.unmodifiableCollection(Collections.emptyList());
+  private static final Iterable<Object> emptyIterable = Collections.emptyList();
 
   /**
    * Returns the provided collection. If the collection is null, returns an unmodifiable empty List. This lets you
@@ -83,41 +83,6 @@ public enum PojoUtility {
     } catch (NumberFormatException e) {
       throw new BadRequest400Exception(id, e);
     }
-  }
-
-  /**
-   * Confirms the requested entity was found, throwing a NotFound404Exception if not.
-   * Use when an entity was requested from the database at the specified id. 
-   * @param entity The entity to test.
-   * @param id The id, used to generate a useful error message
-   * @param <T> The type of the entity
-   * @return entity, if it's not null
-   * @throws ResponseException NOT_FOUND (404) if entity is null.
-   */
-  @SuppressWarnings("ConstantConditions")
-  public static <T> T confirmEntityFound(T entity, Object id) throws ResponseException {
-    if (entity == null) {
-      throw new NotFound404Exception(String.format("Missing entity at id %s", id));
-    }
-    assert isEntityAssertion(entity) : "This method is only for entities. Use confirmNeverNull() " + getEntityClass(entity);
-    return entity;
-  }
-
-  /**
-   * Confirms the requested entity was found, throwing a NotFound404Exception if not.
-   * Use when an entity was added to another entity, and wasn't explicitly retrieved from an id.
-   *
-   * @param entity The entity to test.
-   * @param <T>    The type of the entity
-   * @return entity, if it's not null
-   * @throws ResponseException NOT_FOUND (404) if entity is null.
-   */
-  public static <T> T confirmEntityFound(T entity) throws ResponseException {
-    if (entity == null) {
-      throw new NotFound404Exception("Missing object");
-    }
-    assert isEntityAssertion(entity) : "This method is only for entities. Use confirmNeverNull() " + getEntityClass(entity);
-    return entity;
   }
 
   /**

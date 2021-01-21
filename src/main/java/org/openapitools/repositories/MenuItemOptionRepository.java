@@ -19,32 +19,27 @@ import org.springframework.stereotype.Component;
  * @author Miguel Mu\u00f1oz
  */
 @Component
-public class MenuItemOptionRepository {
+public class MenuItemOptionRepository extends RepositoryWrapper<MenuItemOption, Integer> {
   private static final Logger log = LoggerFactory.getLogger(MenuItemOptionRepository.class);
-  private final MenuItemOptionUncachedRepository repository;
   private static final String MENU_ITEM_CACHE = OpenAPI2SpringBoot.MENU_ITEM_CACHE;
 
   @Autowired
   public MenuItemOptionRepository(MenuItemOptionUncachedRepository repo) {
-    repository = repo;
+    super(repo);
   }
   
   @CacheEvict(cacheNames = MENU_ITEM_CACHE, allEntries = true)
   public <MIO extends MenuItemOption> MIO save(MIO option) {
     log.trace("Save menu item option {}", option);
-    return repository.save(option);
+    return getRepo().save(option);
   }
   
-  public MenuItemOption getOne(Integer optionId) {
-    return repository.getOne(optionId);
-  }
-
   @CacheEvict(cacheNames = MENU_ITEM_CACHE, allEntries = true)
   public void delete(MenuItemOption optionToDelete) {
-    repository.delete(optionToDelete);
+    getRepo().delete(optionToDelete);
   }
   
   public List<MenuItemOption> findAll() {
-    return repository.findAll();
+    return getRepo().findAll();
   }
 }

@@ -56,7 +56,6 @@ public class MenuItemApiController implements MenuItemApi {
 //    logHeaders(request, "MenuItemApiController.getMenuItem(id)");
     return serveOK(() -> {
       MenuItem menuItem = menuItemRepository.getOne(id);
-      confirmEntityFound(menuItem, id);
       return objectMapper.convertValue(menuItem, MenuItemDto.class);
     });
   }

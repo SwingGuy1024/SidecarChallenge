@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
 
@@ -63,14 +62,17 @@ public class AdminApiController implements AdminApi {
     public ResponseEntity<CreatedResponse> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
 //        logHeaders(request, "AdminApiController addMenuItemOption");
         return serveCreated(() -> {
-            confirmNotEmpty(optionDto.getName()); // throws ResponseException
-            MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
-            final MenuItem menuItem = menuItemRepository.getOne(menuItemId);
-            confirmEntityFound(menuItem, menuItemId);
-            menuItemOption.setMenuItem(menuItem);
-            MenuItemOption savedOption = menuItemOptionRepository.save(menuItemOption);
-            return fromId(savedOption.getId());
+            return addOption(menuItemId, optionDto);
         });
+    }
+
+    private CreatedResponse addOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
+        confirmNotEmpty(optionDto.getName()); // throws ResponseException
+        MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
+        final MenuItem menuItem = menuItemRepository.getOne(menuItemId);
+        menuItemOption.setMenuItem(menuItem);
+        MenuItemOption savedOption = menuItemOptionRepository.save(menuItemOption);
+        return fromId(savedOption.getId());
     }
 
     @Override
@@ -114,21 +116,25 @@ public class AdminApiController implements AdminApi {
     public ResponseEntity<Void> deleteOption(final Integer optionId) {
 //        logHeaders(request, "AdminApiController deleteOption");
         return serveOK(() -> {
-            log.debug("Deleting menuItemOption with id {}", optionId);
-
-            MenuItemOption itemToDelete = menuItemOptionRepository.getOne(optionId);
-            PojoUtility.confirmEntityFound(itemToDelete, optionId);
-
-            // Before I can successfully delete the menuItemOption, I first have to set its menuItem to null. If I don't
-            // do that, the delete call will fail. It doesn't help to set Cascade to Remove in the @ManyToOne annotation in 
-            // MenuItemOption. Since it's set to ALL in MenuItem's @OneToMany annotation, the Cascade value doesn't seem to 
-            // affect this.
-            itemToDelete.setMenuItem(null);
-            menuItemOptionRepository.save(itemToDelete);
-
-            menuItemOptionRepository.delete(itemToDelete);
-            return null;
+            return deleteById(optionId);
         });
+    }
+
+    private Void deleteById(final Integer optionId) {
+        log.debug("Deleting menuItemOption with id {}", optionId);
+
+        
+        MenuItemOption itemToDelete = menuItemOptionRepository.getOne(optionId);
+
+        // Before I can successfully delete the menuItemOption, I first have to set its menuItem to null. If I don't
+        // do that, the delete call will fail. It doesn't help to set Cascade to Remove in the @ManyToOne annotation in 
+        // MenuItemOption. Since it's set to ALL in MenuItem's @OneToMany annotation, the Cascade value doesn't seem to 
+        // affect this.
+        itemToDelete.setMenuItem(null);
+        menuItemOptionRepository.save(itemToDelete);
+
+        menuItemOptionRepository.delete(itemToDelete);
+        return null;
     }
 
     private MenuItem convertMenuItem(final MenuItemDto menuItemDto) {

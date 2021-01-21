@@ -111,8 +111,7 @@ public class AdminApiControllerTest {
 
   // Tests of addMenuItemOption()
 
-  //  @Disabled // For some reason, this annotation doesn't work.
-//  @Test
+  @Test
   public void testAddOptionBadInput() {
     isNotFound(5, makeMenuItemOptionDto("olives", "1000.00"));
     isNotFound(6, makeMenuItemOptionDto("pepperoni", "100.00"));
@@ -136,23 +135,22 @@ public class AdminApiControllerTest {
 
   // Test of deleteOption()
 
-//  @Disabled
-//    @Test
-    public void testDeleteOption() throws ResponseException {
-      MenuItemDto menuItemDto = createPizzaMenuItem();
-      ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
-      final CreatedResponse body = responseEntity.getBody();
-      assertNotNull(body);
-      Integer id = body.getId();
-      System.out.printf("Body: <%s>%n", id);
-      
-      MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
-      Hibernate.initialize(item);
-      List<String> nameList = new LinkedList<>();
-      for (MenuItemOption option : item.getAllowedOptions()) {
-        nameList.add(option.getName());
-      }
-      assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
+  @Test
+  public void testDeleteOption() throws ResponseException {
+    MenuItemDto menuItemDto = createPizzaMenuItem();
+    ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    final CreatedResponse body = responseEntity.getBody();
+    assertNotNull(body);
+    Integer id = body.getId();
+    System.out.printf("Body: <%s>%n", id);
+
+    MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
+    Hibernate.initialize(item);
+    List<String> nameList = new LinkedList<>();
+    for (MenuItemOption option : item.getAllowedOptions()) {
+      nameList.add(option.getName());
+    }
+    assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
 
 
     try {
@@ -176,7 +174,10 @@ public class AdminApiControllerTest {
 
     item = menuItemApiController.getMenuItemTestOnly(id);
     assertFalse(hasName(item, removedName));
-    assertNull(menuItemApiController.getMenuItemOptionTestOnly(removedId));
+    try {
+      menuItemApiController.getMenuItemOptionTestOnly(removedId);
+      fail("Item not removed");
+    } catch (NotFound404Exception ignored) { }
   }
 
   public static MenuItemDto createPizzaMenuItem() {

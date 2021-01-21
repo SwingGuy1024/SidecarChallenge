@@ -55,7 +55,7 @@
 				</executions>
 			</plugin>
 
-			<!--Note: Because the generated code does not compile, (It overrides in interface incompletely) 
+			<!--Note: Because the generated code does not compile, (It overrides an interface incompletely) 
 			I need to comment out the generator plugin once my code is generated. And I need to move the generated 
 			classes out of the target folder and into src. This is not very convenient, but it works. To generate
 			additional classes you will need to uncomment this generator plugin. -->

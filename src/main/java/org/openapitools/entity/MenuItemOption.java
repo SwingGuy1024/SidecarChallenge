@@ -121,7 +121,7 @@ public class MenuItemOption implements Serializable {
     //noinspection StringConcatenation,ObjectToString,MagicCharacter
     return "MenuItemOption{" +
         "id=" + id +
-        ", menuItem=" + menuItem +
+        ", menuItemId=" + menuItem.getId() + // We don't print the menuItem, because that would create an infinite loop.
         ", deltaPrice=" + deltaPrice +
         ", name='" + name + '\'' +
         '}';

@@ -139,6 +139,8 @@ public class AdminApiController implements AdminApi {
         for (MenuItemOption option : menuItem.getAllowedOptions()) {
             option.setMenuItem(menuItem);
         }
+        
+        log.trace("Menu Item {}", menuItem);
 
         return menuItem;
     }

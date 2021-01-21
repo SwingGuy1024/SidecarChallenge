@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.hibernate.Hibernate;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
@@ -65,8 +66,7 @@ public class AdminApiControllerTest {
 //    } catch (BadRequest400Exception ignored) { }
   }
 
-//  @Disabled // For some reason, this annotation doesn't work.
-//  @Test
+  @Test
   public void testAddMenuItemGoodInput() {
     MenuItemDto menuItemDto = makeMenuItem();
     ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
@@ -77,6 +77,7 @@ public class AdminApiControllerTest {
 //    Integer id = body.getId();
     if (id != null) {
       MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
+      Hibernate.initialize(item);
       assertEquals("0.50", item.getItemPrice().toString());
       assertEquals("GoodItem", item.getName());
       Set<String> foodOptionSet = new HashSet<>();
@@ -110,7 +111,7 @@ public class AdminApiControllerTest {
 
   // Tests of addMenuItemOption()
 
-//  @Disabled
+  //  @Disabled // For some reason, this annotation doesn't work.
 //  @Test
   public void testAddOptionBadInput() {
     isNotFound(5, makeMenuItemOptionDto("olives", "1000.00"));
@@ -136,21 +137,22 @@ public class AdminApiControllerTest {
   // Test of deleteOption()
 
 //  @Disabled
-//  @Test
-  public void testDeleteOption() throws ResponseException {
-    MenuItemDto menuItemDto = createPizzaMenuItem();
-    ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
-    final CreatedResponse body = responseEntity.getBody();
-    assertNotNull(body);
-    Integer id = body.getId();
-    System.out.printf("Body: <%s>%n", id);
-    
-    MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
-    List<String> nameList = new LinkedList<>();
-    for (MenuItemOption option : item.getAllowedOptions()) {
-      nameList.add(option.getName());
-    }
-    assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
+//    @Test
+    public void testDeleteOption() throws ResponseException {
+      MenuItemDto menuItemDto = createPizzaMenuItem();
+      ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
+      final CreatedResponse body = responseEntity.getBody();
+      assertNotNull(body);
+      Integer id = body.getId();
+      System.out.printf("Body: <%s>%n", id);
+      
+      MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
+      Hibernate.initialize(item);
+      List<String> nameList = new LinkedList<>();
+      for (MenuItemOption option : item.getAllowedOptions()) {
+        nameList.add(option.getName());
+      }
+      assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
 
 
     try {

@@ -1,13 +1,10 @@
 package org.openapitools.framework;
 
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.framework.exception.ResponseException;
 import org.openapitools.model.CreatedResponse;
 import org.slf4j.Logger;

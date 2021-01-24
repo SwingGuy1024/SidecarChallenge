@@ -404,7 +404,6 @@ components:
           type: string
         deltaPrice:
           type: number
-          format: int32
           description: Floating point price. Strings are easier to work with.
         id:
           type: integer

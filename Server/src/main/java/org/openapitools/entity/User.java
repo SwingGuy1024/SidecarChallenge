@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import org.openapitools.model.UserDto;
 import org.springframework.security.core.GrantedAuthority;

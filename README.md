@@ -1,3 +1,6 @@
+# Building
+
+The project is divided into two modules, Gen and Server. You can to an mvn clean install in the main directory to build both packages. Or you can build each module separately. Either way, this will produce an executable jar file at Server/target/Server-0.0.1-SNAPSHOT.jar
 # Starting up
 
 Start Redis:
@@ -29,7 +32,7 @@ This design is in the same folder as this README.md file, called **Part 1 — Pi
 
 ## 1. Implementation
 
-This doesn't exactly implement the Design I produced in the Part 1 of the assignment. The biggest change is the menu structure. The design calls for a tree structure of Menu Items. This implements MenuItems with separate MenuItemOptions, in a many-to-many relationship.
+This doesn't exactly implement the Design I produced in the Part 1 of the assignment. The biggest change is the menu structure. The design calls for a tree structure of Menu Items. This implements MenuItems with separate MenuItemOptions, in a one-to-many relationship.
 
 ### API Design:
 #### General

@@ -5,7 +5,6 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.entity.MenuItem;
 import org.openapitools.entity.MenuItemOption;
-import org.openapitools.framework.PojoUtility;
 import org.openapitools.framework.exception.BadRequest400Exception;
 import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;

@@ -11,7 +11,7 @@
 
   <artifactId>Server</artifactId>
 
-  <name>miguelmunoz.challenge</name>
+  <name>Server</name>
   <description>Pizza Order Coding Challenge</description>
 
   <properties>

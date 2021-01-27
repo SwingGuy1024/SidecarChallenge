@@ -1,6 +1,6 @@
 # Building
 
-The project is divided into two modules, Gen and Server. You can to an mvn clean install in the main directory to build both packages. Or you can build each module separately. Either way, this will produce an executable jar file at Server/target/Server-0.0.1-SNAPSHOT.jar
+The project is divided into two modules, Gen and Server. You can do `mvn clean install` in the main directory to build both packages. Or you can build each module separately. Either way, this will produce an executable jar file at `Server/target/Server-0.0.1-SNAPSHOT.jar`. 
 # Starting up
 
 Start Redis:
@@ -13,7 +13,7 @@ Grant the user all rights on the pizza database
 
     create database pizza;
 
-    use mysql;
+    use pizza;
     create user pizza identified by 'pizza';
     grant all on pizza.* to pizza;
 
@@ -68,11 +68,11 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
 
 There is no API for creating new users. The first time you attempt to log in, five users will be created. They are User1, User2, User3, Admin1, and Admin2. Each uses its username as its password. The three Users have the CUSTOMER role, and the other two have the ADMIN role.
 
-## 4. Broken, for now:
+## 4. Notes:
 
-Some of the unit tests don't work, and have been disabled. They used to work, and I'm looking into this.
+To monitor the Redis cache, and verify that it's working, use the Redis CLI:
 
--- Miguel Muñoz
+    $> redis-cli MONITOR
 
  ----
 

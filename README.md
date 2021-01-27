@@ -66,7 +66,7 @@ The APIs are implemented with a call to a serve method, which takes a lambda exp
 
 ## 3. Logging In Users
 
-There is no API for creating new users. The first time you attempt to log in, five users will be created. They are User1, User2, User3, Admin1, and Admin2. Each uses its username as its password. The three Users have the CUSTOMER role, and the other two have the ADMIN role.
+There is no API for creating new users. The first time you attempt to log in, five users will be created. They are User1, User2, User3, Admin1, and Admin2. Each uses its username as its password. The three Users have the CUSTOMER role, and the other two have the ADMIN role. All users, including guests, may view the menus. Users with the CUSTOMER role may place orders (not implemented). Users with the ADMIN role may modify the menu items, create new ones, and delete old ones.
 
 ## 4. Notes:
 

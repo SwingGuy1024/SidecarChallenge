@@ -71,7 +71,7 @@ public class LoginApiController implements LoginApi {
         if (!encoder.matches(userDto.getPassword(), storedUser.getPassword())) {
             throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
         }
-        final String token = JwtTokenUtil.getInstance().generateToken(user, storedUser.getRole().toString());
+        final String token = JwtTokenUtil.getInstance().generateToken(user.getUsername(), storedUser.getRole().toString());
         log.info("token = " + token);
         return token;
     }

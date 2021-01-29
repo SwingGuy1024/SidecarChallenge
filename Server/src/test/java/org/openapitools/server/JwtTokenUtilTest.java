@@ -25,10 +25,10 @@ public class JwtTokenUtilTest {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
 //    assertNotNull(jwtTokenUtil.secret);
     User adminUserOne = makeUser("adminUserOne", "passwordOne", UserDto.RoleEnum.ADMIN);
-    String tokenOne = jwtTokenUtil.generateToken(adminUserOne, UserDto.RoleEnum.ADMIN.toString());
+    String tokenOne = jwtTokenUtil.generateToken(adminUserOne.getUsername(), UserDto.RoleEnum.ADMIN.toString());
 
     User customerUserOne = makeUser("custUserOne", "custPWOne", UserDto.RoleEnum.CUSTOMER);
-    String custToken = jwtTokenUtil.generateToken(customerUserOne, UserDto.RoleEnum.CUSTOMER.toString());
+    String custToken = jwtTokenUtil.generateToken(customerUserOne.getUsername(), UserDto.RoleEnum.CUSTOMER.toString());
 
     assertTrue(jwtTokenUtil.validateToken(tokenOne));
     assertTrue(jwtTokenUtil.validateToken(custToken));
@@ -45,7 +45,7 @@ public class JwtTokenUtilTest {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
     User adminUserOne = makeUser("adminUserOne", "passwordOne", UserDto.RoleEnum.ADMIN);
     long tooLongAgo = System.currentTimeMillis() - JWT_TOKEN_VALIDITY_MILLIS - 1000;
-    String expiredToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne, UserDto.RoleEnum.ADMIN.toString(), tooLongAgo);
+    String expiredToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), UserDto.RoleEnum.ADMIN.toString(), tooLongAgo);
     assertFalse(jwtTokenUtil.validateToken(expiredToken));
   }
   
@@ -54,7 +54,7 @@ public class JwtTokenUtilTest {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
     User adminUserOne = makeUser("adminUserOne", "passwordOne", UserDto.RoleEnum.ADMIN);
     long oneHourAgo = System.currentTimeMillis() - ONE_HOUR_MILLIS;
-    String validToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne, UserDto.RoleEnum.ADMIN.toString(), oneHourAgo);
+    String validToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), UserDto.RoleEnum.ADMIN.toString(), oneHourAgo);
     char[] chars = validToken.toCharArray();
     int length = chars.length;
     chars[length-1]++; // change the last character.

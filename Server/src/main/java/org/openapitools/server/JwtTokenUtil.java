@@ -12,7 +12,6 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -82,12 +81,6 @@ public enum JwtTokenUtil {
     return getClaimFromToken(token, ROLE_CLAIM, String.class);
   }
   
-  private boolean isTokenExpired(String token) {
-    final Date expiration = getExpirationDateFromToken(token);
-    log.trace("Expire at {}", expiration);
-    return expiration.before(new Date());
-  }
-
   private String doGenerateToken(Map<String, Object> claims, String subject) {
     final long now = System.currentTimeMillis();
     return doGenerateToken(claims, subject, now);
@@ -110,15 +103,15 @@ public enum JwtTokenUtil {
   /**
    * Generate a token for the user
    *
-   * @param userDetails The UserDetails
+   * @param username The username
    * @return a valid token
    */
-  public String generateToken(UserDetails userDetails, String role) {
-    Map<String, Object> claims = defaultClaimsForUser(role);
-    return doGenerateToken(claims, userDetails.getUsername());
+  public String generateToken(String username, String role) {
+    Map<String, Object> claims = createDefaultClaimsForUser(role);
+    return doGenerateToken(claims, username);
   }
 
-  private Map<String, Object> defaultClaimsForUser(final String role) {
+  private Map<String, Object> createDefaultClaimsForUser(final String role) {
     Map<String, Object> claims = new HashMap<>();
     claims.put(ROLE_CLAIM, role);
     return claims;
@@ -127,8 +120,8 @@ public enum JwtTokenUtil {
   /**
    * Validate token
    *
-   * @param token       The Token
-   * @return true if valid, false if wrong user or token has expired
+   * @param token The JWT Token
+   * @return true if valid, false if the token has expired or tampered with.
    */
   public boolean validateToken(String token) {
     String username;
@@ -145,23 +138,19 @@ public enum JwtTokenUtil {
     }
 
     String role = getRoleFromToken(token);
-    String duplicateToken = doGenerateToken(defaultClaimsForUser(role), username, issuedAt.getTime());
-    if (!duplicateToken.equals(token)) {
-      return false;
-    }
-    final String usernameFromToken = getUsernameFromToken(token);
-    return (usernameFromToken.equals(username) && !isTokenExpired(token));
+    String duplicateToken = doGenerateToken(createDefaultClaimsForUser(role), username, issuedAt.getTime());
+    return duplicateToken.equals(token);
   }
   
   // Package method for testing only
 
   // Test-only methods with package access only.
-  String generateTokenTestOnly(String username, String role, long millis) {
-    Map<String, Object> claims = defaultClaimsForUser(role);
+  String testOnlyGenerateToken(String username, String role, long millis) {
+    Map<String, Object> claims = createDefaultClaimsForUser(role);
     return getToken(claims, username, millis);
   }
   
-  String testOnlyGenerateTokenFromTime(UserDetails userDetails, String role, long millis) {
-    return doGenerateToken(defaultClaimsForUser(role), userDetails.getUsername(), millis);
+  String testOnlyGenerateTokenFromTime(String username, String role, long millis) {
+    return doGenerateToken(createDefaultClaimsForUser(role), username, millis);
   }
 }

@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
+import org.openapitools.model.UserDto;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -43,7 +44,7 @@ public class JwtRequestFilterTest {
     // current expiration time is 5 hours, which is 18,000,000 milliseconds
     String user = VALID_USER;
     final long millis = System.currentTimeMillis() - 3_000_000_000L; // longer than a month
-    String token = JwtTokenUtil.instance.generateTokenTestOnly(user, "ADMIN", millis);
+    String token = JwtTokenUtil.instance.testOnlyGenerateToken(user, UserDto.RoleEnum.ADMIN.toString(), millis);
     String bearerToken = JwtRequestFilter.BEARER_ + token;
     runTest(user, bearerToken, 1);
   }
@@ -57,7 +58,7 @@ public class JwtRequestFilterTest {
   @Test
   public void testGoodName() throws ServletException, IOException {
     long millis = System.currentTimeMillis();
-    String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.generateTokenTestOnly(VALID_USER, "ADMIN", millis);
+    String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.testOnlyGenerateToken(VALID_USER, "ADMIN", millis);
     runTest(VALID_USER, token, 1);
   }
 

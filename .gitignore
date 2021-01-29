@@ -2,7 +2,7 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 
 spring-server-generated/
-gen/
+gen/target/
 src/freezer/
 docs/
 

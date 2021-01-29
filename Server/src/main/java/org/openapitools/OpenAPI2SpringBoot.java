@@ -19,7 +19,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
  * Caching Configuration Reference: https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis
  */
 
-@EnableCaching()
+@EnableCaching
 @SpringBootApplication
 @ComponentScan(basePackages = {
     "org.openapitools",
@@ -74,7 +74,7 @@ public class OpenAPI2SpringBoot implements CommandLineRunner {
 
             @Override
             protected String buildLogMessage(final Exception ex, final HttpServletRequest request) {
-                log.debug("build log message: " + ex.getStackTrace());
+                log.debug("build log message", ex);
                 final String message = super.buildLogMessage(ex, request);
                 log.error("{}: {}", ex.getClass().getSimpleName(), ex.getLocalizedMessage(), ex);
                 return message;

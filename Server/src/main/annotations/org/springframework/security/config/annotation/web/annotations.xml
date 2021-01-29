@@ -1,0 +1,5 @@
+<root>
+  <item name='org.springframework.security.config.annotation.web.AbstractRequestMatcherRegistry C antMatchers(java.lang.String...)'>
+    <annotation name='org.jetbrains.annotations.NonNls'/>
+  </item>
+</root>

@@ -1,9 +1,9 @@
 package org.openapitools.server;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.List;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -44,47 +43,33 @@ public class JwtRequestFilterTest {
     // current expiration time is 5 hours, which is 18,000,000 milliseconds
     String user = VALID_USER;
     final long millis = System.currentTimeMillis() - 3_000_000_000L; // longer than a month
-    String token = JwtTokenUtil.instance.generateTokenTestOnly(user, millis);
+    String token = JwtTokenUtil.instance.generateTokenTestOnly(user, "ADMIN", millis);
     String bearerToken = JwtRequestFilter.BEARER_ + token;
-    runTest(user, bearerToken, 0, 1);
+    runTest(user, bearerToken, 1);
   }
   
   @Test
   public void testBadBearer() throws ServletException, IOException {
     String token = "badToken";
-    runTest(VALID_USER, token, 0, 0);
+    runTest(VALID_USER, token, 0);
   }
   
   @Test
-  public void testMismatchedName() throws ServletException, IOException {
-    long millis = System.currentTimeMillis();
-    String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.generateTokenTestOnly(VALID_USER, millis);
-    runTest("invalidUser", token, 1, 0);
-  }
-
-  @Test
-  public void testMissingUser() throws ServletException, IOException {
-    long millis = System.currentTimeMillis();
-    String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.generateTokenTestOnly(NOT_FOUND, millis);
-    runTest(NOT_FOUND, token, 1, 0);
-  }
-
-  @Test
   public void testGoodName() throws ServletException, IOException {
     long millis = System.currentTimeMillis();
-    String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.generateTokenTestOnly(VALID_USER, millis);
-    runTest(VALID_USER, token, 1, 1);
+    String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.generateTokenTestOnly(VALID_USER, "ADMIN", millis);
+    runTest(VALID_USER, token, 1);
   }
 
-  private void runTest(final String user,  String bearerToken, int serviceCount, int contextCount) throws ServletException, IOException {
+  private void runTest(final String user,  String bearerToken, int contextCount) throws ServletException, IOException {
     UserDetails mockDetails = mock(UserDetails.class);
     when(mockDetails.getUsername()).thenReturn(user);
-    List authorityList = Collections.singletonList(fakeAuthority());
+    
+    // I don't like using a raw parameterized class, but this is the only way it compiles. This is only a unit test, so I'm okay with it
+    //noinspection rawtypes
+    Collection authorityList = Collections.singletonList(fakeAuthority());
+    //noinspection unchecked
     when(mockDetails.getAuthorities()).thenReturn(authorityList);
-
-    UserDetailsService mockUserDetailService = mock(UserDetailsService.class);
-    when(mockUserDetailService.loadUserByUsername(VALID_USER)).thenReturn(mockDetails);
-    when(mockUserDetailService.loadUserByUsername(NOT_FOUND)).thenReturn(null);
 
     HttpServletRequest mockRequest = mock(HttpServletRequest.class);
     when(mockRequest.getHeaderNames()).thenReturn(new EmptyEnumeration<>());
@@ -93,19 +78,17 @@ public class JwtRequestFilterTest {
     HttpServletResponse mockResponse = mock(HttpServletResponse.class);
     
     FilterChain mockChain = mock(FilterChain.class);
-//    when (mockChain.doFilter(any(), any())).
 
     SecurityContext mockContext = mock(SecurityContext.class);
     when(mockContext.getAuthentication()).thenReturn(null);
 
-    JwtRequestFilter filter = new JwtRequestFilter(mockUserDetailService);
+    JwtRequestFilter filter = new JwtRequestFilter();
     filter.setContextSupplierTestOnly(() -> mockContext);
 
     // Perform test
     filter.doFilterInternal(mockRequest, mockResponse, mockChain);
 
     verify(mockChain, times(1)).doFilter(any(), any());
-    verify(mockUserDetailService, times(serviceCount)).loadUserByUsername(any());
     verify(mockContext, times(contextCount)).setAuthentication(any());
   }
   
@@ -113,7 +96,7 @@ public class JwtRequestFilterTest {
     return new GrantedAuthority() {
       @Override
       public String getAuthority() {
-        return "Dummy";
+        return "ADMIN";
       }
 
       @Override

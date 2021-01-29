@@ -34,16 +34,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
   static final String AUTHORIZATION = "Authorization";
   static final String BEARER_ = "Bearer ";
-  private final UserDetailsService userDetailsService;
 
   private final JwtTokenUtil jwtTokenUtil = JwtTokenUtil.getInstance();
   private Supplier<SecurityContext> contextSupplier = SecurityContextHolder::getContext;
 
-//  @Autowired
-  public JwtRequestFilter(final UserDetailsService userDetailsService) {
+  public JwtRequestFilter() {
     super();
-    this.userDetailsService = userDetailsService;
-    log.debug("Instantiating JwtRequestFilter");
+    log.trace("Instantiating JwtRequestFilter");
   }
 
   @Override
@@ -54,7 +51,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
   ) throws ServletException, IOException {
     log.debug("JwtRequestFilter.doFilterInternal");
 //    ResponseUtility.logHeaders(request, "jwtRequestFilter");
-    log.debug("Tail: {}", ResponseUtility.getUriTail(request));
+    log.trace("Tail: {}", ResponseUtility.getUriTail(request));
 
     final String requestTokenHeader = request.getHeader(AUTHORIZATION);
 
@@ -86,30 +83,27 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     }
 
     log.trace("Time remains on token");
+
     // Once we get the token validate it.
     final SecurityContext context = contextSupplier.get();
     if ((username != null) && (context.getAuthentication() == null)) {
 
-      log.debug("Authenticating user {}", username);
-      UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-      if (userDetails == null) {
-        log.debug("User {} not found", username);
-        return;
-      }
+      String role = JwtTokenUtil.instance.getRoleFromToken(jwtToken);
+      final Collection<? extends GrantedAuthority> authorities = UserAndRoleDetails.getAuthoritiesFromRole(role);
+      log.trace("Authenticating user {}", username);
       if (log.isTraceEnabled()) {
-        log.trace("user Found with {}", userDetails.getAuthorities().iterator().next());
+        log.trace("user Found with {}", authorities.iterator().next());
       }
 
       // if token is valid configure Spring Security to manually set authentication
-      if (jwtTokenUtil.validateToken(jwtToken, userDetails)) {
+      if (jwtTokenUtil.validateToken(jwtToken)) {
 
-        final Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
-        log.debug("User Authenticated with first authorityCount = {}", authorities.size());
+        log.trace("User Authenticated with first authorityCount = {}", authorities.size());
         if (log.isDebugEnabled() && !authorities.isEmpty()) {
-          log.debug("First authority: {}", authorities.iterator().next());
+          log.trace("First authority: {}", authorities.iterator().next());
         }
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
-            = new UsernamePasswordAuthenticationToken(userDetails, null, authorities);
+            = new UsernamePasswordAuthenticationToken(username, null, authorities);
         usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         // After setting the Authentication in the context, we specify that the current user is authenticated.
         // So it passes the Spring Security Configurations successfully.

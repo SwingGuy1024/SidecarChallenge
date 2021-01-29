@@ -6,8 +6,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +27,8 @@ public enum JwtTokenUtil {
   instance;
 
   private static final Logger log = LoggerFactory.getLogger(JwtTokenUtil.class);
-  
+  private static final String ROLE_CLAIM = "role";
+
   public static JwtTokenUtil getInstance() {
     log.info("Getting JwtTokenUtil instance");
     return instance;
@@ -43,6 +46,11 @@ public enum JwtTokenUtil {
   public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = getAllClaimsFromToken(token);
     return claimsResolver.apply(claims);
+  }
+  
+  public <T> T getClaimFromToken(String token, String claimName, Class<T> claimClass) {
+    final Claims claims = getAllClaimsFromToken(token);
+    return claims.get(claimName, claimClass);
   }
 
   /**
@@ -65,6 +73,15 @@ public enum JwtTokenUtil {
     return getClaimFromToken(token, Claims::getExpiration);
   }
 
+  /**
+   * Retrieve the user role from the jwt token
+   * @param token the jwt token
+   * @return The role, as a String
+   */
+  public String getRoleFromToken(String token) {
+    return getClaimFromToken(token, ROLE_CLAIM, String.class);
+  }
+  
   private boolean isTokenExpired(String token) {
     final Date expiration = getExpirationDateFromToken(token);
     log.trace("Expire at {}", expiration);
@@ -73,9 +90,13 @@ public enum JwtTokenUtil {
 
   private String doGenerateToken(Map<String, Object> claims, String subject) {
     final long now = System.currentTimeMillis();
-    return getToken(claims, subject, now);
+    return doGenerateToken(claims, subject, now);
   }
-
+  
+  private String doGenerateToken(Map<String, Object> claims, String subject, long issueTimeMillis) {
+    return getToken(claims, subject, issueTimeMillis);
+  }
+  
   private String getToken(final Map<String, Object> claims, final String subject, final long timeMillis) {
     return Jwts
         .builder()
@@ -92,26 +113,55 @@ public enum JwtTokenUtil {
    * @param userDetails The UserDetails
    * @return a valid token
    */
-  public String generateToken(UserDetails userDetails) {
-    Map<String, Object> claims = new HashMap<>();
+  public String generateToken(UserDetails userDetails, String role) {
+    Map<String, Object> claims = defaultClaimsForUser(role);
     return doGenerateToken(claims, userDetails.getUsername());
+  }
+
+  private Map<String, Object> defaultClaimsForUser(final String role) {
+    Map<String, Object> claims = new HashMap<>();
+    claims.put(ROLE_CLAIM, role);
+    return claims;
   }
   
   /**
    * Validate token
    *
    * @param token       The Token
-   * @param userDetails The UserDetails
    * @return true if valid, false if wrong user or token has expired
    */
-  public boolean validateToken(String token, UserDetails userDetails) {
-    final String username = getUsernameFromToken(token);
-    return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+  public boolean validateToken(String token) {
+    String username;
+    Date issuedAt;
+    try {
+      issuedAt = getClaimFromToken(token, Claims::getIssuedAt);
+      username = getUsernameFromToken(token);
+    } catch (SignatureException e) {
+      log.warn("Invalid token: {}", token, e);
+      return false;
+    } catch (ExpiredJwtException e) {
+      log.warn("Expired token: {}", token, e);
+      return false;
+    }
+
+    String role = getRoleFromToken(token);
+    String duplicateToken = doGenerateToken(defaultClaimsForUser(role), username, issuedAt.getTime());
+    if (!duplicateToken.equals(token)) {
+      return false;
+    }
+    final String usernameFromToken = getUsernameFromToken(token);
+    return (usernameFromToken.equals(username) && !isTokenExpired(token));
   }
+  
+  // Package method for testing only
 
   // Test-only methods with package access only.
-  String generateTokenTestOnly(String username, long millis) {
-    Map<String, Object> claims = new HashMap<>();
+  String generateTokenTestOnly(String username, String role, long millis) {
+    Map<String, Object> claims = defaultClaimsForUser(role);
     return getToken(claims, username, millis);
+  }
+  
+  String testOnlyGenerateTokenFromTime(UserDetails userDetails, String role, long millis) {
+    return doGenerateToken(defaultClaimsForUser(role), userDetails.getUsername(), millis);
   }
 }

@@ -70,6 +70,8 @@ paths:
                 $ref: '#/components/schemas/CreatedResponse'
         400:
           description: Bad Request
+        403:
+          description: Forbidden
   /admin/menuItem/addOption/{menuItemId}:
     post:
       summary: Add a menuItemOption

@@ -1,0 +1,6 @@
+<root>
+  <item
+      name='org.springframework.security.authentication.UsernamePasswordAuthenticationToken UsernamePasswordAuthenticationToken(java.lang.Object, java.lang.Object)'>
+    <annotation name='org.jetbrains.annotations.NonNls'/>
+  </item>
+</root>

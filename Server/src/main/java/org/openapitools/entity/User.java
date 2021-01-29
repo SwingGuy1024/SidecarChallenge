@@ -6,8 +6,8 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.openapitools.model.UserDto;
+import org.openapitools.server.UserAndRoleDetails;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -17,7 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
  * @author Miguel Mu\u00f1oz
  */
 @Entity
-public class User implements UserDetails {
+public class User implements UserAndRoleDetails {
   @Id
   @Column(unique = true)
   private String username = null;
@@ -135,6 +135,10 @@ public class User implements UserDetails {
     Authority(UserDto.RoleEnum role) {
       //noinspection HardCodedStringLiteral
       authority = String.format("ROLE_%s", role);
+    }
+    
+    public Authority(String role) {
+      this(UserDto.RoleEnum.fromValue(role));
     }
 
     @Override

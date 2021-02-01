@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.openapitools.framework.ResponseUtility;
+import org.openapitools.framework.exception.ExpectationFailed417Exception;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,9 +48,11 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       HttpServletResponse response,
       FilterChain chain
   ) throws ServletException, IOException {
-    log.debug("JwtRequestFilter.doFilterInternal");
+    log.trace("JwtRequestFilter.doFilterInternal");
 //    ResponseUtility.logHeaders(request, "jwtRequestFilter");
-    log.trace("Tail: {}", ResponseUtility.getUriTail(request));
+    if (log.isTraceEnabled()) {
+      log.trace("Tail: {}", ResponseUtility.getUriTail(request));
+    }
 
     final String requestTokenHeader = request.getHeader(AUTHORIZATION);
 
@@ -71,13 +74,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
   private void processFilter(final HttpServletRequest request, final String jwtToken) {
     String username;
     try {
-      username = jwtTokenUtil.getUsernameFromToken(jwtToken);
+      username = jwtTokenUtil.getUsernameFromToken(jwtToken); // will throw ExpiredJwtException if expired
     } catch (ExpiredJwtException e) {
       log.debug("Token expired");
-      final UsernamePasswordAuthenticationToken expired 
-          = new UsernamePasswordAuthenticationToken("Unknown User", "Expired Token");
-      contextSupplier.get().setAuthentication(expired);
-      return;
+      // Spring Security expects me to set an "expired token" message into the context, but this returns a 401: Unauthorized, which is the
+      // same thing it returns if the token has been counterfeited. So there's no way for the client to know that it just needs to log in
+      // again for a new token. Instead, we throw an ExpectationFailed417Exception. I don't know why the server doesn't return the message
+      // specified in the UsernamePasswordAuthenticationToken, which would be more helpful.
+
+//      final UsernamePasswordAuthenticationToken expired = new UsernamePasswordAuthenticationToken("Unknown User", "Expired Token");
+//      contextSupplier.get().setAuthentication(expired);
+//      return;
+      throw new ExpectationFailed417Exception("Expired Token", e);
     }
 
     log.trace("Time remains on token");
@@ -96,8 +104,8 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       // if token is valid configure Spring Security to manually set authentication
       if (jwtTokenUtil.validateToken(jwtToken)) {
 
-        log.trace("User Authenticated with first authorityCount = {}", authorities.size());
-        if (log.isDebugEnabled() && !authorities.isEmpty()) {
+        if (log.isTraceEnabled() && !authorities.isEmpty()) {
+          log.trace("User Authenticated with first authorityCount = {}", authorities.size());
           log.trace("First authority: {}", authorities.iterator().next());
         }
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 

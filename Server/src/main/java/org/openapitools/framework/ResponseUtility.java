@@ -121,7 +121,9 @@ public enum ResponseUtility {
   public static void logHeaders(Iterable<String> getNames, Function<String, String> getName) {
     if (log.isDebugEnabled()) {
       Iterator<String> headerNames = getNames.iterator();
-      log.debug("{} headers", countTokens(headerNames));
+      if (log.isDebugEnabled()) {
+        log.debug("{} headers", countTokens(headerNames));
+      }
       headerNames = getNames.iterator();
       while (headerNames.hasNext()) {
         String hName = headerNames.next();

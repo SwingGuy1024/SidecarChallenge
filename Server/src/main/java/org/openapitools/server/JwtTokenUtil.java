@@ -39,6 +39,7 @@ public enum JwtTokenUtil {
   private final String secret = "SPEAK FRIEND AND ENTER"; //NON-NLS
 
   public Claims getAllClaimsFromToken(String token) {
+    Jwts.parser().setSigningKey(secret).isSigned(token);
     return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
   }
 

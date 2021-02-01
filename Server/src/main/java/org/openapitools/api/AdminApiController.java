@@ -48,7 +48,7 @@ public class AdminApiController implements AdminApi {
         this.objectMapper = objectMapper;
         this.menuItemRepository = menuItemRepository;
         this.menuItemOptionRepository = menuItemOptionRepository;
-        log.debug("instantiating AdminApiController");
+        log.trace("instantiating AdminApiController");
     }
 
     // I would never wrap this in an Optional, but the interface is generated.
@@ -60,9 +60,7 @@ public class AdminApiController implements AdminApi {
     @Override
     public ResponseEntity<CreatedResponse> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
 //        logHeaders(request, "AdminApiController addMenuItemOption");
-        return serveCreated(() -> {
-            return addOption(menuItemId, optionDto);
-        });
+        return serveCreated(() -> addOption(menuItemId, optionDto));
     }
 
     private CreatedResponse addOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
@@ -76,9 +74,7 @@ public class AdminApiController implements AdminApi {
 
     @Override
     public ResponseEntity<CreatedResponse> addMenuItem(final MenuItemDto menuItemDto) {
-        return serveCreated(() -> {
-            return addMenuItemFromDto(menuItemDto);
-        });
+        return serveCreated(() -> addMenuItemFromDto(menuItemDto));
     }
 
     private CreatedResponse addMenuItemFromDto(final MenuItemDto menuItemDto) {
@@ -92,7 +88,7 @@ public class AdminApiController implements AdminApi {
         log.trace("MenuItem: {}", menuItem);
         MenuItem savedItem = menuItemRepository.save(menuItem);
         final Integer id = savedItem.getId();
-        log.debug("added menuItem with id {}", id);
+        log.trace("added menuItem with id {}", id);
         return fromId(id);
     }
 
@@ -106,21 +102,18 @@ public class AdminApiController implements AdminApi {
         log.trace("MenuItemOption: {}", menuItemOption);
         MenuItemOption savedItem = menuItemOptionRepository.save(menuItemOption);
         final Integer id = savedItem.getId();
-        log.debug("MenuItemOption added with id {}", id);
-        final CreatedResponse createdResponse = fromId(id);
-        return createdResponse;
+        log.trace("MenuItemOption added with id {}", id);
+        return fromId(id);
     }
 
     @Override
     public ResponseEntity<Void> deleteOption(final Integer optionId) {
 //        logHeaders(request, "AdminApiController deleteOption");
-        return serveOK(() -> {
-            return deleteById(optionId);
-        });
+        return serveOK(() -> deleteById(optionId));
     }
 
     private Void deleteById(final Integer optionId) {
-        log.debug("Deleting menuItemOption with id {}", optionId);
+        log.trace("Deleting menuItemOption with id {}", optionId);
 
         
         MenuItemOption itemToDelete = menuItemOptionRepository.getOne(optionId);

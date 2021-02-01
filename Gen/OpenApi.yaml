@@ -72,6 +72,8 @@ paths:
           description: Bad Request
         403:
           description: Forbidden
+        417:
+          description: Token Expired
   /admin/menuItem/addOption/{menuItemId}:
     post:
       summary: Add a menuItemOption
@@ -102,6 +104,8 @@ paths:
                 $ref: '#/components/schemas/CreatedResponse'
         '400':
           description: Bad Request
+        417:
+          description: Token Expired
   /admin/menuItem/addOption:
     put:
       summary: Add a MenuItemOption
@@ -121,6 +125,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreatedResponse'
+        417:
+          description: Token Expired
   /admin/menuItem/deleteOption/{optionId}:
     delete:
       summary: Delete a MenuItemOption
@@ -139,6 +145,8 @@ paths:
           description: MenuItemOption deleted
         400:
           description: Bad Request
+        417:
+          description: Token Expired
   /login:
     post:
       summary: Log in to the system

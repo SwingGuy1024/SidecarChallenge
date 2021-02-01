@@ -54,13 +54,9 @@ public class LoginApiController implements LoginApi {
         return ResponseUtility.serveOK(() -> loginUser(userDto));
     }
 
-    private String loginUser(UserDto badUserDto) {
-        log.debug("LoginApiController.loginUser with {}", badUserDto);
-        UserDto userDto = badUserDto;
-//        if (badUserDto.getUsername() == null) {
-//            userDto = ResponseUtility.getAlternativeDto(request, objectMapper, UserDto.class); // Kludge! See method docs for why.
-//        }
-        log.debug("user DTO: {}", userDto);
+    private String loginUser(UserDto userDto) {
+        log.trace("LoginApiController.loginUser with {}", userDto);
+        log.trace("user DTO: {}", userDto.getUsername());
         User user = makeUser(userDto);
         log.info("user: {} = {}", userDto.getUsername(), user.getUsername());
         User storedUser = userRepository.findByUsername(user.getUsername());
@@ -72,7 +68,7 @@ public class LoginApiController implements LoginApi {
             throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
         }
         final String token = JwtTokenUtil.getInstance().generateToken(user.getUsername(), storedUser.getRole().toString());
-        log.info("token = " + token);
+        log.info("token = {}", token);
         return token;
     }
 
@@ -80,31 +76,36 @@ public class LoginApiController implements LoginApi {
         return objectMapper.convertValue(userDto, User.class);
     }
 
+    @SuppressWarnings("HardCodedStringLiteral")
     private void doDemoStartup() {
         long count = userRepository.count();
         log.info("Total users = {}", count);
         boolean create = count == 0;
-        makeUser("User1", UserDto.RoleEnum.CUSTOMER, create, userRepository);
-        makeUser("User2", UserDto.RoleEnum.CUSTOMER, create, userRepository);
-        makeUser("User3", UserDto.RoleEnum.CUSTOMER, create, userRepository);
-        makeUser("Admin1", UserDto.RoleEnum.ADMIN, create, userRepository);
-        makeUser("Admin2", UserDto.RoleEnum.ADMIN, create, userRepository);
-        for (int i=0; i<5; ++i) {
-            log.debug("Encoding password: {}", encoder.encode("password"));
+        makeUser("User1", UserDto.RoleEnum.CUSTOMER, create);
+        makeUser("User2", UserDto.RoleEnum.CUSTOMER, create);
+        makeUser("User3", UserDto.RoleEnum.CUSTOMER, create);
+        makeUser("Admin1", UserDto.RoleEnum.ADMIN, create);
+        makeUser("Admin2", UserDto.RoleEnum.ADMIN, create);
+        if (log.isTraceEnabled()) {
+            for (int i=0; i<5; ++i) {
+                log.trace("Encoding password: {}", encoder.encode("password"));
+            }
         }
     }
 
-    private User makeUser(String userName, UserDto.RoleEnum role, boolean create, UserRepository repo) {
+    @SuppressWarnings("HardCodedStringLiteral")
+    private void makeUser(String userName, UserDto.RoleEnum role, boolean create) {
         User user = new User();
         user.setUsername(userName);
         user.setPassword(encoder.encode(userName));
         user.setRole(role);
-        user.setEmail(userName + "@nobody.com");
-        log.debug("Creating user {} with password {}", user.getUsername(), user.getPassword());
+        user.setEmail(String.format("%s@nobody.com", userName));
+        if (log.isDebugEnabled()) {
+            log.debug("Creating user {} with password {}", user.getUsername(), user.getPassword());
+        }
         if (create) {
             userRepository.save(user);
         }
-        return user;
     }
 
 }

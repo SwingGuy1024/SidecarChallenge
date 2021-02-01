@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
+import org.openapitools.framework.exception.ExpectationFailed417Exception;
 import org.openapitools.model.UserDto;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.GrantedAuthority;
@@ -39,7 +40,7 @@ public class JwtRequestFilterTest {
   private static final String NOT_FOUND = "NotFound";
 
   @SuppressWarnings("StringConcatenation")
-  @Test
+  @Test(expected = ExpectationFailed417Exception.class)
   public void testFilterExpired() throws ServletException, IOException {
     // current expiration time is 5 hours, which is 18,000,000 milliseconds
     String user = VALID_USER;

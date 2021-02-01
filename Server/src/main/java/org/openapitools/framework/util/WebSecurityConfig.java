@@ -89,7 +89,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(final HttpSecurity http) throws Exception {
-    log.debug("Configuring WebSecurityConfig");
+    log.trace("Configuring WebSecurityConfig");
     
     // The idea here is that the menu is accessible under /menuItem, which does not require authentication, so 
     // potential customers may always look at a menu. Customer operations like placing an order require a 

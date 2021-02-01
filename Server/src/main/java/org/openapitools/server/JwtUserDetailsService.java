@@ -36,13 +36,15 @@ public class JwtUserDetailsService implements UserDetailsService {
 
   @Override
   public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException {
-    log.debug("username: {}", username);
+    log.trace("username: {}", username);
     final User byUsername = userRepository.findByUsername(username);
     if (byUsername == null) {
       throw new UsernameNotFoundException(username);
     }
-    log.debug("password: {}", byUsername.getPassword());
-    log.debug("    Role: {}", byUsername.getRole());
+    if (log.isTraceEnabled()) {
+      log.trace("password: {}", byUsername.getPassword());
+      log.trace("    Role: {}", byUsername.getRole());
+    }
     return byUsername;
   }
   

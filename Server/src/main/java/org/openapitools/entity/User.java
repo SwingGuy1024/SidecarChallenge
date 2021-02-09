@@ -5,9 +5,10 @@ import java.util.Collections;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import org.openapitools.model.UserAuthority;
 import org.openapitools.model.UserDto;
-import org.openapitools.server.UserAndRoleDetails;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -17,7 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
  * @author Miguel Mu\u00f1oz
  */
 @Entity
-public class User implements UserAndRoleDetails {
+public class User implements UserDetails {
   @Id
   @Column(unique = true)
   private String username = null;
@@ -104,7 +105,7 @@ public class User implements UserAndRoleDetails {
 //    isEnabled = enabled;
 //  }
 
-  // Okay, this is a quick and dirty implementation, because this is just a demo. I would never do this in produciton!
+  // Okay, this is a quick and dirty implementation, because this is just a demo. I would never do this in production!
   @Override
   public boolean isAccountNonExpired() {
     return true; // isAccountNonExpired;
@@ -127,28 +128,6 @@ public class User implements UserAndRoleDetails {
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
-    return Collections.singleton(new Authority(getRole()));
-  }
-  
-  public static final class Authority implements GrantedAuthority {
-    private final String authority;
-    Authority(UserDto.RoleEnum role) {
-      //noinspection HardCodedStringLiteral
-      authority = String.format("ROLE_%s", role);
-    }
-    
-    public Authority(String role) {
-      this(UserDto.RoleEnum.fromValue(role));
-    }
-
-    @Override
-    public String getAuthority() {
-      return authority;
-    }
-
-    @Override
-    public String toString() {
-      return authority;
-    }
+    return Collections.singleton(new UserAuthority(getRole()));
   }
 }

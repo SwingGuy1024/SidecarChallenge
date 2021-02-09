@@ -134,7 +134,7 @@ public enum ResponseUtility {
   
   public static String getUriTail(HttpServletRequest request) {
     String uri = request.getRequestURI();
-    if (uri == null) { // This may happen in unit tests, but not production.
+    if (uri == null) { // This may happen in unit tests, but not production. This is only used for logging anyway
       return "";
     }
     String path = request.getContextPath();

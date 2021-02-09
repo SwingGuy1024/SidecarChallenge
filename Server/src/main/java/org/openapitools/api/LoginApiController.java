@@ -47,6 +47,9 @@ public class LoginApiController implements LoginApi {
         doDemoStartup();
         log.info("LoginApiController");
         log.info("${openapi.customerOrders.base-path:}");
+        if (log.isDebugEnabled()) {
+            log.debug("Expired Token for testing: {}", JwtTokenUtil.getInstance().generateExpiredTokenForTesting("ADMIN", "CUSTOMER"));
+        }
     }
 
     @Override

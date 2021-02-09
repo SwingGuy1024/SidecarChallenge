@@ -8,12 +8,14 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
 import org.openapitools.framework.exception.ExpectationFailed417Exception;
 import org.openapitools.model.UserDto;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,30 +42,34 @@ public class JwtRequestFilterTest {
   private static final String NOT_FOUND = "NotFound";
 
   @SuppressWarnings("StringConcatenation")
-  @Test(expected = ExpectationFailed417Exception.class)
+  @Test
   public void testFilterExpired() throws ServletException, IOException {
     // current expiration time is 5 hours, which is 18,000,000 milliseconds
     String user = VALID_USER;
     final long millis = System.currentTimeMillis() - 3_000_000_000L; // longer than a month
     String token = JwtTokenUtil.instance.testOnlyGenerateToken(user, UserDto.RoleEnum.ADMIN.toString(), millis);
     String bearerToken = JwtRequestFilter.BEARER_ + token;
-    runTest(user, bearerToken, 1);
+    runTest(user, JwtRequestFilter.UNKNOWN_USER, bearerToken, true);
   }
   
   @Test
   public void testBadBearer() throws ServletException, IOException {
     String token = "badToken";
-    runTest(VALID_USER, token, 0);
+    runTest(VALID_USER, null, token, false);
   }
   
   @Test
   public void testGoodName() throws ServletException, IOException {
     long millis = System.currentTimeMillis();
     String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.testOnlyGenerateToken(VALID_USER, "ADMIN", millis);
-    runTest(VALID_USER, token, 1);
+    runTest(VALID_USER, token, true);
+  }
+  
+  private void runTest(final String user, String bearerToken, boolean authenticationExpected) throws ServletException, IOException {
+    runTest(user, user, bearerToken, authenticationExpected);
   }
 
-  private void runTest(final String user,  String bearerToken, int contextCount) throws ServletException, IOException {
+  private void runTest(final String user, String expectedUser,  String bearerToken, boolean authenticationExpected) throws ServletException, IOException {
     UserDetails mockDetails = mock(UserDetails.class);
     when(mockDetails.getUsername()).thenReturn(user);
     
@@ -81,8 +87,7 @@ public class JwtRequestFilterTest {
     
     FilterChain mockChain = mock(FilterChain.class);
 
-    SecurityContext mockContext = mock(SecurityContext.class);
-    when(mockContext.getAuthentication()).thenReturn(null);
+    SecurityContext mockContext = new MockSecurityContext();
 
     JwtRequestFilter filter = new JwtRequestFilter();
     filter.setContextSupplierTestOnly(() -> mockContext);
@@ -91,9 +96,14 @@ public class JwtRequestFilterTest {
     filter.doFilterInternal(mockRequest, mockResponse, mockChain);
 
     verify(mockChain, times(1)).doFilter(any(), any());
-    verify(mockContext, times(contextCount)).setAuthentication(any());
+    final Authentication authentication = mockContext.getAuthentication();
+    if (authenticationExpected) {
+      Assert.assertEquals(expectedUser, authentication.getName());
+    } else {
+      Assert.assertNull(authentication);
+    }
   }
-  
+
   private static GrantedAuthority fakeAuthority() {
     return new GrantedAuthority() {
       @Override
@@ -117,6 +127,20 @@ public class JwtRequestFilterTest {
     @Override
     public T nextElement() {
       throw new AssertionError("Should never be called!");
+    }
+  }
+  
+  private static class MockSecurityContext implements SecurityContext {
+    private Authentication authentication;
+
+    @Override
+    public Authentication getAuthentication() {
+      return authentication;
+    }
+
+    @Override
+    public void setAuthentication(final Authentication authentication) {
+      this.authentication = authentication;
     }
   }
 }

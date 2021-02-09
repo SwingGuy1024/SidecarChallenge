@@ -111,6 +111,12 @@ public enum JwtTokenUtil {
     Map<String, Object> claims = createDefaultClaimsForUser(role);
     return doGenerateToken(claims, username);
   }
+  
+  public String generateExpiredTokenForTesting(String username, String role) {
+    //noinspection MagicNumber
+    long expiredTimeMillis = System.currentTimeMillis() - JWT_TOKEN_VALIDITY_MILLIS - 1000L;
+    return doGenerateToken(createDefaultClaimsForUser(role), username, expiredTimeMillis);
+  }
 
   private Map<String, Object> createDefaultClaimsForUser(final String role) {
     Map<String, Object> claims = new HashMap<>();

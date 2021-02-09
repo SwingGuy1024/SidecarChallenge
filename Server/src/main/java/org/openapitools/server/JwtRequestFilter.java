@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.openapitools.framework.ResponseUtility;
-import org.openapitools.framework.exception.ExpectationFailed417Exception;
+import org.openapitools.model.UserAuthority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,7 +17,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -27,12 +26,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  *
  * @author Miguel Mu\u00f1oz
  */
-@Component
 public class JwtRequestFilter extends OncePerRequestFilter {
   private static final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);
 
+  // These have package access to be accessible to the unit test.
   static final String AUTHORIZATION = "Authorization";
   static final String BEARER_ = "Bearer ";
+  static final String UNKNOWN_USER = "Unknown User";
 
   private final JwtTokenUtil jwtTokenUtil = JwtTokenUtil.getInstance();
   private Supplier<SecurityContext> contextSupplier = SecurityContextHolder::getContext;
@@ -65,37 +65,50 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     String jwtToken = requestTokenHeader.substring(BEARER_.length());
     log.trace("Found token: {}", jwtToken);
 
-    processFilter(request, jwtToken);
+    processFilter(request, response, jwtToken);
     log.trace("filter processed");
     chain.doFilter(request, response);
     log.trace("Filter chained");
   }
 
-  private void processFilter(final HttpServletRequest request, final String jwtToken) {
+  private void processFilter(final HttpServletRequest request, final HttpServletResponse response, final String jwtToken) {
     String username;
     try {
+      // This validates the token as well
       username = jwtTokenUtil.getUsernameFromToken(jwtToken); // will throw ExpiredJwtException if expired
     } catch (ExpiredJwtException e) {
-      log.debug("Token expired");
-      // Spring Security expects me to set an "expired token" message into the context, but this returns a 401: Unauthorized, which is the
+      // The JWT library call does not test for an expired token or throw this exception until after it has validated the signature.
+      // So we know the token is valid, and nobody is trying to hack in. We can safely inform the caller that they need to log
+      // back in. (As of this writing, this doesn't work yet.) 
+      log.debug("Token expired.");
+      // Spring Security expects me to set an "expired token" message into the context, but this returns a 403: Forbidden, which is the
       // same thing it returns if the token has been counterfeited. So there's no way for the client to know that it just needs to log in
       // again for a new token. Instead, we throw an ExpectationFailed417Exception. I don't know why the server doesn't return the message
       // specified in the UsernamePasswordAuthenticationToken, which would be more helpful.
 
-//      final UsernamePasswordAuthenticationToken expired = new UsernamePasswordAuthenticationToken("Unknown User", "Expired Token");
-//      contextSupplier.get().setAuthentication(expired);
+      final UsernamePasswordAuthenticationToken expired = new UsernamePasswordAuthenticationToken(UNKNOWN_USER, "Expired Token");
+      contextSupplier.get().setAuthentication(expired);
+
+      // This is the only way to tell the caller that the token has timed out. Spring Security cleans all information out from any
+      // exception I throw, so that doesn't work. This is safe because I only get the ExpiredJwtException when it has a valid signature.
+      response.setHeader("JwtExpiredToken", "EXPIRED");
+      return;
+
 //      return;
-      throw new ExpectationFailed417Exception("Expired Token", e);
+      // Above: I tried throwing a CredentialsExpiredException, which extends AuthorizationException, in the hope that it would get
+      // caught by the JwtAuthenticationEntryPoint class. It didn't work. That class never saw this one. I'm not sure what good the
+      // JwtAuthenticationEntryPoint class does me. Early in the development process, it was catching things, but not anymore.
     }
+    
+    // At this point, we know the token is valid, because it did not throw an exception when getting the username.
 
     log.trace("Time remains on token");
 
-    // Once we get the token validate it.
     final SecurityContext context = contextSupplier.get();
     if ((username != null) && (context.getAuthentication() == null)) {
 
       String role = JwtTokenUtil.instance.getRoleFromToken(jwtToken);
-      final Collection<? extends GrantedAuthority> authorities = UserAndRoleDetails.getAuthoritiesFromRole(role);
+      final Collection<? extends GrantedAuthority> authorities = UserAuthority.getAuthoritiesFromRole(role);
       log.trace("Authenticating user {}", username);
       if (log.isTraceEnabled()) {
         log.trace("user Found with {}", authorities.iterator().next());

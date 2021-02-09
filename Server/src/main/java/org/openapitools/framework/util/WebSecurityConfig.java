@@ -66,7 +66,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
-    auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+    auth
+        .userDetailsService(jwtUserDetailsService)
+        .passwordEncoder(passwordEncoder());
   }
 
   @SuppressWarnings({"HardCodedStringLiteral", "HardcodedFileSeparator"})
@@ -97,6 +99,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // authentication with the ADMIN role.
     //noinspection HardcodedFileSeparator
     http
+        .httpBasic().and()
         .csrf()
           .disable()
         .cors()
@@ -104,16 +107,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         .formLogin()
           .disable()
         .authorizeRequests()
-          .antMatchers("/admin/**").hasRole(UserDto.RoleEnum.ADMIN.toString()) 
-          .antMatchers("/order/**").hasRole(UserDto.RoleEnum.CUSTOMER.toString())
+          .antMatchers("/admin/**")
+            .hasRole(UserDto.RoleEnum.ADMIN.toString()) 
+          .antMatchers("/order/**")
+            .hasRole(UserDto.RoleEnum.CUSTOMER.toString())
           .antMatchers(
               "/login", 
               "/menuItem",
-              "/**",
-//              "/css/**",
-//              "/js/**",
-//              "/images/**",
-//              "/**/favicon.ico",
               "/home",
               "/swagger-ui.html",
               "/api-docs",
@@ -123,9 +123,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
               "/swagger-resources/**"
           ).permitAll()
           .anyRequest().authenticated()
-        .and()
-          .exceptionHandling()
-          .authenticationEntryPoint(jwtAuthenticationEntryPoint)
         .and()
           .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)//          .httpBasic()

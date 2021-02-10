@@ -1,6 +1,5 @@
-package org.openapitools.framework;
+package org.openapitools.engine;
 
-import java.lang.annotation.Annotation;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collection;
@@ -13,7 +12,6 @@ import javax.persistence.Entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.framework.exception.BadRequest400Exception;
-import org.openapitools.framework.exception.NotFound404Exception;
 import org.openapitools.framework.exception.ResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,26 +99,35 @@ public enum PojoUtility {
     return object;
   }
 
-//   This used to work. Now it sees classes of type org.openapitools.entity.MenuItem$HibernateProxy$iL2y68Mg
-//   I've modified it to repeatedly call the superclass until it finds the Entity class. It works for now, but
+//   This used to work. Then it broke, and now it works again.
 //   I'm wondering if this is a bad idea. Fortunately, it's only executed in assertions.
   private static boolean isEntityAssertion(Object object) {
-    Set<Annotation> annotationSet = new HashSet<>();
-    Class<?> objectClass = getEntityClass(object);
-    return Arrays.stream(objectClass.getDeclaredAnnotations())
+    Class<?> entityClass = getEntityClass(object);
+    return entityClass != null;
+  }
+  
+  private static boolean isDeclaredEntityClass(Class<?> theClass) {
+    return Arrays.stream(theClass.getDeclaredAnnotations())
         .anyMatch(a -> a.annotationType() == Entity.class);
   }
-
+  
   private static Class<?> getEntityClass(final Object object) {
     Class<?> objectClass = object.getClass();
-    Class<?> superClass = objectClass.getSuperclass();
-    while (superClass != Object.class) {
+    Class<?> superClass = objectClass;
+    
+    // If the object class is an interface, this loop will end with a null superclass.
+    while ((superClass != Object.class) && (superClass != null)) {
+      if (isDeclaredEntityClass(superClass)) {
+        return superClass;
+      }
       objectClass = superClass;
-      superClass = objectClass.getSuperclass(); }
-    return objectClass;
+      superClass = objectClass.getSuperclass();
+    }
+    return null;
   }
-
-  public static <T> Set<T> asSet(T[] tArray) {
+  
+  @SafeVarargs
+  public static <T> Set<T> asSet(T... tArray) {
     return new HashSet<>(Arrays.asList(tArray));
   }
 
@@ -157,7 +164,7 @@ public enum PojoUtility {
    * @param expected The expected value
    * @param actual The actual value
    * @param <T> The type of each object
-   * @throws ResponseException BAD_REQUEST (400) if the objects are not equal
+   * @throws ResponseException BAD_REQUEST (400) if the objects are not equal, using the specified message
    * @see Objects#equals(Object, Object)
    */
   public static <T> void confirmEqual(String message, T expected, T actual) throws ResponseException {
@@ -175,13 +182,14 @@ public enum PojoUtility {
 
   /**
    * Convert a Collection of DTOs into a collection of the corresponding entities.
+   * This convenience method isn't really very convenient, but I keep it around to remind me of how to do this kind of conversion.
    * @param inputList The list of DTOs
    * @param <I> The Input DTO type
    * @param <O> The Output entity type
    * @return A list of entities of type O
    */
-  public static <I, O> List<O> convertList(Collection<I> inputList) {
-    return mapper.convertValue(inputList, new TypeReference<List<O>>() { });
+  public static <I, O> List<O> convertList(Collection<I> inputList, TypeReference<List<O>> typeReference) {
+    return mapper.convertValue(inputList, typeReference);
   }
 
 //  private static Instant parse(String dateText) {
@@ -201,7 +209,7 @@ public enum PojoUtility {
    * @param s The String
    * @return The original String, or an empty String if the original was empty. Never returns null.
    */
-  public static String notNull(String s) {
+  public static String emptyIfNull(String s) {
     return (s == null) ? "" : s;
   }
 

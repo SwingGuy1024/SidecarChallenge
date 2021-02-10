@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import org.hibernate.Hibernate;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
@@ -21,6 +22,8 @@ import org.openapitools.framework.exception.ResponseException;
 import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
+import org.openapitools.repositories.MenuItemOptionRepositoryWrapper;
+import org.openapitools.repositories.MenuItemRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
@@ -50,6 +53,12 @@ public class AdminApiControllerTest {
   @Autowired
   private MenuItemApiController menuItemApiController;
 
+  @Autowired
+  private MenuItemRepositoryWrapper menuItemRepositoryWrapper;
+
+  @Autowired
+  private MenuItemOptionRepositoryWrapper menuItemOptionRepositoryWrapper;
+
   @Test(expected = BadRequest400Exception.class)
   public void testAddMenuItemBadInput() {
     MenuItemOptionDto menuItemOption = new MenuItemOptionDto();
@@ -76,7 +85,7 @@ public class AdminApiControllerTest {
     Integer id = body.getId();
 //    Integer id = body.getId();
     if (id != null) {
-      MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
+      MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
       Hibernate.initialize(item);
       assertEquals("0.50", item.getItemPrice().toString());
       assertEquals("GoodItem", item.getName());
@@ -144,7 +153,7 @@ public class AdminApiControllerTest {
     Integer id = body.getId();
     System.out.printf("Body: <%s>%n", id);
 
-    MenuItem item = menuItemApiController.getMenuItemTestOnly(id);
+    MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
     Hibernate.initialize(item);
     List<String> nameList = new LinkedList<>();
     for (MenuItemOption option : item.getAllowedOptions()) {
@@ -162,20 +171,20 @@ public class AdminApiControllerTest {
     String removedName = removedOption.getName();
     int removedId = removedOption.getId();
     assertTrue(hasName(item, removedName));
-    assertNotNull(menuItemApiController.getMenuItemOptionTestOnly(removedId));
+    assertNotNull(menuItemOptionRepositoryWrapper.getOneOrThrow(removedId));
     ResponseEntity<Void> goodResponse = adminApiController.deleteOption(removedOption.getId());
 
     assertEquals(HttpStatus.OK, goodResponse.getStatusCode());
 
-    List<MenuItemOption> allOptions = menuItemApiController.findAllOptionsTestOnly();
+    List<MenuItemOption> allOptions = menuItemOptionRepositoryWrapper.findAll();
     for (MenuItemOption option : allOptions) {
       System.out.println(option);
     }
 
-    item = menuItemApiController.getMenuItemTestOnly(id);
+    item = menuItemRepositoryWrapper.getOneOrThrow(id);
     assertFalse(hasName(item, removedName));
     try {
-      menuItemApiController.getMenuItemOptionTestOnly(removedId);
+      menuItemOptionRepositoryWrapper.getOneOrThrow(removedId);
       fail("Item not removed");
     } catch (NotFound404Exception ignored) { }
   }
@@ -201,5 +210,20 @@ public class AdminApiControllerTest {
       }
     }
     return false;
+  }
+
+  @After
+  public void tearDown() {
+    List<MenuItem> menuItems = menuItemRepositoryWrapper.findAll();
+    for (MenuItem menuItem : menuItems) {
+      Collection<MenuItemOption> ops = menuItem.getAllowedOptions();
+      menuItem.setAllowedOptions(new LinkedList<>());
+      menuItemRepositoryWrapper.save(menuItem);
+      menuItemOptionRepositoryWrapper.deleteInBatch(ops);
+    }
+    menuItemRepositoryWrapper.deleteInBatch(menuItems);
+
+    List<MenuItemOption> optionList = menuItemOptionRepositoryWrapper.findAll();
+    menuItemOptionRepositoryWrapper.deleteInBatch(optionList);
   }
 }

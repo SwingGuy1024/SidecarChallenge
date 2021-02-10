@@ -33,12 +33,16 @@ public enum ResponseUtility {
    * @see #serve(HttpStatus, Supplier) 
    * @see Supplier#get() 
    */
-  public static ResponseEntity<CreatedResponse> serveCreated(Supplier<CreatedResponse> method) throws ResponseException {
+  public static ResponseEntity<CreatedResponse> serveCreated(Supplier<Integer> method) throws ResponseException {
     assert method != null;
-    return serve(HttpStatus.CREATED, method);
+    return serve(HttpStatus.CREATED, idWrapper(method));
+  }
+
+  private static Supplier<CreatedResponse> idWrapper(Supplier<Integer> method) {
+    return () -> fromId(method.get());
   }
   
-  public static CreatedResponse fromId(Integer id) {
+  private static CreatedResponse fromId(Integer id) {
     CreatedResponse createdResponse = new CreatedResponse();
     createdResponse.setId(id);
     return createdResponse;

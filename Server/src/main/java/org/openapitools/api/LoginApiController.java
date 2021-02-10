@@ -2,6 +2,7 @@ package org.openapitools.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.framework.ResponseUtility;
+import org.openapitools.model.LoginDto;
 import org.openapitools.model.UserDto;
 import org.openapitools.repositories.UserRepository;
 import org.openapitools.server.JwtTokenUtil;
@@ -53,21 +54,21 @@ public class LoginApiController implements LoginApi {
     }
 
     @Override
-    public ResponseEntity<String> login(final UserDto userDto) {
-        return ResponseUtility.serveOK(() -> loginUser(userDto));
+    public ResponseEntity<String> login(final LoginDto loginDto) {
+        return ResponseUtility.serveOK(() -> loginUser(loginDto));
     }
 
-    private String loginUser(UserDto userDto) {
-        log.trace("LoginApiController.loginUser with {}", userDto);
-        log.trace("user DTO: {}", userDto.getUsername());
-        User user = makeUser(userDto);
-        log.info("user: {} = {}", userDto.getUsername(), user.getUsername());
+    private String loginUser(LoginDto loginDto) {
+        log.trace("LoginApiController.loginUser with {}", loginDto);
+        log.trace("user DTO: {}", loginDto.getUsername());
+        User user = makeUser(loginDto);
+        log.info("user: {} = {}", loginDto.getUsername(), user.getUsername());
         User storedUser = userRepository.findByUsername(user.getUsername());
         log.info("Stored User: {}", storedUser);
         if (storedUser == null) {
             throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
         }
-        if (!encoder.matches(userDto.getPassword(), storedUser.getPassword())) {
+        if (!encoder.matches(loginDto.getPassword(), storedUser.getPassword())) {
             throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
         }
         final String token = JwtTokenUtil.getInstance().generateToken(user.getUsername(), storedUser.getRole().toString());
@@ -75,8 +76,8 @@ public class LoginApiController implements LoginApi {
         return token;
     }
 
-    private User makeUser(UserDto userDto) {
-        return objectMapper.convertValue(userDto, User.class);
+    private User makeUser(LoginDto loginDto) {
+        return objectMapper.convertValue(loginDto, User.class);
     }
 
     @SuppressWarnings("HardCodedStringLiteral")

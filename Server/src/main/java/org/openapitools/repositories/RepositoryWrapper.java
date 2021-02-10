@@ -1,6 +1,12 @@
 package org.openapitools.repositories;
 
+import java.util.List;
+import java.util.Optional;
 import org.openapitools.framework.exception.NotFound404Exception;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -15,7 +21,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  *
  * @author Miguel Mu\u00f1oz
  */
-abstract class RepositoryWrapper<T, ID> {
+class RepositoryWrapper<T, ID> implements JpaRepository<T, ID> {
   private final JpaRepository<T, ID> repository;
 
   protected RepositoryWrapper(JpaRepository<T, ID> repository) {
@@ -24,15 +30,135 @@ abstract class RepositoryWrapper<T, ID> {
   
   protected final JpaRepository<T, ID> getRepo() { return repository; }
 
+  @Override
+  public T getOne(final ID id) {
+    return repository.getOne(id);
+  }
+
   /**
    * This method tests the object for existence and throws an exception if it's not in the table.
    * @param id The id
    * @return The entity with the provided id
    */
-  public T getOne(ID id) {
+  public T getOneOrThrow(ID id) {
     if (repository.existsById(id)) {
       return repository.getOne(id);
     }
     throw new NotFound404Exception("Missing object");
+  }
+
+  @Override
+  public void deleteInBatch(Iterable<T> items) {
+    repository.deleteInBatch(items);
+  }
+
+  @Override
+  public List<T> findAll() {
+    return repository.findAll();
+  }
+
+  @Override
+  public List<T> findAll(final Sort sort) {
+    return repository.findAll(sort);
+  }
+
+  @Override
+  public List<T> findAllById(final Iterable<ID> iterable) {
+    return repository.findAllById(iterable);
+  }
+
+  @Override
+  public <S extends T> List<S> saveAll(final Iterable<S> iterable) {
+    return repository.saveAll(iterable);
+  }
+
+  @Override
+  public void flush() {
+    repository.flush();
+  }
+
+  @Override
+  public <S extends T> S saveAndFlush(final S s) {
+    return repository.saveAndFlush(s);
+  }
+
+  @Override
+  public void deleteAllInBatch() {
+    repository.deleteAllInBatch();
+  }
+
+  @Override
+  public <S extends T> List<S> findAll(final Example<S> example) {
+    return repository.findAll(example);
+  }
+
+  @Override
+  public <S extends T> List<S> findAll(final Example<S> example, final Sort sort) {
+    return repository.findAll(example, sort);
+  }
+
+  @Override
+  public Page<T> findAll(final Pageable pageable) {
+    return repository.findAll(pageable);
+  }
+
+  @Override
+  public <S extends T> S save(final S entity) {
+    return repository.save(entity);
+  }
+
+  @Override
+  public Optional<T> findById(final ID id) {
+    return repository.findById(id);
+  }
+
+  @Override
+  public boolean existsById(final ID id) {
+    return repository.existsById(id);
+  }
+
+  @Override
+  public long count() {
+    return repository.count();
+  }
+
+  @Override
+  public void deleteById(final ID id) {
+    repository.deleteById(id);
+  }
+
+  @Override
+  public void delete(final T entity) {
+    repository.delete(entity);
+  }
+
+  @Override
+  public void deleteAll(final Iterable<? extends T> entities) {
+    repository.deleteAll(entities);
+  }
+
+  @Override
+  public void deleteAll() {
+    repository.deleteAll();
+  }
+
+  @Override
+  public <S extends T> Optional<S> findOne(final Example<S> example) {
+    return repository.findOne(example);
+  }
+
+  @Override
+  public <S extends T> Page<S> findAll(final Example<S> example, final Pageable pageable) {
+    return repository.findAll(example, pageable);
+  }
+
+  @Override
+  public <S extends T> long count(final Example<S> example) {
+    return repository.count(example);
+  }
+
+  @Override
+  public <S extends T> boolean exists(final Example<S> example) {
+    return repository.exists(example);
   }
 }

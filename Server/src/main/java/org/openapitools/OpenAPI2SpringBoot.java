@@ -27,6 +27,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
     "org.openapitools.server",
     "org.openapitools.repositories",
     "org.openapitools.framework.util",
+    "org.openapitools.engine",
     "org.openapitools.configuration"
 })
 public class OpenAPI2SpringBoot implements CommandLineRunner {

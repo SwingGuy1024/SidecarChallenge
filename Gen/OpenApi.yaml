@@ -156,7 +156,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UserDto'
+              $ref: '#/components/schemas/LoginDto'
         required: true
       responses:
         200:
@@ -395,11 +395,6 @@ components:
         itemPrice:
           type: number
           description: Price. (BigDecimal)
-        parentId:
-          type: integer
-          format: int32
-        expired:
-          type: boolean
         allowedOptions:
           type: array
           items:
@@ -465,9 +460,9 @@ components:
     UserDto:
       type: object
       properties:
-        id:
-          type: integer
-          format: int32
+#        id:
+#          type: integer
+#          format: int32
         username:
           type: string
           description: username
@@ -485,6 +480,18 @@ components:
           type: string
           enum: [ CUSTOMER, ADMIN ]
           description: Role (Ignored for logging in)
+      required:
+        - username
+        - password
+    LoginDto:
+      type: object
+      properties:
+        username:
+          type: string
+          description: username
+        password:
+          type: string
+          description: password
       required:
         - username
         - password

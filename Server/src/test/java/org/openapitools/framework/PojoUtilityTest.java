@@ -166,9 +166,9 @@ public class PojoUtilityTest {
 
   @Test
   public void testConvertList() {
-    UserDto userDto0 = makeUser("zer", "pw-zer", UserDto.RoleEnum.CUSTOMER);
-    UserDto userDto1 = makeUser("one", "pw-one", UserDto.RoleEnum.CUSTOMER);
-    UserDto userDto2 = makeUser("two", "pw-two", UserDto.RoleEnum.ADMIN);
+    UserDto userDto0 = makeUser("zer", "pw-zer");
+    UserDto userDto1 = makeUser("one", "pw-one");
+    UserDto userDto2 = makeUser("two", "pw-two");
     List<UserDto> dtoList = Arrays.asList(userDto0, userDto1, userDto2);
     List<User> userList = PojoUtility.convertList(dtoList, new TypeReference<List<User>>() { });
     for (int i=0; i<dtoList.size(); ++i) {
@@ -176,7 +176,6 @@ public class PojoUtilityTest {
       UserDto dto = dtoList.get(i);
       assertEquals(dto.getUsername(), user.getUsername());
       assertEquals(dto.getPassword(), user.getPassword());
-      assertEquals(dto.getRole(), user.getRole());
     }
     assertEquals(dtoList.size(), userList.size());
   }
@@ -188,11 +187,10 @@ public class PojoUtilityTest {
     assertThat(set, Matchers.hasSize(3));
   }
   
-  private static UserDto makeUser(String name, String pw, UserDto.RoleEnum role) {
+  private static UserDto makeUser(String name, String pw) {
     UserDto userDto = new UserDto();
     userDto.setUsername(name);
     userDto.setPassword(pw);
-    userDto.setRole(role);
     return userDto;
   }
 

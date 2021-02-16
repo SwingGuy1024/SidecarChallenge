@@ -30,7 +30,6 @@ public enum ResponseUtility {
    * @return A {@literal ResponseEntity<CreatedResponse>} holding the value returned by the ServiceMethod's doService() method.
    * @throws ResponseException if the method fails
    * @see #serve(HttpStatus, Supplier)
-   * @see #serve(HttpStatus, Supplier) 
    * @see Supplier#get() 
    */
   public static ResponseEntity<CreatedResponse> serveCreated(Supplier<Integer> method) throws ResponseException {
@@ -82,7 +81,7 @@ public enum ResponseUtility {
    *   {@literal @Override}
    *   {@literal @RequestMapping}(value = "/menuItem/{id}", produces = {"application/json"}, method = RequestMethod.GET)
    *   public ResponseEntity{@literal <MenuItemDto>} getMenuItem(@PathVariable("id") final Integer id) {
-   *     return serve(HttpStatus.OK, () -> {
+   *     return serve(HttpStatus.OK, nativeWebRequest, () -> {
    *       MenuItem menuItem = menuItemRepository.findOne(id);
    *       confirmFound(menuItem, id); // throws NotFound404Exception if null
    *       MenuItemDto dto = objectMapper.convertValue(menuItem, MenuItemDto.class);
@@ -99,12 +98,17 @@ public enum ResponseUtility {
    * @see Supplier#get() 
    * @see ResponseException
    */
+  @SuppressWarnings("unchecked")
   public static <T> ResponseEntity<T> serve(HttpStatus successStatus, Supplier<T> method) throws ResponseException {
     assert method != null;
     try {
       return new ResponseEntity<>(method.get(), successStatus);
     } catch (ResponseException e) {
-      log.warn(e.getMessage(), e);
+      if (log.isDebugEnabled()) {
+        log.debug(e.getMessage(), e);
+      } else if (log.isWarnEnabled()) {
+        log.warn(e.getMessage());
+      }
       throw e;
     } catch (RuntimeException | Error e) {
       log.error(e.getMessage(), e);
@@ -112,11 +116,13 @@ public enum ResponseUtility {
     }
   }
   
+  @SuppressWarnings("unused")
   public static void logHeaders(HttpServletRequest request, String label) {
     log.debug("logHeaders from {}", label);
     logHeaders(() -> asIterator(request.getHeaderNames()), request::getHeader);
   }
 
+  @SuppressWarnings("unused")
   public static void logHeaders(NativeWebRequest request, String label) {
     log.debug("logHeaders from {}", label);
     logHeaders(request::getHeaderNames, request::getHeader);
@@ -154,7 +160,6 @@ public enum ResponseUtility {
       @Override public E next() { return e.nextElement();}
     };
   }
-
 
   private static int countTokens(Iterator<?> enumeration) {
     int count = 0;

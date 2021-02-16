@@ -12,6 +12,9 @@ import org.openapitools.entity.User;
  * @author Miguel Mu\u00f1oz
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, String> {
   User findByUsername(String username);
+  User findByEmail(String email);
+  User findByMobilePhone(String mobilePhone);
+  User findByLandPhone(String landPhone);
 }

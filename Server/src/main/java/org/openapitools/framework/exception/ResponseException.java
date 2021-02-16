@@ -57,6 +57,16 @@ public abstract class ResponseException extends RuntimeException {
 	public HttpStatus getHttpStatus() {
 		return httpStatus;
 	}
+	
+	@JsonIgnore
+	public int getStatusCode() {
+		return httpStatus.value();
+	}
+	
+	@JsonIgnore
+	public String getErrorName() {
+		return httpStatus.name();
+	}
 
 	/**
 	 * Return the value of the ResponseStatus annotation. Subclasses of this Exception class that aren't annotated

@@ -5,8 +5,8 @@ import java.util.Collections;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import org.openapitools.engine.Role;
 import org.openapitools.model.UserAuthority;
-import org.openapitools.model.UserDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -25,11 +25,16 @@ public class User implements UserDetails {
 
   private String password = null;
 
+  @Column(unique = true)
   private String email = null;
 
+  @Column(unique = true)
   private String mobilePhone = null;
 
-  private UserDto.RoleEnum role = null;
+  @Column(unique = true)
+  private String landPhone = null;
+
+  private Role role = null;
 
   @Override
   public String getUsername() {
@@ -65,11 +70,19 @@ public class User implements UserDetails {
     this.mobilePhone = mobilePhone;
   }
 
-  public UserDto.RoleEnum getRole() {
+  public String getLandPhone() {
+    return landPhone;
+  }
+
+  public void setLandPhone(final String landPhone) {
+    this.landPhone = landPhone;
+  }
+
+  public Role getRole() {
     return role;
   }
 
-  public void setRole(final UserDto.RoleEnum role) {
+  public void setRole(final Role role) {
     this.role = role;
   }
 

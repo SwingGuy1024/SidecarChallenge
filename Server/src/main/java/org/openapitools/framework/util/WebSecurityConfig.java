@@ -1,5 +1,6 @@
 package org.openapitools.framework.util;
 
+import org.openapitools.engine.Role;
 import org.openapitools.model.UserDto;
 import org.openapitools.server.JwtAuthenticationEntryPoint;
 import org.openapitools.server.JwtRequestFilter;
@@ -18,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -40,7 +42,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
   private final JwtRequestFilter jwtRequestFilter;
-  
+
+  private final PasswordEncoder encoder = new BCryptPasswordEncoder();
+
   @Autowired
   public void configureGlobal(AuthenticationManagerBuilder authBuilder) {
     authBuilder.eraseCredentials(false);
@@ -48,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Bean
   public PasswordEncoder passwordEncoder() {
-    return jwtUserDetailsService.getEncoder();
+    return encoder;
   }
 
   @Autowired
@@ -108,11 +112,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
           .disable()
         .authorizeRequests()
           .antMatchers("/admin/**")
-            .hasRole(UserDto.RoleEnum.ADMIN.toString()) 
+            .hasRole(Role.ADMIN.toString()) 
           .antMatchers("/order/**")
-            .hasRole(UserDto.RoleEnum.CUSTOMER.toString())
+            .hasRole(Role.CUSTOMER.toString())
           .antMatchers(
-              "/login", 
+              "/login/**", 
               "/menuItem",
               "/home",
               "/swagger-ui.html",

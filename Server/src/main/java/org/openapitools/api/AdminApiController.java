@@ -3,9 +3,13 @@ package org.openapitools.api;
 import java.util.Optional;
 import javax.validation.Valid;
 import org.openapitools.engine.DataEngine;
+import org.openapitools.engine.Role;
+import org.openapitools.engine.UserEngine;
+import org.openapitools.framework.ResponseUtility;
 import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
+import org.openapitools.model.UserDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +30,13 @@ public class AdminApiController implements AdminApi {
     private final NativeWebRequest request;
     
     private DataEngine dataEngine;
+    
+    private UserEngine userEngine;
 
     @Autowired
     public AdminApiController(
         final DataEngine dataEngine,
+        final UserEngine userEngine,
         final NativeWebRequest request
     ) {
         this.request = request;
@@ -37,7 +44,7 @@ public class AdminApiController implements AdminApi {
         log.trace("instantiating AdminApiController");
     }
 
-    // I would never wrap this in an Optional, but the interface is generated.
+    // I would never wrap this in an Optional, because it's never null, but the interface is generated.
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
@@ -65,4 +72,8 @@ public class AdminApiController implements AdminApi {
         return serveOK(() -> dataEngine.deleteById(optionId));
     }
 
+    @Override
+    public ResponseEntity<Void> addAdmin(@Valid final UserDto userDto) {
+        return ResponseUtility.serveOK(() -> userEngine.createUser(userDto, Role.ADMIN));
+    }
 }

@@ -12,8 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openapitools.OpenAPI2SpringBoot;
-import org.openapitools.framework.exception.ExpectationFailed417Exception;
-import org.openapitools.model.UserDto;
+import org.openapitools.engine.Role;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -47,7 +46,7 @@ public class JwtRequestFilterTest {
     // current expiration time is 5 hours, which is 18,000,000 milliseconds
     String user = VALID_USER;
     final long millis = System.currentTimeMillis() - 3_000_000_000L; // longer than a month
-    String token = JwtTokenUtil.instance.testOnlyGenerateToken(user, UserDto.RoleEnum.ADMIN.toString(), millis);
+    String token = JwtTokenUtil.instance.testOnlyGenerateToken(user, Role.ADMIN.toString(), millis);
     String bearerToken = JwtRequestFilter.BEARER_ + token;
     runTest(user, JwtRequestFilter.UNKNOWN_USER, bearerToken, true);
   }

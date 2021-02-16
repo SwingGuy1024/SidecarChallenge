@@ -3,8 +3,8 @@ package org.openapitools.server;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import io.jsonwebtoken.impl.TextCodec;
 import org.junit.Test;
+import org.openapitools.engine.Role;
 import org.openapitools.entity.User;
-import org.openapitools.model.UserDto;
 
 import static org.junit.Assert.*;
 import static org.openapitools.server.JwtTokenUtil.*;
@@ -24,11 +24,11 @@ public class JwtTokenUtilTest {
   public void testGenerateToken() {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
 //    assertNotNull(jwtTokenUtil.secret);
-    User adminUserOne = makeUser("adminUserOne", "passwordOne", UserDto.RoleEnum.ADMIN);
-    String tokenOne = jwtTokenUtil.generateToken(adminUserOne.getUsername(), UserDto.RoleEnum.ADMIN.toString());
+    User adminUserOne = makeUser("adminUserOne", "passwordOne", Role.ADMIN);
+    String tokenOne = jwtTokenUtil.generateToken(adminUserOne.getUsername(), Role.ADMIN.toString());
 
-    User customerUserOne = makeUser("custUserOne", "custPWOne", UserDto.RoleEnum.CUSTOMER);
-    String custToken = jwtTokenUtil.generateToken(customerUserOne.getUsername(), UserDto.RoleEnum.CUSTOMER.toString());
+    User customerUserOne = makeUser("custUserOne", "custPWOne", Role.CUSTOMER);
+    String custToken = jwtTokenUtil.generateToken(customerUserOne.getUsername(), Role.CUSTOMER.toString());
 
     assertTrue(jwtTokenUtil.validateToken(tokenOne));
     assertTrue(jwtTokenUtil.validateToken(custToken));
@@ -43,18 +43,18 @@ public class JwtTokenUtilTest {
   @Test
   public void testExpiredToken() {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
-    User adminUserOne = makeUser("adminUserOne", "passwordOne", UserDto.RoleEnum.ADMIN);
+    User adminUserOne = makeUser("adminUserOne", "passwordOne", Role.ADMIN);
     long tooLongAgo = System.currentTimeMillis() - JWT_TOKEN_VALIDITY_MILLIS - 1000;
-    String expiredToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), UserDto.RoleEnum.ADMIN.toString(), tooLongAgo);
+    String expiredToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), Role.ADMIN.toString(), tooLongAgo);
     assertFalse(jwtTokenUtil.validateToken(expiredToken));
   }
   
   @Test
   public void testBadToken() {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
-    User adminUserOne = makeUser("adminUserOne", "passwordOne", UserDto.RoleEnum.ADMIN);
+    User adminUserOne = makeUser("adminUserOne", "passwordOne", Role.ADMIN);
     long oneHourAgo = System.currentTimeMillis() - ONE_HOUR_MILLIS;
-    String validToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), UserDto.RoleEnum.ADMIN.toString(), oneHourAgo);
+    String validToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), Role.ADMIN.toString(), oneHourAgo);
     char[] chars = validToken.toCharArray();
     int length = chars.length;
     chars[length-1]++; // change the last character.
@@ -80,7 +80,7 @@ public class JwtTokenUtilTest {
     return codec.encode(decodedImposter);
   }
 
-  private User makeUser(String name, String password, UserDto.RoleEnum role) {
+  private User makeUser(String name, String password, Role role) {
     User user = new User();
     user.setUsername(name);
     user.setPassword(password);

@@ -1,6 +1,11 @@
 package org.openapitools.api;
 
+import java.util.Optional;
+import javax.validation.Valid;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openapitools.engine.Role;
+import org.openapitools.engine.UserEngine;
+import org.openapitools.entity.User;
 import org.openapitools.framework.ResponseUtility;
 import org.openapitools.model.LoginDto;
 import org.openapitools.model.UserDto;
@@ -10,21 +15,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AuthorizationServiceException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
-import java.util.Optional;
-import org.openapitools.entity.User;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-08T23:22:44.934923-08:00[America/Los_Angeles]")
 @Controller
 @RequestMapping("${openapi.customerOrders.base-path:}")
 public class LoginApiController implements LoginApi {
-
-    private static final String USER_PASSWORD_COMBINATION_NOT_FOUND = "User/password Combination not found";
 
     private static final Logger log = LoggerFactory.getLogger(LoginApiController.class);
     private final NativeWebRequest request;
@@ -33,18 +31,29 @@ public class LoginApiController implements LoginApi {
     
     private final UserRepository userRepository;
     
-    private final PasswordEncoder encoder = new BCryptPasswordEncoder();
+    private final UserEngine userEngine;
+    
+    private final PasswordEncoder encoder;
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
     }
-
+    
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
-    public LoginApiController(final NativeWebRequest request, final ObjectMapper objectMapper, final UserRepository userRepository) {
+    public LoginApiController(
+            final NativeWebRequest request,
+            final ObjectMapper objectMapper,
+            final UserRepository userRepository,
+            final PasswordEncoder encoder,
+            final UserEngine userEngine
+    ) {
         this.request = request;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
+        this.encoder = encoder;
+        this.userEngine = userEngine;
         doDemoStartup();
         log.info("LoginApiController");
         log.info("${openapi.customerOrders.base-path:}");
@@ -55,25 +64,7 @@ public class LoginApiController implements LoginApi {
 
     @Override
     public ResponseEntity<String> login(final LoginDto loginDto) {
-        return ResponseUtility.serveOK(() -> loginUser(loginDto));
-    }
-
-    private String loginUser(LoginDto loginDto) {
-        log.trace("LoginApiController.loginUser with {}", loginDto);
-        log.trace("user DTO: {}", loginDto.getUsername());
-        User user = makeUser(loginDto);
-        log.info("user: {} = {}", loginDto.getUsername(), user.getUsername());
-        User storedUser = userRepository.findByUsername(user.getUsername());
-        log.info("Stored User: {}", storedUser);
-        if (storedUser == null) {
-            throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
-        }
-        if (!encoder.matches(loginDto.getPassword(), storedUser.getPassword())) {
-            throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
-        }
-        final String token = JwtTokenUtil.getInstance().generateToken(user.getUsername(), storedUser.getRole().toString());
-        log.info("token = {}", token);
-        return token;
+        return ResponseUtility.serveOK(() -> userEngine.loginUser(loginDto));
     }
 
     private User makeUser(LoginDto loginDto) {
@@ -84,12 +75,13 @@ public class LoginApiController implements LoginApi {
     private void doDemoStartup() {
         long count = userRepository.count();
         log.info("Total users = {}", count);
-        boolean create = count == 0;
-        makeUser("User1", UserDto.RoleEnum.CUSTOMER, create);
-        makeUser("User2", UserDto.RoleEnum.CUSTOMER, create);
-        makeUser("User3", UserDto.RoleEnum.CUSTOMER, create);
-        makeUser("Admin1", UserDto.RoleEnum.ADMIN, create);
-        makeUser("Admin2", UserDto.RoleEnum.ADMIN, create);
+        if (count == 0) {
+            makeUser("User1", Role.CUSTOMER);
+            makeUser("User2", Role.CUSTOMER);
+            makeUser("User3", Role.CUSTOMER);
+            makeUser("Admin1", Role.ADMIN);
+            makeUser("Admin2", Role.ADMIN);
+        }
         if (log.isTraceEnabled()) {
             for (int i=0; i<5; ++i) {
                 log.trace("Encoding password: {}", encoder.encode("password"));
@@ -98,18 +90,19 @@ public class LoginApiController implements LoginApi {
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
-    private void makeUser(String userName, UserDto.RoleEnum role, boolean create) {
-        User user = new User();
-        user.setUsername(userName);
-        user.setPassword(encoder.encode(userName));
-        user.setRole(role);
-        user.setEmail(String.format("%s@nobody.com", userName));
+    private void makeUser(String userName, Role role) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(userName);
+        userDto.setPassword(userName);
+        userDto.setEmail(String.format("%s@nobody.com", userName));
         if (log.isDebugEnabled()) {
-            log.debug("Creating user {} with password {}", user.getUsername(), user.getPassword());
+            log.debug("Creating userDto {} with password {}", userDto.getUsername(), userDto.getPassword());
         }
-        if (create) {
-            userRepository.save(user);
-        }
+        userEngine.createUser(userDto, role);
     }
 
+    @Override
+    public ResponseEntity<Void> addCustomer(@Valid final org.openapitools.model.UserDto userDto) {
+        return ResponseUtility.serveOK(() -> userEngine.createUser(userDto, Role.CUSTOMER));
+    }
 }

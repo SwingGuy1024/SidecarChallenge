@@ -130,6 +130,18 @@ public enum PojoUtility {
   public static <T> Set<T> asSet(T... tArray) {
     return new HashSet<>(Arrays.asList(tArray));
   }
+  
+  public static String getLastMessage(Throwable ex) {
+    Throwable priorEx;
+    String message;
+    //noinspection ObjectEquality
+    do {
+      message = ex.getLocalizedMessage();
+      priorEx = ex;
+      ex = ex.getCause();
+    } while ((ex != null) && (ex != priorEx));
+    return message;
+  }
 
   /**
    * Use when a value should be null. For example, if a field should not be initialized, such as the ID of an entity 
@@ -173,6 +185,20 @@ public enum PojoUtility {
     }
   }
 
+  /**
+   * Returns the String. Throws a ResponseException if the String is null or empty. 
+   * The return value is usually not used, since this is just to test for valid data.
+   * @param s The String
+   * @return s
+   * @throws ResponseException BAD_REQUEST (400) if the String is null or empty
+   */
+  public static String confirmNotEmpty(String s) throws ResponseException {
+    if ((s == null) || s.isEmpty()) {
+      throw new BadRequest400Exception(String.format("Null or empty value: \"%s\"", s));
+    }
+    return s;
+  }
+
 //  // This doesn't get used, and the missing LinkedHashMap from the return statement suggests it can't work this way,
 //  // so the whole thing has been removed. We probably don't need it, but I'm not entirely sure, so I'm keeping it 
 //  // around until I have a clearer idea if we will need it.
@@ -212,18 +238,8 @@ public enum PojoUtility {
   public static String emptyIfNull(String s) {
     return (s == null) ? "" : s;
   }
-
-  /**
-   * Returns the String. Throws a ResponseException if the String is null or empty. 
-   * The return value is usually not used, since this is just to test for valid data.
-   * @param s The String
-   * @return s
-   * @throws ResponseException BAD_REQUEST (400) if the String is null or empty
-   */
-  public static String confirmNotEmpty(String s) throws ResponseException {
-    if ((s == null) || s.isEmpty()) {
-      throw new BadRequest400Exception(String.format("Null or empty value: \"%s\"", s));
-    }
-    return s;
+  
+  public static boolean isBlank(String s) {
+    return (s == null) || s.isEmpty();
   }
 }

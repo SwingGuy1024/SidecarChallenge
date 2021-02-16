@@ -147,6 +147,24 @@ paths:
           description: Bad Request
         417:
           description: Token Expired
+  /admin/user/addAdminUser:
+    put:
+      summary: Add an ADMIN user
+      description: Add an administrative user to the system
+      operationId: addAdmin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        200:
+          description: User added successfully
+        400:
+          description: Information missing from request
+        409:
+          description: Conflict with existing user
   /login:
     post:
       summary: Log in to the system
@@ -167,6 +185,24 @@ paths:
                 type: string
         401:
           description: Unauthorized
+  /login/addCustomer:
+    put:
+      summary: Add a customer to the system
+      description: Add a user to the system with Customer access
+      operationId: addCustomer
+      requestBody: 
+        content: 
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDto'
+        required: true
+      responses:
+        200:
+          description: User added successfully
+        400:
+          description: Information missing from request
+        409:
+          description: Conflict with existing user
 ##  /logout:
 ##    post:
 ##      summary: Log out
@@ -470,16 +506,15 @@ components:
           type: string
           format: password
           description: password
-#        email:
-#          type: string
-#          description: username
-#        mobilePhone:
-#          type: string
-#          description: username
-        role:
+        email:
           type: string
-          enum: [ CUSTOMER, ADMIN ]
-          description: Role (Ignored for logging in)
+          description: email
+        mobilePhone:
+          type: string
+          description: mobile phone number
+        landPhone:
+          type: string
+          description: Land line phone number
       required:
         - username
         - password

@@ -103,7 +103,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     // authentication with the ADMIN role.
     //noinspection HardcodedFileSeparator
     http
-        .httpBasic().and()
         .csrf()
           .disable()
         .cors()
@@ -117,14 +116,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             .hasRole(Role.CUSTOMER.toString())
           .antMatchers(
               "/login/**", 
-              "/menuItem",
-              "/home",
+              "/menuItem/**",
               "/swagger-ui.html",
               "/api-docs",
-              "/configuration/**",
-              "/swagger*/**",
-              "/webjars/**",
-              "/swagger-resources/**"
+              "/"
           ).permitAll()
           .anyRequest().authenticated()
         .and()
@@ -140,5 +135,3 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     return jwtUserDetailsService;
   }
 }
-
-

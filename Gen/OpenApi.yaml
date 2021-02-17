@@ -65,9 +65,9 @@ paths:
         201:
           description: Menu Item Created
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/CreatedResponse'
+                type: string
         400:
           description: Bad Request
         403:
@@ -99,9 +99,9 @@ paths:
         201:
           description: MenuItemOption added
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/CreatedResponse'
+                type: string
         '400':
           description: Bad Request
         417:
@@ -122,9 +122,9 @@ paths:
         201:
           description: Menu Item Option Created
           content:
-            application/json:
+            text/plain:
               schema:
-                $ref: '#/components/schemas/CreatedResponse'
+                type: string
         417:
           description: Token Expired
   /admin/menuItem/deleteOption/{optionId}:
@@ -249,10 +249,9 @@ paths:
 #        201:
 #          description: Order Placed
 #          content:
-#            application/text:
+#            text/plain:
 #              schema:
-#                type: integer
-#                format: int32
+#                type: string
 #        '400':
 #          description: Bad Request
 #    post:
@@ -359,10 +358,9 @@ paths:
 #        202:
 #          description: Addition successful
 #          content:
-#            application/text:
+#            text/plain:
 #              schema:
-#                type: integer
-#                format: int32
+#                type: string
 #        400:
 #          description: Bad Request
 #
@@ -530,12 +528,7 @@ components:
       required:
         - username
         - password
-    CreatedResponse:
-      type: object
-      properties: 
-        id:
-          type: integer
-          format: int32
+
           # isAccountNonExpired:
           #   type: boolean
           #   description: username

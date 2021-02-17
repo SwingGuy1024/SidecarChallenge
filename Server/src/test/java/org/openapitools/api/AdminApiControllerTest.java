@@ -19,7 +19,6 @@ import org.openapitools.entity.MenuItemOption;
 import org.openapitools.framework.exception.BadRequest400Exception;
 import org.openapitools.framework.exception.NotFound404Exception;
 import org.openapitools.framework.exception.ResponseException;
-import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
 import org.openapitools.repositories.MenuItemOptionRepositoryWrapper;
@@ -51,9 +50,6 @@ public class AdminApiControllerTest {
   private AdminApiController adminApiController;
 
   @Autowired
-  private MenuItemApiController menuItemApiController;
-
-  @Autowired
   private MenuItemRepositoryWrapper menuItemRepositoryWrapper;
 
   @Autowired
@@ -70,7 +66,7 @@ public class AdminApiControllerTest {
     menuItemDto.setName("BadItem");
     menuItemDto.setItemPrice(new BigDecimal("0.50"));
 //    try {
-      ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
+      ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
       fail(responseEntity.toString());
 //    } catch (BadRequest400Exception ignored) { }
   }
@@ -78,25 +74,21 @@ public class AdminApiControllerTest {
   @Test
   public void testAddMenuItemGoodInput() {
     MenuItemDto menuItemDto = makeMenuItem();
-    ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-    final CreatedResponse body = responseEntity.getBody();
-    assertNotNull(body);
-    Integer id = body.getId();
-//    Integer id = body.getId();
-    if (id != null) {
-      MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
-      Hibernate.initialize(item);
-      assertEquals("0.50", item.getItemPrice().toString());
-      assertEquals("GoodItem", item.getName());
-      Set<String> foodOptionSet = new HashSet<>();
-      Collection<MenuItemOption> optionList = item.getAllowedOptions();
-      for (MenuItemOption option : optionList) {
-        foodOptionSet.add(option.getName());
-      }
-      assertThat(foodOptionSet, hasItems("olives", "pepperoni"));
-      assertEquals(2, foodOptionSet.size());
+    final Integer id = Integer.valueOf(Objects.requireNonNull(responseEntity.getBody()));
+    assertNotNull(id);
+    MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
+    Hibernate.initialize(item);
+    assertEquals("0.50", item.getItemPrice().toString());
+    assertEquals("GoodItem", item.getName());
+    Set<String> foodOptionSet = new HashSet<>();
+    Collection<MenuItemOption> optionList = item.getAllowedOptions();
+    for (MenuItemOption option : optionList) {
+      foodOptionSet.add(option.getName());
     }
+    assertThat(foodOptionSet, hasItems("olives", "pepperoni"));
+    assertEquals(2, foodOptionSet.size());
 
   }
 
@@ -130,14 +122,14 @@ public class AdminApiControllerTest {
 
   private void isBadRequest(int id, MenuItemOptionDto optionDto) {
     try {
-      final ResponseEntity<CreatedResponse> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
+      final ResponseEntity<String> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
       fail(stringResponseEntity.toString());
     } catch (BadRequest400Exception ignored) { }
   }
 
   private void isNotFound(int id, MenuItemOptionDto optionDto) {
     try {
-      final ResponseEntity<CreatedResponse> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
+      final ResponseEntity<String> stringResponseEntity = adminApiController.addMenuItemOption(id, optionDto);
       fail(stringResponseEntity.toString());
     } catch (NotFound404Exception ignored) { }
   }
@@ -147,10 +139,9 @@ public class AdminApiControllerTest {
   @Test
   public void testDeleteOption() throws ResponseException {
     MenuItemDto menuItemDto = createPizzaMenuItem();
-    ResponseEntity<CreatedResponse> responseEntity = adminApiController.addMenuItem(menuItemDto);
-    final CreatedResponse body = responseEntity.getBody();
-    assertNotNull(body);
-    Integer id = body.getId();
+    ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    final Integer id = Integer.valueOf(Objects.requireNonNull(responseEntity.getBody()));
+    assertNotNull(id);
     System.out.printf("Body: <%s>%n", id);
 
     MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
@@ -169,7 +160,7 @@ public class AdminApiControllerTest {
 
     MenuItemOption removedOption = item.getAllowedOptions().iterator().next();
     String removedName = removedOption.getName();
-    int removedId = removedOption.getId();
+    Integer removedId = removedOption.getId();
     assertTrue(hasName(item, removedName));
     assertNotNull(menuItemOptionRepositoryWrapper.getOneOrThrow(removedId));
     ResponseEntity<Void> goodResponse = adminApiController.deleteOption(removedOption.getId());

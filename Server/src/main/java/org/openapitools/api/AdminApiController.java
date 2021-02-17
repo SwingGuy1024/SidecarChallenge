@@ -6,7 +6,6 @@ import org.openapitools.engine.DataEngine;
 import org.openapitools.engine.Role;
 import org.openapitools.engine.UserEngine;
 import org.openapitools.framework.ResponseUtility;
-import org.openapitools.model.CreatedResponse;
 import org.openapitools.model.MenuItemDto;
 import org.openapitools.model.MenuItemOptionDto;
 import org.openapitools.model.UserDto;
@@ -51,19 +50,22 @@ public class AdminApiController implements AdminApi {
     }
 
     @Override
-    public ResponseEntity<CreatedResponse> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
+    public ResponseEntity<String> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
+        log.trace("addMenuItemOption() to id {}: {}", menuItemId, optionDto);
 //        logHeaders(request, "AdminApiController addMenuItemOption");
-        return serveCreated(() -> dataEngine.addOption(menuItemId, optionDto));
+        return serveCreatedEntity(() -> dataEngine.addOption(menuItemId, optionDto));
     }
 
     @Override
-    public ResponseEntity<CreatedResponse> addMenuItem(final MenuItemDto menuItemDto) {
-        return serveCreated(() -> dataEngine.addMenuItemFromDto(menuItemDto));
+    public ResponseEntity<String> addMenuItem(final MenuItemDto menuItemDto) {
+        log.trace("addMenuItem: {}", menuItemDto);
+        return serveCreatedEntity(() -> dataEngine.addMenuItemFromDto(menuItemDto));
     }
 
     @Override
-    public ResponseEntity<CreatedResponse> addNewMenuItemOption(@Valid final MenuItemOptionDto menuItemOptionDto) {
-        return serveCreated(() -> dataEngine.createNewOption(menuItemOptionDto));
+    public ResponseEntity<String> addNewMenuItemOption(@Valid final MenuItemOptionDto menuItemOptionDto) {
+        log.trace("addNewMenuItemOption(): {}", menuItemOptionDto);
+        return serveCreatedEntity(() -> dataEngine.createNewOption(menuItemOptionDto));
     }
 
     @Override

@@ -3,14 +3,12 @@ package org.openapitools.server;
 
 import java.io.IOException;
 import java.io.Serializable;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import org.openapitools.framework.ResponseUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.authentication.CredentialsExpiredException;
+import org.springframework.lang.NonNull;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
@@ -44,14 +42,14 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint, Se
 
   @Override
   public void commence(HttpServletRequest request, HttpServletResponse response,
-                       final AuthenticationException authException) throws IOException {
+                       @NonNull final AuthenticationException authException) throws IOException {
     if (log.isTraceEnabled()) {
       log.trace("Error processing {}", ResponseUtility.getUriTail(request));
     }
     Throwable prior = null;
     Throwable ex = authException;
     //noinspection ObjectEquality
-    while (ex != prior) {
+    while ((ex != null) && (ex != prior)) {
       if (log.isDebugEnabled()) {
         log.debug("Error message from {}: {}", ex.getClass().getSimpleName(), authException.getLocalizedMessage());
       }

@@ -6,7 +6,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
 import org.openapitools.framework.exception.ResponseException;
-import org.openapitools.model.CreatedResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -25,26 +24,20 @@ public enum ResponseUtility {
   private static final Logger log = LoggerFactory.getLogger(ResponseUtility.class);
 
   /**
-   * Serve the data, using HttpStatus.CREATED as the response if successful. This method delegates the work to serve().
-   * @param method The service method that does the work of the service, and returns an instance of CreatedResponse
-   * @return A {@literal ResponseEntity<CreatedResponse>} holding the value returned by the ServiceMethod's doService() method.
+   * Serves a method to create an entity, using HttpStatus.CREATED as the response if successful. This method delegates the work to 
+   * serve(), but also translates the returned integer into a String. This is designed for endpoints that create an entity and return 
+   * its id. Unlike the other {@code serveXxx()} methods, it does not take a {@code Supplier} of the same type as the ResponseEntity.
+   * Instead, it should be called with a method that returns a numerical ID of the new entity, which it translates to a String.
+   * @param method The service method that does the work of the service, and returns an id as a Number (an Integer or Long)
+   * @return A {@literal ResponseEntity<String>} holding the value of the id returned by the ServiceMethod's get() method, converted 
+   * to a String.
    * @throws ResponseException if the method fails
    * @see #serve(HttpStatus, Supplier)
    * @see Supplier#get() 
    */
-  public static ResponseEntity<CreatedResponse> serveCreated(Supplier<Integer> method) throws ResponseException {
+  public static ResponseEntity<String> serveCreatedEntity(Supplier<Number> method) throws ResponseException {
     assert method != null;
-    return serve(HttpStatus.CREATED, idWrapper(method));
-  }
-
-  private static Supplier<CreatedResponse> idWrapper(Supplier<Integer> method) {
-    return () -> fromId(method.get());
-  }
-  
-  private static CreatedResponse fromId(Integer id) {
-    CreatedResponse createdResponse = new CreatedResponse();
-    createdResponse.setId(id);
-    return createdResponse;
+    return serve(HttpStatus.CREATED, () -> String.valueOf(method.get()));
   }
 
   /**

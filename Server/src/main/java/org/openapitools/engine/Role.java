@@ -32,6 +32,12 @@ public enum Role {
     return String.valueOf(value);
   }
 
+  /**
+   * Get the role for a text string. Case insensitive.
+   * @param value The String value
+   * @return the matching role
+   * @throws IllegalArgumentException if the String doesn't match.
+   */
   @JsonCreator
   public static Role fromValue(String value) {
     value = value.toUpperCase(Locale.ROOT);

@@ -3,6 +3,7 @@ package org.openapitools.entity;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -15,6 +16,7 @@ import javax.persistence.ManyToOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.springframework.lang.Nullable;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -25,11 +27,13 @@ import org.hibernate.annotations.FetchMode;
  */
 @Entity
 public class MenuItemOption implements Serializable {
+  @Nullable
   private Integer id;
+  @Nullable
   private MenuItem menuItem;
   private BigDecimal deltaPrice;
   private String name;
-  private Collection<CustomerOrder> orders;
+  private Collection<CustomerOrder> orders = new LinkedList<>();
 
   @Id
   @GeneratedValue
@@ -80,7 +84,7 @@ public class MenuItemOption implements Serializable {
    * 
    */
   @SuppressWarnings("HardCodedStringLiteral")
-  @Fetch(value = FetchMode.SUBSELECT)
+  @Fetch(FetchMode.SUBSELECT)
   @JsonIgnore
   @ManyToMany
   @JoinTable(
@@ -89,14 +93,14 @@ public class MenuItemOption implements Serializable {
       joinColumns = @JoinColumn(name = "menu_item_option_id")
   )
   public Collection<CustomerOrder> getOrders() {
-    return orders;
+    return new LinkedList<>(orders);
   }
 
   public void setOrders(final Collection<CustomerOrder> orders) {
     if (orders == null) {
       this.orders = new LinkedList<>();
     } else {
-      this.orders = orders;
+      this.orders = new LinkedList<>(orders);
     }
   }
 
@@ -116,12 +120,13 @@ public class MenuItemOption implements Serializable {
     return (getId() != null) ? getId().hashCode() : 0;
   }
 
+  @SuppressWarnings("HardCodedStringLiteral")
   @Override
   public String toString() {
     //noinspection StringConcatenation,ObjectToString,MagicCharacter
     return "MenuItemOption{" +
         "id=" + id +
-        ", menuItemId=" + menuItem.getId() + // We don't print the menuItem, because that would create an infinite loop.
+        ", menuItemId="+(menuItem ==null? "<none>" : menuItem.getId())+ // We don't print the menuItem, to avoid an infinite loop.
         ", deltaPrice=" + deltaPrice +
         ", name='" + name + '\'' +
         '}';

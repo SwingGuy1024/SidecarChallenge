@@ -83,8 +83,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       log.debug("Token expired.");
       // Spring Security expects me to set an "expired token" message into the context, but this returns a 403: Forbidden, which is the
       // same thing it returns if the token has been counterfeited. So there's no way for the client to know that it just needs to log in
-      // again for a new token. Instead, we throw an ExpectationFailed417Exception. I don't know why the server doesn't return the message
-      // specified in the UsernamePasswordAuthenticationToken, which would be more helpful.
+      // again for a new token. Throwing a different exception doesn't help. I don't know why the server doesn't return the message
+      // specified in the UsernamePasswordAuthenticationToken, which would be more helpful. Instead, we notify the caller by setting
+      // a custom header in the Response.
 
       final UsernamePasswordAuthenticationToken expired = new UsernamePasswordAuthenticationToken(UNKNOWN_USER, "Expired Token");
       contextSupplier.get().setAuthentication(expired);

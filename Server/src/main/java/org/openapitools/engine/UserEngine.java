@@ -60,6 +60,10 @@ public class UserEngine {
    */
   public Void createUser(final org.openapitools.model.UserDto userDto, Role role) {
     String username = userDto.getUsername();
+    if (userRepository.existsById(username)) {
+      throw new Conflict409Exception(String.format("Username %s already exists.", username));
+    }
+
     final String candidateEmail = userDto.getEmail();
     testForExisting(candidateEmail, userRepository::findByEmail, "email");
     if (isBlank(candidateEmail) && isBlank(userDto.getMobilePhone())) {
@@ -74,7 +78,6 @@ public class UserEngine {
       }
     }
     log.trace("user/email requirements met");
-
     final String mobilePhone = removeNonDigits(userDto.getMobilePhone());
     userDto.setMobilePhone(mobilePhone);
     final String landPhone = removeNonDigits(userDto.getLandPhone());

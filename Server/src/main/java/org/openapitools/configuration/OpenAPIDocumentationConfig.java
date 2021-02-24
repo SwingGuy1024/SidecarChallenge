@@ -17,7 +17,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import javax.servlet.ServletContext;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-14T22:05:57.338245-08:00[America/Los_Angeles]")
+@SuppressWarnings("HardCodedStringLiteral")
 @Configuration
 @EnableSwagger2
 public class OpenAPIDocumentationConfig {
@@ -46,9 +46,10 @@ public class OpenAPIDocumentationConfig {
                 .apiInfo(apiInfo());
     }
 
-    class BasePathAwareRelativePathProvider extends RelativePathProvider {
-        private String basePath;
+    static class BasePathAwareRelativePathProvider extends RelativePathProvider {
+        private final String basePath;
 
+        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public BasePathAwareRelativePathProvider(ServletContext servletContext, String basePath) {
             super(servletContext);
             this.basePath = basePath;
@@ -59,11 +60,12 @@ public class OpenAPIDocumentationConfig {
             return  Paths.removeAdjacentForwardSlashes(UriComponentsBuilder.fromPath(super.applicationPath()).path(basePath).build().toString());
         }
 
+        @SuppressWarnings("MagicCharacter")
         @Override
         public String getOperationPath(String operationPath) {
             UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromPath("/");
             return Paths.removeAdjacentForwardSlashes(
-                    uriComponentsBuilder.path(operationPath.replaceFirst("^" + basePath, "")).build().toString());
+                    uriComponentsBuilder.path(operationPath.replaceFirst('^' + basePath, "")).build().toString());
         }
     }
 

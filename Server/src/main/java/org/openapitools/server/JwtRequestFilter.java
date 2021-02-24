@@ -8,6 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.openapitools.framework.ResponseUtility;
 import org.openapitools.model.UserAuthority;
 import org.slf4j.Logger;
@@ -99,11 +100,16 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       // Above: I tried throwing a CredentialsExpiredException, which extends AuthorizationException, in the hope that it would get
       // caught by the JwtAuthenticationEntryPoint class. It didn't work. That class never saw this one. I'm not sure what good the
       // JwtAuthenticationEntryPoint class does me. Early in the development process, it was catching things, but not anymore.
+    } catch (SignatureException se) {
+      log.warn("Invalid Token: {}", jwtToken);
+      return;
     }
     
     // At this point, we know the token is valid, because it did not throw an exception when getting the username.
 
     log.trace("Time remains on token");
+    
+    assert username != null;
 
     final SecurityContext context = contextSupplier.get();
     if ((username != null) && (context.getAuthentication() == null)) {

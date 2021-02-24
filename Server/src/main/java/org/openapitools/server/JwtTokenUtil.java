@@ -1,6 +1,7 @@
 package org.openapitools.server;
 
 
+import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +10,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,19 +30,31 @@ public enum JwtTokenUtil {
   private static final Logger log = LoggerFactory.getLogger(JwtTokenUtil.class);
   private static final String ROLE_CLAIM = "role";
 
+  private final SignatureAlgorithm HS_512;
+  private final Key key;
+
   public static JwtTokenUtil getInstance() {
     log.info("Getting JwtTokenUtil instance");
     return instance;
   }
+  
+  JwtTokenUtil() {
+    HS_512 = SignatureAlgorithm.HS512;
+    // This is fine for a single server, but I wonder if it still works after deploying it in the cloud, where multiple servers can
+    // be created, each with its own key.
+    key = Keys.secretKeyFor(HS_512);
+  }
+
   public static final long JWT_TOKEN_VALIDITY_MILLIS = 5 * 60 * 60 * 1000; // 5 Hours in Milliseconds
 
   //  @Value("${jwt.secret}") //NON-NLS // I set this in applications.properties, but it didn't work.
   // There has to be a better way to do this. This is not suitable for production!
-  private final String secret = "SPEAK FRIEND AND ENTER"; //NON-NLS
+//  private final String secret = "SPEAKFRIENDANDENTERSPEAKFRIENDANDENTERSPEAKFRIENDANDENTERSPEAKFRIENDANDENTERSPEAKFRIENDANDENTER"; //NON-NLS
+//  private final Key key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
 
   public Claims getAllClaimsFromToken(String token) {
-    Jwts.parser().setSigningKey(secret).isSigned(token);
-    return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody();
+    Jwts.parserBuilder().setSigningKey(key).build().isSigned(token);
+    return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
   }
 
   public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
@@ -98,7 +112,7 @@ public enum JwtTokenUtil {
         .setSubject(subject)
         .setIssuedAt(new Date(timeMillis))
         .setExpiration(new Date(timeMillis + (JWT_TOKEN_VALIDITY_MILLIS)))
-        .signWith(SignatureAlgorithm.HS512, secret).compact();
+        .signWith(key, HS_512).compact();
   }
 
   /**

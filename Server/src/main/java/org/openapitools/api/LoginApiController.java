@@ -58,7 +58,7 @@ public class LoginApiController implements LoginApi {
         log.info("LoginApiController");
         log.info("${openapi.customerOrders.base-path:}");
         if (log.isDebugEnabled()) {
-            log.debug("Expired Token for testing: {}", JwtTokenUtil.getInstance().generateExpiredTokenForTesting("ADMIN", "CUSTOMER"));
+            log.debug("Expired Token for testing: {}", JwtTokenUtil.getInstance().generateExpiredTokenForTesting("ADMIN", "ADMIN"));
         }
     }
 
@@ -102,7 +102,7 @@ public class LoginApiController implements LoginApi {
     }
 
     @Override
-    public ResponseEntity<Void> addCustomer(@Valid final org.openapitools.model.UserDto userDto) {
+    public ResponseEntity<Void> addCustomer(@Valid final UserDto userDto) {
         return ResponseUtility.serveOK(() -> userEngine.createUser(userDto, Role.CUSTOMER));
     }
 }

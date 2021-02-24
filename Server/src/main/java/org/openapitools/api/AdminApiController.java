@@ -19,7 +19,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 
 import static org.openapitools.framework.ResponseUtility.*;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2021-01-08T23:22:44.934923-08:00[America/Los_Angeles]")
 @RestController
 @RequestMapping("${openapi.customerOrders.base-path:}")
 public class AdminApiController implements AdminApi {
@@ -28,18 +27,20 @@ public class AdminApiController implements AdminApi {
 
     private final NativeWebRequest request;
     
-    private DataEngine dataEngine;
+    private final DataEngine dataEngine;
     
-    private UserEngine userEngine;
+    private final UserEngine userEngine;
 
     @Autowired
     public AdminApiController(
         final DataEngine dataEngine,
         final UserEngine userEngine,
+        @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
         final NativeWebRequest request
     ) {
         this.request = request;
         this.dataEngine = dataEngine;
+        this.userEngine = userEngine;
         log.trace("instantiating AdminApiController");
     }
 

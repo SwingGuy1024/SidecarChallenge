@@ -34,7 +34,7 @@ public enum JwtTokenUtil {
   private final Key key;
 
   public static JwtTokenUtil getInstance() {
-    log.info("Getting JwtTokenUtil instance");
+    log.trace("Getting JwtTokenUtil instance");
     return instance;
   }
   

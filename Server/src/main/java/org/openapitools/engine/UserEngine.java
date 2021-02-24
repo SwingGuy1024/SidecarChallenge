@@ -100,19 +100,20 @@ public class UserEngine {
   
   public String loginUser(LoginDto loginDto) {
     log.trace("LoginApiController.loginUser with {}", loginDto);
-    log.trace("user DTO: {}", loginDto.getUsername());
-    User user = objectMapper.convertValue(loginDto, User.class);
-    log.info("user: {} = {}", loginDto.getUsername(), user.getUsername());
-    User storedUser = userRepository.findByUsername(user.getUsername());
-    log.info("Stored User: {}", storedUser);
+    final String username = loginDto.getUsername();
+    log.trace("user DTO: {}", username);
+    User storedUser = userRepository.findByUsername(username);
+    log.trace("Stored User: {}", storedUser);
     if (storedUser == null) {
+      log.info("Login Reject: {}", username);
       throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
     }
     if (!encoder.matches(loginDto.getPassword(), storedUser.getPassword())) {
+      log.info("Login password failure: {}", username);
       throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
     }
-    final String token = JwtTokenUtil.getInstance().generateToken(user.getUsername(), storedUser.getRole().toString());
-    log.info("token = {}", token);
+    final String token = JwtTokenUtil.getInstance().generateToken(username, storedUser.getRole().toString());
+    log.info("Login success: {}  Token: {}", username, token);
     return token;
   }
 

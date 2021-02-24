@@ -55,8 +55,7 @@ public class LoginApiController implements LoginApi {
         this.encoder = encoder;
         this.userEngine = userEngine;
         doDemoStartup();
-        log.info("LoginApiController");
-        log.info("${openapi.customerOrders.base-path:}");
+        log.trace("LoginApiController");
         if (log.isDebugEnabled()) {
             log.debug("Expired Token for testing: {}", JwtTokenUtil.getInstance().generateExpiredTokenForTesting("ADMIN", "ADMIN"));
         }
@@ -74,7 +73,7 @@ public class LoginApiController implements LoginApi {
     @SuppressWarnings("HardCodedStringLiteral")
     private void doDemoStartup() {
         long count = userRepository.count();
-        log.info("Total users = {}", count);
+        log.debug("Total users = {}", count);
         if (count == 0) {
             makeUser("User1", Role.CUSTOMER);
             makeUser("User2", Role.CUSTOMER);

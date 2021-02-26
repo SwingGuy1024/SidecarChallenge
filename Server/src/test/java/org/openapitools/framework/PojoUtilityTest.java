@@ -12,7 +12,7 @@ import org.openapitools.engine.PojoUtility;
 import org.openapitools.entity.MenuItem;
 import org.openapitools.entity.User;
 import org.openapitools.framework.exception.BadRequest400Exception;
-import org.openapitools.model.UserDto;
+import com.neptunedreams.model.UserDto;
 
 import static org.junit.Assert.*;
 
@@ -105,7 +105,7 @@ public class PojoUtilityTest {
       MenuItem confirmed = PojoUtility.confirmNeverNull(new TestClass());
       fail();
     } catch (AssertionError e) {
-      System.out.println("testEntityAssertion: " + e.getMessage());
+      System.out.printf("testEntityAssertion: %s%n", e.getMessage());
       assertThat(e.getMessage(), Matchers.containsString("MenuItem"));
     }
   }

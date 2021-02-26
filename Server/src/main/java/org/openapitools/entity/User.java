@@ -6,7 +6,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import org.openapitools.engine.Role;
-import org.openapitools.model.UserAuthority;
+import com.neptunedreams.model.UserAuthority;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

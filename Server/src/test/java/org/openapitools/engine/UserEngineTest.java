@@ -41,7 +41,7 @@ public class UserEngineTest {
 
   @Test(expected = BadRequest400Exception.class)
   public void testMissingEmailAndUsername() {
-    org.openapitools.model.UserDto dto = makeUserDto("", "password", "", "1234", "23445");
+    com.neptunedreams.model.UserDto dto = makeUserDto("", "password", "", "1234", "23445");
     UserRepository localMockRepository = mock(UserRepository.class);
     PasswordEncoder encoder = new BCryptPasswordEncoder();
     UserEngine localMockUserEngine = new UserEngine(localMockRepository, encoder, new ObjectMapper());
@@ -50,7 +50,7 @@ public class UserEngineTest {
   
   @Test(expected = BadRequest400Exception.class)
   public void testMissingContactInfo() {
-    org.openapitools.model.UserDto dto = makeUserDto("user", "pw", "", "", "1234");
+    com.neptunedreams.model.UserDto dto = makeUserDto("user", "pw", "", "", "1234");
     UserRepository localMockRepository = mock(UserRepository.class);
     PasswordEncoder encoder = new BCryptPasswordEncoder();
     UserEngine localMockUserEngine = new UserEngine(localMockRepository, encoder, new ObjectMapper());
@@ -59,7 +59,7 @@ public class UserEngineTest {
   
   @Test
   public void testMissingUsername() {
-    org.openapitools.model.UserDto dto = makeUserDto("", "pw", "user1@nowhere.com", "", "");
+    com.neptunedreams.model.UserDto dto = makeUserDto("", "pw", "user1@nowhere.com", "", "");
     UserRepository localMockRepository = mock(UserRepository.class);
     PasswordEncoder encoder = new BCryptPasswordEncoder();
     UserEngine localMockUserEngine = new UserEngine(localMockRepository, encoder, new ObjectMapper());
@@ -72,27 +72,27 @@ public class UserEngineTest {
 
   @Test(expected = Conflict409Exception.class)
   public void testUsernameConflict() {
-    org.openapitools.model.UserDto dto1 = makeUserDto("UserOne", "Pw1", "User1@nowhere.com", "1", "2");
+    com.neptunedreams.model.UserDto dto1 = makeUserDto("UserOne", "Pw1", "User1@nowhere.com", "1", "2");
     userEngine.createUser(dto1, Role.CUSTOMER);
-    org.openapitools.model.UserDto dto2 = makeUserDto("UserTwo", "pw2", "user2@nowhere.com", "2", "3");
+    com.neptunedreams.model.UserDto dto2 = makeUserDto("UserTwo", "pw2", "user2@nowhere.com", "2", "3");
     userEngine.createUser(dto2, Role.CUSTOMER);
   }
 
   @Test(expected = Conflict409Exception.class)
   public void testUsernameConflict2() {
-    org.openapitools.model.UserDto dto1 = makeUserDto("UserOne", "Pw1", "User1@nowhere.com", "1", "2");
+    com.neptunedreams.model.UserDto dto1 = makeUserDto("UserOne", "Pw1", "User1@nowhere.com", "1", "2");
     userEngine.createUser(dto1, Role.CUSTOMER);
-    org.openapitools.model.UserDto dto2 = makeUserDto("UserTwo", "pw2", "user2@nowhere.com", "3", "1");
+    com.neptunedreams.model.UserDto dto2 = makeUserDto("UserTwo", "pw2", "user2@nowhere.com", "3", "1");
     userEngine.createUser(dto2, Role.CUSTOMER);
   }
 
   private User makeUser(String username, String password, String email, String mobilePhone, String landPhone) {
-    org.openapitools.model.UserDto dto = makeUserDto(username, password, email, mobilePhone, landPhone);
+    com.neptunedreams.model.UserDto dto = makeUserDto(username, password, email, mobilePhone, landPhone);
     return objectMapper.convertValue(dto, User.class);
   }
 
-  private org.openapitools.model.UserDto makeUserDto(String username, String password, String email, String mobilePhone, String landPhone) {
-    org.openapitools.model.UserDto dto = new org.openapitools.model.UserDto();
+  private com.neptunedreams.model.UserDto makeUserDto(String username, String password, String email, String mobilePhone, String landPhone) {
+    com.neptunedreams.model.UserDto dto = new com.neptunedreams.model.UserDto();
     dto.setUsername(username);
     dto.setPassword(password);
     dto.setEmail(email);

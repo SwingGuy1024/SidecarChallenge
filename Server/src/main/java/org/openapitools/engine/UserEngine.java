@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.openapitools.entity.User;
 import org.openapitools.framework.exception.BadRequest400Exception;
 import org.openapitools.framework.exception.Conflict409Exception;
-import org.openapitools.model.LoginDto;
+import com.neptunedreams.model.LoginDto;
 import org.openapitools.repositories.UserRepository;
 import org.openapitools.server.JwtTokenUtil;
 import org.slf4j.Logger;
@@ -42,6 +42,7 @@ public class UserEngine {
   private final ObjectMapper objectMapper;
   private final PasswordEncoder encoder;
 
+  @SuppressWarnings("HardcodedFileSeparator")
   private static final String USER_PASSWORD_COMBINATION_NOT_FOUND = "User/password Combination not found";
 
   @Autowired
@@ -58,7 +59,7 @@ public class UserEngine {
    * @return null. This returns Void (which can't be instantiated) rather than void, so it can be used as the
    * supplier to be sent to the ResponseUtility.serve() method.
    */
-  public Void createUser(final org.openapitools.model.UserDto userDto, Role role) {
+  public Void createUser(final com.neptunedreams.model.UserDto userDto, Role role) {
     String username = userDto.getUsername();
     if (userRepository.existsById(username)) {
       throw new Conflict409Exception(String.format("Username %s already exists.", username));

@@ -1,4 +1,4 @@
-package org.openapitools.model;
+package com.neptunedreams.model;
 
 import java.util.Collection;
 import java.util.Collections;

@@ -1,7 +1,6 @@
 package org.openapitools.framework.util;
 
 import org.openapitools.engine.Role;
-import org.openapitools.model.UserDto;
 import org.openapitools.server.JwtAuthenticationEntryPoint;
 import org.openapitools.server.JwtRequestFilter;
 import org.openapitools.server.JwtUserDetailsService;

@@ -10,7 +10,7 @@ import org.openapitools.framework.ResponseUtility;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.model.UserDto;
 import com.neptunedreams.repository.UserRepository;
-import org.openapitools.server.JwtTokenUtil;
+import com.neptunedreams.server.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,9 @@
 package org.openapitools.framework.util;
 
 import com.neptunedreams.engine.Role;
-import org.openapitools.server.JwtAuthenticationEntryPoint;
-import org.openapitools.server.JwtRequestFilter;
-import org.openapitools.server.JwtUserDetailsService;
+import com.neptunedreams.server.JwtAuthenticationEntryPoint;
+import com.neptunedreams.server.JwtRequestFilter;
+import com.neptunedreams.server.JwtUserDetailsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

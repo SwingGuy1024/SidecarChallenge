@@ -1,4 +1,4 @@
-package org.openapitools.server;
+package com.neptunedreams.server;
 
 import com.neptunedreams.entity.User;
 import com.neptunedreams.repository.UserRepository;

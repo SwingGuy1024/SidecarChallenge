@@ -8,7 +8,7 @@ import org.openapitools.framework.exception.BadRequest400Exception;
 import org.openapitools.framework.exception.Conflict409Exception;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.repository.UserRepository;
-import org.openapitools.server.JwtTokenUtil;
+import com.neptunedreams.server.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

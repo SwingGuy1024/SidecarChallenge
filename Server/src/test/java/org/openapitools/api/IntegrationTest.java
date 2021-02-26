@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
 @ComponentScan(basePackages = {
     "org.openapitools",
     "org.openapitools.api",
-    "org.openapitools.server",
+    "com.neptunedreams.server",
     "com.neptunedreams.repository",
     "org.openapitools.framework.util",
     "com.neptunedreams.engine",

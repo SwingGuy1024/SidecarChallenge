@@ -1,4 +1,4 @@
-package org.openapitools.server;
+package com.neptunedreams.server;
 
 import java.io.IOException;
 import java.util.Collection;

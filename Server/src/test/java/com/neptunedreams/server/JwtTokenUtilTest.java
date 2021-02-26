@@ -1,4 +1,4 @@
-package org.openapitools.server;
+package com.neptunedreams.server;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -7,7 +7,7 @@ import com.neptunedreams.engine.Role;
 import com.neptunedreams.entity.User;
 
 import static org.junit.Assert.*;
-import static org.openapitools.server.JwtTokenUtil.*;
+import static com.neptunedreams.server.JwtTokenUtil.*;
 
 /**
  * <p>Created by IntelliJ IDEA.

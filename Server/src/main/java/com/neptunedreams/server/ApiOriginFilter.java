@@ -1,4 +1,4 @@
-package org.openapitools.server;
+package com.neptunedreams.server;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
@@ -60,7 +60,7 @@ public class ApiOriginFilter implements javax.servlet.Filter {
   }
 
   @Override
-  public void init(FilterConfig filterConfig) throws ServletException {
+  public void init(FilterConfig filterConfig) { // normally throws ServletException
   }
 
   private static final Pattern OPEN_BRACE_PATTERN = Pattern.compile("%7B");

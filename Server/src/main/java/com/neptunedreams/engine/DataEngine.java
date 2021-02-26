@@ -1,4 +1,4 @@
-package org.openapitools.engine;
+package com.neptunedreams.engine;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.openapitools.engine.PojoUtility.*;
+import static com.neptunedreams.engine.PojoUtility.*;
 
 /**
  * <p>Created by IntelliJ IDEA.

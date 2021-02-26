@@ -1,4 +1,4 @@
-package org.openapitools.engine;
+package com.neptunedreams.engine;
 
 import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonCreator;

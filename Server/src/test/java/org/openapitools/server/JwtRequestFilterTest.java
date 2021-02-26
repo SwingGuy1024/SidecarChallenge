@@ -12,7 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.neptunedreams.OpenAPI2SpringBoot;
-import org.openapitools.engine.Role;
+import com.neptunedreams.engine.Role;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;

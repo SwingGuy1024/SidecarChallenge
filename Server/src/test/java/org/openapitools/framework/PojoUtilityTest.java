@@ -8,7 +8,7 @@ import java.util.Set;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import org.openapitools.engine.PojoUtility;
+import com.neptunedreams.engine.PojoUtility;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.User;
 import org.openapitools.framework.exception.BadRequest400Exception;

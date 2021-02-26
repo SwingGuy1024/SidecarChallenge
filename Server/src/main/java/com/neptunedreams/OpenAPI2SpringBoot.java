@@ -22,7 +22,7 @@ import org.springframework.context.annotation.ComponentScan;
     "org.openapitools.server",
     "com.neptunedreams.repository",
     "org.openapitools.framework.util",
-    "org.openapitools.engine",
+    "com.neptunedreams.engine",
     "org.openapitools.configuration"
 })
 public class OpenAPI2SpringBoot implements CommandLineRunner {

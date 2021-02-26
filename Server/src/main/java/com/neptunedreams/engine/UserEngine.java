@@ -1,4 +1,4 @@
-package org.openapitools.engine;
+package com.neptunedreams.engine;
 
 import java.util.function.Function;
 import javax.persistence.PersistenceException;
@@ -17,7 +17,7 @@ import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static org.openapitools.engine.PojoUtility.*;
+import static com.neptunedreams.engine.PojoUtility.*;
 
 /**
  * Requirements:

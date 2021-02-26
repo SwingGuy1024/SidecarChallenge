@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import com.neptunedreams.OpenAPI2SpringBoot;
-import org.openapitools.engine.DataEngine;
+import com.neptunedreams.engine.DataEngine;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.MenuItemOption;
 import com.neptunedreams.model.MenuItemDto;
@@ -45,7 +45,7 @@ import static org.junit.Assert.*;
     "org.openapitools.server",
     "com.neptunedreams.repository",
     "org.openapitools.framework.util",
-    "org.openapitools.engine",
+    "com.neptunedreams.engine",
     "org.openapitools.configuration"
 })
 @ExtendWith(SpringExtension.class)

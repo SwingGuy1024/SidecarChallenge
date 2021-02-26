@@ -2,10 +2,8 @@ package org.openapitools.server;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import io.jsonwebtoken.impl.Base64UrlCodec;
-import io.jsonwebtoken.impl.TextCodec;
 import org.junit.Test;
-import org.openapitools.engine.Role;
+import com.neptunedreams.engine.Role;
 import com.neptunedreams.entity.User;
 
 import static org.junit.Assert.*;

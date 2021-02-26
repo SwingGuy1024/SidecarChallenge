@@ -2,9 +2,9 @@ package com.neptunedreams.api;
 
 import java.util.Optional;
 import javax.validation.Valid;
-import org.openapitools.engine.DataEngine;
-import org.openapitools.engine.Role;
-import org.openapitools.engine.UserEngine;
+import com.neptunedreams.engine.DataEngine;
+import com.neptunedreams.engine.Role;
+import com.neptunedreams.engine.UserEngine;
 import org.openapitools.framework.ResponseUtility;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;

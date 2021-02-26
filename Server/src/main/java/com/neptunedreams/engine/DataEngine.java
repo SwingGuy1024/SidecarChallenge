@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.MenuItemOption;
-import org.openapitools.framework.exception.BadRequest400Exception;
+import com.neptunedreams.framework.exception.BadRequest400Exception;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
 import com.neptunedreams.repository.MenuItemOptionRepositoryWrapper;

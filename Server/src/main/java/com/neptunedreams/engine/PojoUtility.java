@@ -11,8 +11,8 @@ import java.util.Set;
 import javax.persistence.Entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.openapitools.framework.exception.BadRequest400Exception;
-import org.openapitools.framework.exception.ResponseException;
+import com.neptunedreams.framework.exception.BadRequest400Exception;
+import com.neptunedreams.framework.exception.ResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

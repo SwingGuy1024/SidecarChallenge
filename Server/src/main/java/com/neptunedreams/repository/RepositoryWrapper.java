@@ -2,7 +2,7 @@ package com.neptunedreams.repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.openapitools.framework.exception.NotFound404Exception;
+import com.neptunedreams.framework.exception.NotFound404Exception;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

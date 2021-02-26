@@ -1,4 +1,4 @@
-package org.openapitools.framework;
+package com.neptunedreams.framework;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 import javax.servlet.http.HttpServletRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.openapitools.framework.exception.ResponseException;
+import com.neptunedreams.framework.exception.ResponseException;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.WebRequest;
 

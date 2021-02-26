@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
-import org.openapitools.framework.ResponseUtility;
+import com.neptunedreams.framework.ResponseUtility;
 import com.neptunedreams.model.UserAuthority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

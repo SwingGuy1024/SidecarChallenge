@@ -1,11 +1,11 @@
-package org.openapitools.framework;
+package com.neptunedreams.framework;
 
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
-import org.openapitools.framework.exception.ResponseException;
+import com.neptunedreams.framework.exception.ResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

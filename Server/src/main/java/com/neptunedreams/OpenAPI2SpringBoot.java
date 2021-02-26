@@ -21,7 +21,7 @@ import org.springframework.context.annotation.ComponentScan;
     "org.openapitools",
     "com.neptunedreams.server",
     "com.neptunedreams.repository",
-    "org.openapitools.framework.util",
+    "com.neptunedreams.framework.util",
     "com.neptunedreams.engine",
     "org.openapitools.configuration"
 })

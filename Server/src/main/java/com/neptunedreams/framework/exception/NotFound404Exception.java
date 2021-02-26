@@ -1,4 +1,4 @@
-package org.openapitools.framework.exception;
+package com.neptunedreams.framework.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

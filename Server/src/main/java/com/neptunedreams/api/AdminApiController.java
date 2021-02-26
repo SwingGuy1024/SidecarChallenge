@@ -5,7 +5,7 @@ import javax.validation.Valid;
 import com.neptunedreams.engine.DataEngine;
 import com.neptunedreams.engine.Role;
 import com.neptunedreams.engine.UserEngine;
-import org.openapitools.framework.ResponseUtility;
+import com.neptunedreams.framework.ResponseUtility;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
 import com.neptunedreams.model.UserDto;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import static org.openapitools.framework.ResponseUtility.*;
+import static com.neptunedreams.framework.ResponseUtility.*;
 
 @RestController
 @RequestMapping("${openapi.customerOrders.base-path:}")

@@ -1,4 +1,4 @@
-package org.openapitools.framework.util;
+package com.neptunedreams.framework.util;
 
 import java.util.regex.Pattern;
 

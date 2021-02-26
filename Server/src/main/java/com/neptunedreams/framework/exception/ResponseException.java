@@ -1,4 +1,4 @@
-package org.openapitools.framework.exception;
+package com.neptunedreams.framework.exception;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.http.HttpStatus;

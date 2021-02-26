@@ -1,4 +1,4 @@
-package org.openapitools.framework;
+package com.neptunedreams.framework;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.neptunedreams.engine.PojoUtility;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.User;
-import org.openapitools.framework.exception.BadRequest400Exception;
+import com.neptunedreams.framework.exception.BadRequest400Exception;
 import com.neptunedreams.model.UserDto;
 
 import static org.junit.Assert.*;

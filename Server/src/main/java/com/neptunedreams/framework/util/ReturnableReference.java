@@ -1,4 +1,4 @@
-package org.openapitools.framework.util;
+package com.neptunedreams.framework.util;
 
 /**
  * Useful when a method needs to return multiple values. This is intended to be used as a parameter

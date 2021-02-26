@@ -12,7 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;
 
-import static org.openapitools.framework.ResponseUtility.*;
+import static com.neptunedreams.framework.ResponseUtility.*;
 
 @Controller
 @RequestMapping("${openapi.customerOrders.base-path:}")

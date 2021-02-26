@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neptunedreams.engine.Role;
 import com.neptunedreams.engine.UserEngine;
 import com.neptunedreams.entity.User;
-import org.openapitools.framework.ResponseUtility;
+import com.neptunedreams.framework.ResponseUtility;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.model.UserDto;
 import com.neptunedreams.repository.UserRepository;

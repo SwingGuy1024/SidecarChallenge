@@ -1,4 +1,4 @@
-package org.openapitools.framework;
+package com.neptunedreams.framework;
 
 /**
  * <p>Created by IntelliJ IDEA.

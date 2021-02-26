@@ -1,4 +1,4 @@
-package org.openapitools.framework.util;
+package com.neptunedreams.framework.util;
 
 import com.neptunedreams.engine.Role;
 import com.neptunedreams.server.JwtAuthenticationEntryPoint;

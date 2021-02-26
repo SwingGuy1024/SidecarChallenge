@@ -44,7 +44,7 @@ import static org.junit.Assert.*;
     "org.openapitools.api",
     "com.neptunedreams.server",
     "com.neptunedreams.repository",
-    "org.openapitools.framework.util",
+    "com.neptunedreams.framework.util",
     "com.neptunedreams.engine",
     "org.openapitools.configuration"
 })

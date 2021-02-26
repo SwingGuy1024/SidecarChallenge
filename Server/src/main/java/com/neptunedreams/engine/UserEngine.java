@@ -9,6 +9,8 @@ import com.neptunedreams.framework.exception.Conflict409Exception;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.repository.UserRepository;
 import com.neptunedreams.server.JwtTokenUtil;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +68,7 @@ public class UserEngine {
     }
 
     final String candidateEmail = userDto.getEmail();
-    throwIfExists(candidateEmail, userRepository::findByEmail, "email");
+    throwConflictIfExists(candidateEmail, userRepository::findByEmail, "email");
     if (isBlank(candidateEmail) && isBlank(userDto.getMobilePhone())) {
       throw new BadRequest400Exception("No mobile phone or email");
     }
@@ -83,8 +85,8 @@ public class UserEngine {
     userDto.setMobilePhone(mobilePhone);
     final String landPhone = removeNonDigits(userDto.getLandPhone());
     userDto.setLandPhone(landPhone);
-    throwIfExists(mobilePhone, userRepository::findByLandPhone, "mobile phone as land phone");
-    throwIfExists(landPhone, userRepository::findByMobilePhone, "land phone as mobile phone");
+    throwConflictIfExists(mobilePhone, userRepository::findByLandPhone, "mobile phone as land phone");
+    throwConflictIfExists(landPhone, userRepository::findByMobilePhone, "land phone as mobile phone");
     log.trace("land/mobile phone requirement met");
     userDto.setPassword(encoder.encode(userDto.getPassword()));
     User newUser = objectMapper.convertValue(userDto, User.class);
@@ -127,18 +129,19 @@ public class UserEngine {
    * @param s The string to strip.
    * @return A string consisting of only numeric digits, which means characters for which Character::isDigit returns true.
    */
-  public static String removeNonDigits(String s) {
+  @Contract("null -> null; !null -> !null")
+  public static @Nullable String removeNonDigits(String s) {
     if (s == null) {
-      return s;
+      return null;
     }
+
     return s.chars()
         .filter(Character::isDigit)
         // This stream doesn't have a collect() method that takes a Collector!
         .collect(
-            StringBuilder::new,                                   // Supplier<StringDigit>
-            UserEngine::appendAsChar, // ObjectIntConsumer<StringBuilder>
-            (b, b2) -> b.append(b2.toString())                    // BiConsumer<StringBuilder, StringBuilder>
-            // The third parameter is only used with spliterators, but it can't be null.
+            StringBuilder::new,                 // Supplier<StringDigit>
+            UserEngine::appendAsChar,           // ObjectIntConsumer<StringBuilder>
+            (b, b2) -> b.append(b2.toString())  // BiConsumer<StringBuilder, StringBuilder>
         ).toString();
   }
 
@@ -146,7 +149,7 @@ public class UserEngine {
     stringBuilder.append((char) i);
   }
 
-  private void throwIfExists(String candidateValue, Function<String, User> userValueSupplier, String field) {
+  private void throwConflictIfExists(String candidateValue, Function<String, User> userValueSupplier, String field) {
     if (!isBlank(candidateValue)) {
       if (isRealUser(userValueSupplier.apply(candidateValue))) {
         throw new Conflict409Exception(String.format("%s already in use", field));

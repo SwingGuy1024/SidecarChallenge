@@ -1,4 +1,4 @@
-package org.openapitools.api;
+package com.neptunedreams.api;
 
 import java.util.Optional;
 import javax.validation.Valid;

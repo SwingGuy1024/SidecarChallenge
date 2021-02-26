@@ -1,4 +1,4 @@
-package org.openapitools.api;
+package com.neptunedreams.api;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,6 +25,7 @@ public class MenuItemApiController implements MenuItemApi {
   
   @Autowired
   public MenuItemApiController(
+      @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
       NativeWebRequest request,
       DataEngine dataEngine
   ) {

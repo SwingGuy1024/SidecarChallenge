@@ -1,4 +1,4 @@
-package org.openapitools.api;
+package com.neptunedreams.api;
 
 import java.util.Optional;
 import javax.validation.Valid;
@@ -14,6 +14,7 @@ import org.openapitools.server.JwtTokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;

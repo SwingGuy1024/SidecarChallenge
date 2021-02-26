@@ -1,7 +1,5 @@
 package org.openapitools;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -9,11 +7,7 @@ import org.springframework.boot.ExitCodeGenerator;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolver;
 
 /**
  * Caching Configuration Reference: https://docs.spring.io/spring-data/data-redis/docs/current/reference/html/#why-spring-redis
@@ -22,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.DefaultHandlerExceptionResolv
 @EnableCaching
 @SpringBootApplication
 @ComponentScan(basePackages = {
+    "com.neptunedreams.api",
     "org.openapitools",
     "org.openapitools.api",
     "org.openapitools.server",
@@ -44,6 +39,7 @@ public class OpenAPI2SpringBoot implements CommandLineRunner {
     }
 
     public static void main(String[] args) {
+        //noinspection resource
         new SpringApplication(OpenAPI2SpringBoot.class).run(args);
     }
 

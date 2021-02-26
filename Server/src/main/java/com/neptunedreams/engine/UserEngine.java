@@ -66,7 +66,7 @@ public class UserEngine {
     }
 
     final String candidateEmail = userDto.getEmail();
-    testForExisting(candidateEmail, userRepository::findByEmail, "email");
+    throwIfExists(candidateEmail, userRepository::findByEmail, "email");
     if (isBlank(candidateEmail) && isBlank(userDto.getMobilePhone())) {
       throw new BadRequest400Exception("No mobile phone or email");
     }
@@ -83,8 +83,8 @@ public class UserEngine {
     userDto.setMobilePhone(mobilePhone);
     final String landPhone = removeNonDigits(userDto.getLandPhone());
     userDto.setLandPhone(landPhone);
-    testForExisting(mobilePhone, userRepository::findByLandPhone, "mobile phone as land phone");
-    testForExisting(landPhone, userRepository::findByMobilePhone, "land phone as mobile phone");
+    throwIfExists(mobilePhone, userRepository::findByLandPhone, "mobile phone as land phone");
+    throwIfExists(landPhone, userRepository::findByMobilePhone, "land phone as mobile phone");
     log.trace("land/mobile phone requirement met");
     userDto.setPassword(encoder.encode(userDto.getPassword()));
     User newUser = objectMapper.convertValue(userDto, User.class);
@@ -113,8 +113,9 @@ public class UserEngine {
       log.info("Login password failure: {}", username);
       throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
     }
-    final String token = JwtTokenUtil.getInstance().generateToken(username, storedUser.getRole().toString());
-    log.info("Login success: {}  Token: {}", username, token);
+    final Role role = storedUser.getRole();
+    final String token = JwtTokenUtil.getInstance().generateToken(username, role.toString());
+    log.info("Login success: {}  Role: {}  Token: {}", username, role, token);
     return token;
   }
 
@@ -135,13 +136,17 @@ public class UserEngine {
         // This stream doesn't have a collect() method that takes a Collector!
         .collect(
             StringBuilder::new,                                   // Supplier<StringDigit>
-            (stringBuilder, i) -> stringBuilder.append((char) i), // ObjectIntConsumer<StringBuilder>
+            UserEngine::appendAsChar, // ObjectIntConsumer<StringBuilder>
             (b, b2) -> b.append(b2.toString())                    // BiConsumer<StringBuilder, StringBuilder>
             // The third parameter is only used with spliterators, but it can't be null.
         ).toString();
   }
 
-  private void testForExisting(String candidateValue, Function<String, User> userValueSupplier, String field) {
+  private static void appendAsChar(StringBuilder stringBuilder, int i) {
+    stringBuilder.append((char) i);
+  }
+
+  private void throwIfExists(String candidateValue, Function<String, User> userValueSupplier, String field) {
     if (!isBlank(candidateValue)) {
       if (isRealUser(userValueSupplier.apply(candidateValue))) {
         throw new Conflict409Exception(String.format("%s already in use", field));
@@ -151,13 +156,13 @@ public class UserEngine {
 
   private boolean isRealUser(User candidate) {
     // This is a precaution against a proxy entity that's a stand in for a null value. (Yes, I've seen this happen with Hibernate.) 
+    if (candidate == null) {
+      return false;
+    }
     try {
-      if (candidate == null) {
-        return false;
-      }
       //noinspection ResultOfMethodCallIgnored
       candidate.getEmail(); // force an exception for a missing user
-    } catch (RuntimeException e) {
+    } catch (RuntimeException e) { // This should probably be HibernateException, but I won't know for sure until I see it again.
       log.debug("Error of {}: {}", e.getClass(), e.getLocalizedMessage());
       return false;
     }

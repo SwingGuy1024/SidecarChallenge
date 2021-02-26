@@ -11,14 +11,14 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
-import org.openapitools.OpenAPI2SpringBoot;
+import com.neptunedreams.OpenAPI2SpringBoot;
 import org.openapitools.engine.DataEngine;
-import org.openapitools.entity.MenuItem;
-import org.openapitools.entity.MenuItemOption;
+import com.neptunedreams.entity.MenuItem;
+import com.neptunedreams.entity.MenuItemOption;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
-import org.openapitools.repositories.MenuItemOptionRepositoryWrapper;
-import org.openapitools.repositories.MenuItemRepositoryWrapper;
+import com.neptunedreams.repository.MenuItemOptionRepositoryWrapper;
+import com.neptunedreams.repository.MenuItemRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +43,7 @@ import static org.junit.Assert.*;
     "org.openapitools",
     "org.openapitools.api",
     "org.openapitools.server",
-    "org.openapitools.repositories",
+    "com.neptunedreams.repository",
     "org.openapitools.framework.util",
     "org.openapitools.engine",
     "org.openapitools.configuration"

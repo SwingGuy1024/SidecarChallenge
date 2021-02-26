@@ -1,8 +1,8 @@
-package org.openapitools.repositories;
+package com.neptunedreams.repository;
 
 import java.time.OffsetDateTime;
 import java.util.Collection;
-import org.openapitools.entity.CustomerOrder;
+import com.neptunedreams.entity.CustomerOrder;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

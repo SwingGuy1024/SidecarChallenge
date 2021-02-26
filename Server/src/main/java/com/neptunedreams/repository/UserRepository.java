@@ -1,8 +1,8 @@
-package org.openapitools.repositories;
+package com.neptunedreams.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.openapitools.entity.User;
+import com.neptunedreams.entity.User;
 
 /**
  * <p>Created by IntelliJ IDEA.

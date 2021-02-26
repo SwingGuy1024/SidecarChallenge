@@ -1,6 +1,6 @@
-package org.openapitools.repositories;
+package com.neptunedreams.repository;
 
-import org.openapitools.entity.MenuItem;
+import com.neptunedreams.entity.MenuItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

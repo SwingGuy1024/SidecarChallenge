@@ -1,4 +1,4 @@
-package org.openapitools.entity;
+package com.neptunedreams.entity;
 
 import java.util.Collection;
 import java.util.Collections;

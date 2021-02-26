@@ -1,4 +1,4 @@
-package org.openapitools;
+package com.neptunedreams;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,11 +16,11 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableCaching
 @SpringBootApplication
 @ComponentScan(basePackages = {
+    "com.neptunedreams",
     "com.neptunedreams.api",
     "org.openapitools",
-    "org.openapitools.api",
     "org.openapitools.server",
-    "org.openapitools.repositories",
+    "com.neptunedreams.repository",
     "org.openapitools.framework.util",
     "org.openapitools.engine",
     "org.openapitools.configuration"

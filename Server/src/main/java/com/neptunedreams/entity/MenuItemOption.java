@@ -1,9 +1,8 @@
-package org.openapitools.entity;
+package com.neptunedreams.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedList;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;

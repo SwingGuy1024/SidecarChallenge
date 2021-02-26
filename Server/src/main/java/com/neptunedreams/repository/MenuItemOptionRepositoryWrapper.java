@@ -1,7 +1,7 @@
-package org.openapitools.repositories;
+package com.neptunedreams.repository;
 
-import org.openapitools.OpenAPI2SpringBoot;
-import org.openapitools.entity.MenuItemOption;
+import com.neptunedreams.OpenAPI2SpringBoot;
+import com.neptunedreams.entity.MenuItemOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

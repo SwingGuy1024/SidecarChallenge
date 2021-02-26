@@ -43,7 +43,7 @@
               <library>spring-boot</library>
               <!--<packageName>com.neptunedreams.configuration</packageName>-->
               <apiPackage>com.neptunedreams.api</apiPackage>
-              <!--<invokerPackage>com.neptunedreams</invokerPackage>-->
+              <invokerPackage>com.neptunedreams</invokerPackage>
               <modelPackage>com.neptunedreams.model</modelPackage>
               <configOptions>
                 <!--See https://github.com/OpenAPITools/openapi-generator/blob/master/docs/generators/spring.md-->

@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.openapitools.OpenAPI2SpringBoot;
+import com.neptunedreams.OpenAPI2SpringBoot;
 import org.openapitools.engine.Role;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.core.Authentication;

@@ -1,4 +1,4 @@
-package org.openapitools.entity;
+package com.neptunedreams.entity;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -136,16 +136,8 @@ public class CustomerOrder {
     return (getId() != null) ? getId().hashCode() : 0;
   }
 
-  @SuppressWarnings({"StringConcatenation", "ObjectToString", "MagicCharacter"})
   @Override
   public String toString() {
-    return "CustomerOrder{" +
-        "id=" + id +
-        ", options=" + options +
-        ", complete=" + complete +
-        ", orderTime=" + orderTime +
-        ", completeTime=" + completeTime +
-        ", menuItem=" + menuItem +
-        '}';
+    return String.format("CustomerOrder{id=%d, options=%s, complete=%s, orderTime=%s, completeTime=%s, menuItem=%s}", id, options, complete, orderTime, completeTime, menuItem);
   }
 }

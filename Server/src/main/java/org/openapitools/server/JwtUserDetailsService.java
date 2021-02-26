@@ -1,7 +1,7 @@
 package org.openapitools.server;
 
-import org.openapitools.entity.User;
-import org.openapitools.repositories.UserRepository;
+import com.neptunedreams.entity.User;
+import com.neptunedreams.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

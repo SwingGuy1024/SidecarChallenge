@@ -1,4 +1,4 @@
-package org.openapitools.entity;
+package com.neptunedreams.entity;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -87,11 +87,6 @@ public class MenuItem implements Serializable {
 
   @Override
   public String toString() {
-    return "MenuItem{" +
-        "id=" + id +
-        ", name='" + name + '\'' +
-        ", itemPrice=" + itemPrice +
-        ", allowedOptions=" + allowedOptions +
-        '}';
+    return String.format("MenuItem{id=%d, name='%s', itemPrice=%s, allowedOptions=%s}", id, name, itemPrice, allowedOptions);
   }
 }

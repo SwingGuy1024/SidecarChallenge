@@ -1,10 +1,12 @@
 package org.openapitools.server;
 
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import io.jsonwebtoken.impl.Base64UrlCodec;
 import io.jsonwebtoken.impl.TextCodec;
 import org.junit.Test;
 import org.openapitools.engine.Role;
-import org.openapitools.entity.User;
+import com.neptunedreams.entity.User;
 
 import static org.junit.Assert.*;
 import static org.openapitools.server.JwtTokenUtil.*;
@@ -72,12 +74,15 @@ public class JwtTokenUtilTest {
   }
 
   private String makeImposter(String part) {
-    TextCodec codec = new Base64UrlCodec();
-    String decoded = codec.decodeToString(part);
+    Base64.Decoder decoder = Base64.getDecoder();
+    String decoded = new String(decoder.decode(part));
     int valueStart = decoded.indexOf(':') + 2;
     final String decodedImposter = decoded.substring(0, valueStart) + '1' + decoded.substring(valueStart);
     System.out.printf("Ch: %s%nTo: %s%n", decoded, decodedImposter);
-    return codec.encode(decodedImposter);
+    final byte[] bytes = decodedImposter.getBytes(StandardCharsets.US_ASCII);
+
+    Base64.Encoder encoder = Base64.getEncoder();
+    return new String(encoder.encode(bytes));
   }
 
   private User makeUser(String name, String password, Role role) {

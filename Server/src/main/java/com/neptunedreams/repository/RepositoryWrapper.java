@@ -1,4 +1,4 @@
-package org.openapitools.repositories;
+package com.neptunedreams.repository;
 
 import java.util.List;
 import java.util.Optional;

@@ -15,7 +15,7 @@ import javax.persistence.ManyToOne;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-import org.springframework.lang.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -36,23 +36,25 @@ public class MenuItemOption implements Serializable {
 
   @Id
   @GeneratedValue
+  @Nullable
   public Integer getId() {
     return id;
   }
 
-  public void setId(final Integer id) {
+  public void setId(@Nullable final Integer id) {
     this.id = id;
   }
 
   @SuppressWarnings("JpaDataSourceORMInspection")
   @JsonIgnore
   @ManyToOne(cascade = CascadeType.REMOVE)
-  @JoinColumn(name="menu_item_id")
+  @JoinColumn(name = "menu_item_id")
+  @Nullable
   public MenuItem getMenuItem() {
     return menuItem;
   }
 
-  public void setMenuItem(final MenuItem menuItem) {
+  public void setMenuItem(@Nullable final MenuItem menuItem) {
     this.menuItem = menuItem;
   }
 

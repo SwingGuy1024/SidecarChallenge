@@ -4,6 +4,7 @@ import com.neptunedreams.engine.Role;
 import com.neptunedreams.server.JwtAuthenticationEntryPoint;
 import com.neptunedreams.server.JwtRequestFilter;
 import com.neptunedreams.server.JwtUserDetailsService;
+import org.jetbrains.annotations.NonNls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-  private static final Logger log = LoggerFactory.getLogger(WebSecurityConfig.class);
+  private static final @NonNls Logger log = LoggerFactory.getLogger(WebSecurityConfig.class);
   
   private final JwtUserDetailsService jwtUserDetailsService;
 
@@ -69,22 +70,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Override
   protected void configure(final AuthenticationManagerBuilder auth) throws Exception {
+    log.trace("configure(AuthenticationBuilder)");
     auth
         .userDetailsService(jwtUserDetailsService)
-        .passwordEncoder(passwordEncoder());
+        .passwordEncoder(encoder);
   }
-
-  @SuppressWarnings({"HardCodedStringLiteral", "HardcodedFileSeparator"})
-  @Override
-  public void configure(WebSecurity web) {
-    web.ignoring().mvcMatchers(HttpMethod.OPTIONS, "/**");
-    // ignore swagger 
-    web
-        .ignoring()
-        .mvcMatchers("/swagger-ui.html/**", "/configuration/**", "/swagger-resources/**", "/v2/api-docs", "/webjars/**")
-        ;
-  }
-
 
   @Bean
   @Override
@@ -95,7 +85,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   @Override
   protected void configure(final HttpSecurity http) throws Exception {
     log.trace("Configuring WebSecurityConfig");
-    
+
     // The idea here is that the menu is accessible under /menuItem, which does not require authentication, so 
     // potential customers may always look at a menu. Customer operations like placing an order require a 
     // authentication with the CUSTOMER role. Administrative work, such as changing the menu, requires
@@ -114,18 +104,25 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
           .antMatchers("/order/**")
             .hasRole(Role.CUSTOMER.toString())
           .antMatchers(
-              "/login/**", 
+              "/login/**",
+              "/home",
               "/menuItem/**",
               "/swagger-ui.html",
               "/api-docs",
+              "/configuration/**",
+              "/swagger*/**",
+              "/webjars/**",
+              "/swagger-resources/**",
+              "/v2/api-docs",
               "/"
           ).permitAll()
-          .anyRequest().authenticated()
+        .anyRequest().authenticated()
         .and()
           .sessionManagement()
           .sessionCreationPolicy(SessionCreationPolicy.STATELESS)//          .httpBasic()
         .and()
-          .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+          .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
+          ;
   }
 
   @Bean

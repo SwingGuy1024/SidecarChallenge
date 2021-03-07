@@ -10,6 +10,7 @@ import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
 import com.neptunedreams.repository.MenuItemOptionRepositoryWrapper;
 import com.neptunedreams.repository.MenuItemRepositoryWrapper;
+import org.jetbrains.annotations.NonNls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ import static com.neptunedreams.engine.PojoUtility.*;
  */
 @Component
 public class DataEngine {
-  private static final Logger log = LoggerFactory.getLogger(DataEngine.class);
+  private static final @NonNls Logger log = LoggerFactory.getLogger(DataEngine.class);
   private final MenuItemRepositoryWrapper menuItemRepositoryWrapper;
   private final MenuItemOptionRepositoryWrapper menuItemOptionRepositoryWrapper;
   private final ObjectMapper objectMapper;
@@ -43,7 +44,7 @@ public class DataEngine {
   }
 
   public MenuItemDto getMenuItemDto(final Integer id) {
-    MenuItem menuItem = menuItemRepositoryWrapper.getOne(id);
+    MenuItem menuItem = getOneOrThrow(menuItemRepositoryWrapper, id);
     return objectMapper.convertValue(menuItem, MenuItemDto.class);
   }
 
@@ -51,17 +52,19 @@ public class DataEngine {
     return menuItemRepositoryWrapper
         .findAll()
         .stream()
-        .map((m) -> objectMapper.convertValue(m, MenuItemDto.class))
+        .map(m -> objectMapper.convertValue(m, MenuItemDto.class))
         .collect(Collectors.toList());
   }
 
   public Integer addOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
     confirmNotEmpty(optionDto.getName()); // throws ResponseException
     MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
-    final MenuItem menuItem = menuItemRepositoryWrapper.getOneOrThrow(menuItemId);
+    final MenuItem menuItem = getOneOrThrow(menuItemRepositoryWrapper, menuItemId);
     menuItemOption.setMenuItem(menuItem);
     MenuItemOption savedOption = menuItemOptionRepositoryWrapper.save(menuItemOption);
-    return savedOption.getId();
+    final Integer newId = savedOption.getId();
+    assert newId != null;
+    return newId;
   }
 
   public Integer addMenuItemFromDto(final MenuItemDto menuItemDto) {
@@ -83,9 +86,10 @@ public class DataEngine {
     MenuItemOption menuItemOption = convertMenuItemOption(menuItemOptionDto);
     log.trace("MenuItemOption: {}", menuItemOption);
     MenuItemOption savedItem = menuItemOptionRepositoryWrapper.save(menuItemOption);
-    final Integer id = savedItem.getId();
-    log.trace("MenuItemOption added with id {}", id);
-    return id;
+    final Integer newId = savedItem.getId();
+    assert newId != null;
+    log.trace("MenuItemOption added with ID {}", newId);
+    return newId;
   }
 
   private MenuItem convertMenuItem(final MenuItemDto menuItemDto) {
@@ -106,7 +110,7 @@ public class DataEngine {
     log.trace("Deleting menuItemOption with id {}", optionId);
 
 
-    MenuItemOption itemToDelete = menuItemOptionRepositoryWrapper.getOneOrThrow(optionId);
+    MenuItemOption itemToDelete = getOneOrThrow(menuItemOptionRepositoryWrapper, optionId);
 
     // Before I can successfully delete the menuItemOption, I first have to set its menuItem to null. If I don't
     // do that, the delete call will fail. It doesn't help to set Cascade to Remove in the @ManyToOne annotation in 

@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import static com.neptunedreams.engine.PojoUtility.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -79,7 +80,7 @@ public class AdminApiControllerTest {
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
     final Integer id = Integer.valueOf(Objects.requireNonNull(responseEntity.getBody()));
     assertNotNull(id);
-    MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
+    MenuItem item = getOneOrThrow(menuItemRepositoryWrapper, id);
     Hibernate.initialize(item);
     assertEquals("0.50", item.getItemPrice().toString());
     assertEquals("GoodItem", item.getName());
@@ -145,7 +146,7 @@ public class AdminApiControllerTest {
     assertNotNull(id);
     System.out.printf("Body: <%s>%n", id);
 
-    MenuItem item = menuItemRepositoryWrapper.getOneOrThrow(id);
+    MenuItem item = getOneOrThrow(menuItemRepositoryWrapper, id);
     Hibernate.initialize(item);
     List<String> nameList = new LinkedList<>();
     for (MenuItemOption option : item.getAllowedOptions()) {
@@ -162,8 +163,9 @@ public class AdminApiControllerTest {
     MenuItemOption removedOption = item.getAllowedOptions().iterator().next();
     String removedName = removedOption.getName();
     Integer removedId = removedOption.getId();
+    assertNotNull(removedId);
     assertTrue(hasName(item, removedName));
-    assertNotNull(menuItemOptionRepositoryWrapper.getOneOrThrow(removedId));
+    assertNotNull(getOneOrThrow(menuItemOptionRepositoryWrapper, removedId));
     ResponseEntity<Void> goodResponse = adminApiController.deleteOption(removedOption.getId());
 
     assertEquals(HttpStatus.OK, goodResponse.getStatusCode());
@@ -173,10 +175,10 @@ public class AdminApiControllerTest {
       System.out.println(option);
     }
 
-    item = menuItemRepositoryWrapper.getOneOrThrow(id);
+    item = getOneOrThrow(menuItemRepositoryWrapper, id);
     assertFalse(hasName(item, removedName));
     try {
-      menuItemOptionRepositoryWrapper.getOneOrThrow(removedId);
+      getOneOrThrow(menuItemOptionRepositoryWrapper, removedId);
       fail("Item not removed");
     } catch (NotFound404Exception ignored) { }
   }

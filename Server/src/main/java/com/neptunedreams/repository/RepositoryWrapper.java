@@ -35,18 +35,6 @@ class RepositoryWrapper<T, ID> implements JpaRepository<T, ID> {
     return repository.getOne(id);
   }
 
-  /**
-   * This method tests the object for existence and throws an exception if it's not in the table.
-   * @param id The id
-   * @return The entity with the provided id
-   */
-  public T getOneOrThrow(ID id) {
-    if (repository.existsById(id)) {
-      return repository.getOne(id);
-    }
-    throw new NotFound404Exception("Missing object");
-  }
-
   @Override
   public void deleteInBatch(Iterable<T> items) {
     repository.deleteInBatch(items);

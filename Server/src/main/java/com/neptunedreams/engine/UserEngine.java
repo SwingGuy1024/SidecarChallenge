@@ -10,6 +10,7 @@ import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.repository.UserRepository;
 import com.neptunedreams.server.JwtTokenUtil;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ import static com.neptunedreams.engine.PojoUtility.*;
  */
 @Component
 public class UserEngine {
-  private static final Logger log = LoggerFactory.getLogger(UserEngine.class);
+  private static final @NonNls Logger log = LoggerFactory.getLogger(UserEngine.class);
 
   private final UserRepository userRepository;
   private final ObjectMapper objectMapper;
@@ -48,7 +49,10 @@ public class UserEngine {
   private static final String USER_PASSWORD_COMBINATION_NOT_FOUND = "User/password Combination not found";
 
   @Autowired
-  public UserEngine(UserRepository userRepository, PasswordEncoder encoder, ObjectMapper objectMapper) {
+  public UserEngine(
+      UserRepository userRepository, 
+      PasswordEncoder encoder, 
+      ObjectMapper objectMapper) {
     this.userRepository = userRepository;
     this.encoder = encoder;
     this.objectMapper = objectMapper;
@@ -149,7 +153,7 @@ public class UserEngine {
     stringBuilder.append((char) i);
   }
 
-  private void throwConflictIfExists(String candidateValue, Function<String, User> userValueSupplier, String field) {
+  private void throwConflictIfExists(String candidateValue, Function<String, User> userValueSupplier, @NonNls String field) {
     if (!isBlank(candidateValue)) {
       if (isRealUser(userValueSupplier.apply(candidateValue))) {
         throw new Conflict409Exception(String.format("%s already in use", field));

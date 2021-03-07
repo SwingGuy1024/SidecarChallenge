@@ -11,6 +11,7 @@ import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.model.UserDto;
 import com.neptunedreams.repository.UserRepository;
 import com.neptunedreams.server.JwtTokenUtil;
+import org.jetbrains.annotations.NonNls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 @RequestMapping("${openapi.customerOrders.base-path:}")
 public class LoginApiController implements LoginApi {
 
-    private static final Logger log = LoggerFactory.getLogger(LoginApiController.class);
+    private static final @NonNls Logger log = LoggerFactory.getLogger(LoginApiController.class);
     private final NativeWebRequest request;
     
     private final ObjectMapper objectMapper;
@@ -34,8 +35,6 @@ public class LoginApiController implements LoginApi {
     
     private final UserEngine userEngine;
     
-    private final PasswordEncoder encoder;
-
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
@@ -47,13 +46,11 @@ public class LoginApiController implements LoginApi {
             final NativeWebRequest request,
             final ObjectMapper objectMapper,
             final UserRepository userRepository,
-            final PasswordEncoder encoder,
             final UserEngine userEngine
     ) {
         this.request = request;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
-        this.encoder = encoder;
         this.userEngine = userEngine;
         doDemoStartup();
         log.trace("LoginApiController");
@@ -67,10 +64,6 @@ public class LoginApiController implements LoginApi {
         return ResponseUtility.serveOK(() -> userEngine.loginUser(loginDto));
     }
 
-    private User makeUser(LoginDto loginDto) {
-        return objectMapper.convertValue(loginDto, User.class);
-    }
-
     @SuppressWarnings("HardCodedStringLiteral")
     private void doDemoStartup() {
         long count = userRepository.count();
@@ -81,11 +74,6 @@ public class LoginApiController implements LoginApi {
             makeUser("User3", Role.CUSTOMER);
             makeUser("Admin1", Role.ADMIN);
             makeUser("Admin2", Role.ADMIN);
-        }
-        if (log.isTraceEnabled()) {
-            for (int i=0; i<5; ++i) {
-                log.trace("Encoding password: {}", encoder.encode("password"));
-            }
         }
     }
 

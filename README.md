@@ -22,7 +22,14 @@ If using MySQL version 8+, you'll need to say
     create user pizza identified WITH mysql_native_password by 'pizza';
 
 Launch the application and start by adding some menu items.
-This was developed under Java 8 and has been tested running under Java 8 and 12.
+This was developed under Java 8 and has been tested running under Java 8 and 12. The application jar file can be found in Server/target. To run using Maven, type
+
+    > cd Server
+    > mvn spring-boot:run
+
+Or you can launch it directly from the jar file:
+
+    > java -jar Server/Target/Server-0.0.1-SNAPSHOT.jar
 
 # Notes:
 

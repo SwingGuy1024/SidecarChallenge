@@ -12,9 +12,12 @@ import javax.persistence.Entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neptunedreams.framework.exception.BadRequest400Exception;
+import com.neptunedreams.framework.exception.NotFound404Exception;
 import com.neptunedreams.framework.exception.ResponseException;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  * By convention, all methods that may throw a ResponseException begin with the word confirm
@@ -84,6 +87,26 @@ public enum PojoUtility {
   }
 
   /**
+   * Retrieves an entity by its ID. First tests the entity for existence, and throws a NotFound404Exception if it's not in the table.
+   *
+   * @param repository The repository
+   * @param id The id
+   * @param <E> The entity type
+   * @param <ID> The type of the entity's ID field
+   * @return The entity with the provided id
+   * @link https://www.javacodemonk.com/difference-between-getone-and-findbyid-in-spring-data-jpa-3a96c3ff
+   * @throws NotFound404Exception if the entity with the specified id is not found
+   */
+  public static <E, ID> E getOneOrThrow(JpaRepository<E, ID> repository, ID id) {
+    // We use findById() instead of getOne() because getOne returns a lazily loadable value even if it didn't find anything. That
+    // delays the exception until the code tries to use the object. findById() returns an empty Optional if it didn't find anything,
+    // which makes our code cleaner.
+    return repository
+        .findById(id)
+        .orElseThrow(() -> new NotFound404Exception(String.format("Missing object with %s", id)));
+  }
+
+  /**
    * Use when a non-entity object should not be null. Throws a BadRequest400Exception if null. If testing for an entity, you 
    * should use confirmFound(T object, Object id), which return a NOT_FOUND (404).
    * @param object The non-entity object to test.
@@ -111,7 +134,7 @@ public enum PojoUtility {
         .anyMatch(a -> a.annotationType() == Entity.class);
   }
   
-  private static Class<?> getEntityClass(final Object object) {
+  private static @Nullable Class<?> getEntityClass(final Object object) {
     Class<?> objectClass = object.getClass();
     Class<?> superClass = objectClass;
     

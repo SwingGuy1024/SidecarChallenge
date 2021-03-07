@@ -5,7 +5,6 @@ import javax.validation.Valid;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neptunedreams.engine.Role;
 import com.neptunedreams.engine.UserEngine;
-import com.neptunedreams.entity.User;
 import com.neptunedreams.framework.ResponseUtility;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.model.UserDto;
@@ -15,9 +14,7 @@ import org.jetbrains.annotations.NonNls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.context.request.NativeWebRequest;

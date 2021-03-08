@@ -1,6 +1,19 @@
 # Building
 
-The project is divided into two modules, Gen and Server. You can do `mvn clean install` in the main directory to build both packages. Or you can build each module separately. Either way, this will produce an executable jar file at `Server/target/Server-0.0.1-SNAPSHOT.jar`. 
+The project is divided into five modules, Gen, Common, Auth, Business, and Server. You can do `mvn clean install` in the main directory to build all packages. Or you can build each module separately. If you build separately, you should build them in three stages:
+
+Stage 1: Gen & Common
+
+Stage 2: Auth & Business
+
+Stage 3. Server.
+
+Either way, this will produce an executable jar file at `Server/target/Server-0.0.1-SNAPSHOT.jar`.
+
+## Notes on module structure:
+
+1. This project is small enough to need only two modules, one for generated code, the other for application code. But eventually the project will presumably benefit from breaking it up into separate modules. The current structure is an experiment on how that might be done. In particular, it was done this way to separate the RESTful services, in the Server module, from the business logic in the Business module. However, this is not meant to be the final word on how the project should be structured. I did it this way mainly to see what kind of issues arise from the separation of server from business logic. I did not expect, for example, that I would need to break the main class into two separate classes, OpenAPI2SpringBoot and ServerMaster, in order to make one of them accessible to unit tests while the other is the main class for launching the server.
+2. The Auth module is broken out into a separate module on the assumption that its code could be shared by multiple modules, all of which need to share authentication code.
 # Starting up
 
 Start Redis:
@@ -17,7 +30,7 @@ Grant the user all rights on the pizza database
     create user pizza identified by 'pizza';
     grant all on pizza.* to pizza;
 
-If using MySQL version 8+, you'll need to say
+If using MySQL version 8+, the second line should be
 
     create user pizza identified WITH mysql_native_password by 'pizza';
 
@@ -43,229 +56,215 @@ This doesn't exactly implement the Design I produced in the Part 1 of the assign
 
 ### API Design:
 #### General
-The APIs are implemented with a call to a serve method, which takes a lambda expression that delivers the requested data. This is packed into a ResponseEntity object and returned. I did this to separate the server-related classes from the implementation, so the implementation code does not need to know it's running on a server, unless it has to throw an Exception. Although I didn't bother to separate the implementation into separate classes for this demo, that's the next step. I did this partly because past servers I've worked on have been very inconsistent in how they log errors, return results, and return errors. The `serve()` method, and some convenience methods that delgate to it, is in the `ResponseUtility` class. At some point, I'd like to write generators for OpenAPI to encourage this design in all APIs.
+The APIs are implemented with a call to a serve method, which takes a lambda expression that delivers the requested data. This is packed into a ResponseEntity object and returned. I did this to separate the server-related classes from the implementation, so the implementation code does not need to know it's running on a server, unless it has to throw an Exception. I did this partly because past servers I've worked on have been very inconsistent in how they log errors, return results, and return errors. The `serve()` method, and some convenience methods that delgate to it, is in the `ResponseUtility` class, and other useful utilities are in the PojoUtilities class (See the [**Service Implementations**](#Service Implementations) section below for more details.) At some point, I'd like to write generators for OpenAPI to encourage this design in all APIs.
 
-#### Rules for error responses:
-1.Return an error response only by throwing an annotated Exception. Exceptions are annotated with the `@HttpStatus` annotation, which specifies the status to return. If there's no Exception for the error response you want to send, add one.
-2. Never catch a RuntimeException. If the code generates a RuntimeException, let it pass through. It will generate a 405 error response, which tells us we need to find the bug and fix it. If you need to say `catch (Exception e)`, first catch any RuntimeExceptions and rethrow them.
-3. Don't worry about logging Exceptions, unless you catch them and don't rethrow. The UncaughtExceptionHandler will log all Exceptions it sees.
+#### Developer Rules for error responses:
+1. Return an error response only by throwing an annotated Exception. Exceptions are annotated with the `@HttpStatus` annotation, which specifies the status to return. All of these exceptions extend ResponseException. If there's no Exception for the error response you want to send, add one. Be sure to extend `ResponseException` and annotate it with `@HttpStatus`.
+1. Never catch a RuntimeException. If the code generates a RuntimeException, let it pass through. It will generate a 500 error response (Internal Server Error), which tells us we need to find the bug and fix it. If you need to say `catch (Exception e)`, first catch any RuntimeExceptions and rethrow them.
+1. Don't worry about logging Exceptions, unless you catch them and don't rethrow. The UncaughtExceptionHandler will log all Exceptions it sees.
+1. The ResponseException subclasses will only get thrown in response to a known exceptional situation that's not due to a bug, so their stack traces don't appear in the log. Never throw one in response to a bug.
 
 ## 2. Implemented Technologies
 
-1. Restful services
-1. JPA Crud operations will write to an underlying MySql database. Unit tests use an in-memory h2 database.
-1. Spring Security defines three security levels with two roles. The levels are ADMIN and CUSTOMER. The third level is no security, and is read-only. It works like this:
+1. RESTful services
+1. JPA Crud operations will write to an underlying MySql database, using Spring Data.
+1. Unit tests use an in-memory h2 database.
+1. Spring Security defines three security levels with two roles. The levels are ADMIN and CUSTOMER. The third level is no security, and is read-only. Endpoints are mapped like this:
 
-    a. `/menuItem` Menus, which are read-only, and require no authentication 
+    1. `/menuItem/**` Menus, which are read-only, and require no authentication 
 
-    b. `/admin` ADMIN role required. Administrative: APIs let you modify the menus and add options
+    1. `/order/**` CUSTOMER role required. For placing orders (Not implemented)
 
-    c. `/order` CUSTOMER role required. For placing orders (Not implemented)
+    1. `/admin/**` ADMIN role required. Administrative: APIs let you modify the menus and add options
 
-    d. `/login` No authorization required.
+    1. `/login/**` No authorization required.
    
-    * Logging  in requires a dto with a few fields, but only the username and password are needed.
-1. Authentication is done using JWT.
-1. Caching. The `menuItem` API, which returns the entire menu, is held in a Redis cache, backed by the MySql database. The cache gets cleared when the menu is updated.
+1. Authorization is done using JWT.
+1. Redis  Caching. The `menuItem` API, which returns the entire menu, is held in a Redis cache, backed by the MySql database. The cache gets cleared when the menu is updated.
 1. Mockito. One unit test ('JwtRequestFilterTest`) uses Mockito create mocks for testing.
 1. Actuator. A simple health check method is implemented.
-1. Logging. Lots of logging is done at the debug level.
+1. Logging. Lots of logging is done at the debug and trace levels. A few methods are logged at the info level, such as login information.
 
 ## 3. Logging In Users
 
-There is no API for creating new users. The first time you attempt to log in, five users will be created. They are User1, User2, User3, Admin1, and Admin2. Each uses its username as its password. The three Users have the CUSTOMER role, and the other two have the ADMIN role. All users, including guests, may view the menus. Users with the CUSTOMER role may place orders (not implemented). Users with the ADMIN role may modify the menu items, create new ones, and delete old ones.
+There is an API for creating new users, but you don't need to use it. The first time you launch the server, it will check to see if any users exist in the database. If there are none, it will create five users. They are User1, User2, User3, Admin1, and Admin2. Each uses its username as its password. The three Users have the CUSTOMER role, and the other two have the ADMIN role. You may use the APIs to create more users. All users, including guests, may view the menus. Users with the CUSTOMER role may place orders (not implemented). Users with the ADMIN role may modify the menu items, create new ones, and delete old ones.
 
 ## 4. Notes:
 
 To monitor the Redis cache, and verify that it's working, use the Redis CLI:
 
     $> redis-cli MONITOR
+Then run the application. Anytime you use the cache, the monitor will print information about the operation.
 
- ----
+## 5. APIs
 
-(The rest of the documentation, below, was generated by Swagger.)
+(The most important part of this demo is described in the [**Service Implementations**](#Service Implementations) section, below.)
 
-# Swagger generated server
+This uses maven to build. It has been tested using Maven v3.6.3 and Java 1.8.0_212. Maven uses Java 9.0.4
 
-Spring Boot Server 
+### REST API Documentation
 
+You can view the api documentation in swagger-ui by launching the server, then go to `http:localhost:8080`, which will redirect to
+`http://localhost:8080/swagger-ui.html`
 
-## Overview  
+You may change the default port value in application.properties
 
-(The most important part of this demo is descirbed in the **Service Implementations** section, below.)
+### Service Implementations
 
-This server was generated by the [swagger-codegen](https://github.com/swagger-api/swagger-codegen) project.  
-By using the [OpenAPI-Spec](https://github.com/swagger-api/swagger-core), you can easily generate a server stub.  
-This is an example of building a swagger-enabled server in Java using the SpringBoot framework.  
-
-The underlying library integrating swagger to SpringBoot is [springfox](https://github.com/springfox/springfox)  
-
-Start your server as a simple java application.
-
-This project requires Java 1.8 and Maven 3
-
-To build:
- 
-`mvn clean install`
-
-To run: 
-
-`mvn spring-boot:run`
-
-or
-
-`java -jar target/miguelmunoz.challenge-0.0.1-SNAPSHOT.jar`
-
-## Build
-This uses maven to build. It has been tested using Maven v3.6.3 and Java 1.8.0_212.
-Maven uses Java 9.0.4
-
-## REST API Documentation
-
-You can view the api documentation in swagger-ui by launching the server, then go to 
-`http://localhost:8080/NeptuneDreams/CustomerOrders/1.0.0/swagger-ui.html`
-
-Change default port value in application.properties
-
-## Database
-You do not need to launch a database server to run this application. I use an embedded h2 database. This is great for demo purposes, because you don't need to launch a server, and it's a java database, so it runs with very little configuration.
-
-## Service Implementations
-
-To ensure consistency in how the services are written, and to reduce the amount of boilerplate code, all the services use a variant of the `ResponseUtility.serve()` method. This allows the service to focus solely on the task of generating the service data, and not worry about creating the ResponseEntity or generating an error response. In case of an error, the service need only throw a ResponseException, which includes an HttpStatus value. There are several convenience methods to simplify this, all of which throw a ResponseException. By convention, all these methods begin with the word "confirm." For example, if a service requests an Entity with a specific ID, and the item may return null, the service should call `PojoUtility.confirmFound(entity, id);` If the value is `null`, the `confirmFound()` method will throw a ResponseException with a NOT_FOUND status, and include the id in the error message.
+To ensure consistency in how the services are written, and to reduce the amount of boilerplate code, all the services use a variant of
+the `ResponseUtility.serve()` method. This allows the service to focus solely on the task of generating the service data, and not worry
+about creating the ResponseEntity or generating an error response. In case of an error, the service need only throw one of the subclasses of ResponseException,which all include an HttpStatus value. The `PojoUtilities` class has several convenience methods to
+simplify this, all of which throw a ResponseException. By convention, all these methods begin with the word "confirm." For example, if a
+service requests an Entity with a specific ID, the service should call 
+`PojoUtility.confirmFound(entity, id);` If the entity doesn't exist, the `confirmFound()` method will throw a ResponseException with a 
+NOT_FOUND status, and include the id in the error message.
 
 So a service method that needs to return an instance of `MenuItemDto` would look something like this:
 
-``` java class X {
-1  @RequestMapping(
-   value = "/menuItem/{id}", 
-   produces = {"application/json"}, 
-   method = RequestMethod.GET)
-2  public ResponseEntity<MenuItemDto> getMenuItem(@PathVariable("id") final Integer id) {
-3    return serve(HttpStatus.OK, () -> {
-4      return objectMapper.convertValue(getMenuItemFromId(id), MenuItemDto.class);
-5    }
-6
-7    // This could go in another class, to keep the service class clean.
-8    MenuItem getMenuItemFromId(int id) {
-9      MenuItem menuItem = menuItemRepository.findOne(id); // Get from the database
-10      confirmFound(menuItem, id);           // throws ResponseException
-11      return menuItem;
-12   });
-13 }
+```
+1   public class MenuItemApiController {
+2
+3   private final DataEngine dataEngine;
+4
+5   // ...  
+6   @Override
+7   public ResponseEntity<MenuItemDto> getMenuItem(final Integer id) {
+8     return serveOK(() -> dataEngine.getMenuItemDto(id));
+9   }
 ```
 
+So, on line 8, we specify an OK status if the method returns successfully. We also create the lambda expression that delegates the work to
+the `DataEngine` class:
 
-So, on line 3, we specify an OK status if the method returns successfully. We also begin the lambda expression that does the work of this service.
+```
+1  public class DataEngine {
+2
+3    MenuItem getMenuItemFromId(int id) {
+4      MenuItem menuItem = confirmFound(menuItemRepository, id);  // throws NotFound404Exception extends ResponseException
+5      return menuItem;
+6   });
+7 }
+```
 
-On line 6, we test for null, using the `confirmFound()` method. If `menuItem` is null, it will throw `ResponseException` with an `HttpStatus` of `NOT_FOUND`. We don't need to catch it, because it's annotated with `@ResponseStatus(HttpStatus.NOT_FOUND)`, so the server will use that status code in its response. But the `serve()` method, on line 3, catches it for logging purposes, then rethrows it.
+On line 6, we test for null, using the `confirmFound()` method. If no `menuItem` exists with the specified id, it will throw `ResponseException` with
+an `HttpStatus` of `NOT_FOUND`. We don't need to catch it, because it's annotated with `@ResponseStatus(HttpStatus.NOT_FOUND)`, so the
+server will use that status code in its response. But the `serveOK()` method, called in the previous method, catches it for logging purposes, then rethrows it.
 
-The call to the `serve()` method takes care five boilerplate details:
+The call to the `serve()` method takes care of five boilerplate details:
+
 1. It adds the return value (an instance of MenuItemDto) to the `ResponseEntity` on successful completion.
 1. It sets the specified HttpStatus, which in this example is `HttpStatus.OK`.
-1. It generates the proper error response, with an error status code taken from the `ResponseException` thrown by the lambda expression. In this case, this is a `NotFoundException` thrown by the`confirmFound()` method. The `NotFoundException` method extends `ResponseException`, as do all the others.
+1. It generates the proper error response, with an error status code taken from the `ResponseException` thrown by the lambda expression. In
+   this case, this is a `NotFound404Exception` thrown by the`confirmFound()` method. The `NotFound404Exception` method extends `ResponseException`
+   , as do all the others.
 1. It logs the error message and exception.
-1. It catches any RuntimeExceptions and returns a respone of Internal Server Error.
+1. It catches any RuntimeExceptions and returns a response of Internal Server Error.
 
-Also, by using ResponseExceptions to send failure information back to the `serve()` method, it discourages the use of common Exception anti-patterns, like catch/log/return-null. Instead, developrs are encouraged to wrap a checked exception in a ResponseException and rethrow it, and to ignore all RuntimeExceptions, letting them propogate up to the `serve()` method, which can then generate an INTERNAL SERVER ERROR response.
+Also, by using ResponseExceptions to send failure information back to the `serve()` method, it discourages the use of common Exception
+anti-patterns, like catch/log/return-null. Instead, developres are encouraged to wrap a checked exception in a ResponseException and rethrow
+it, and to ignore all RuntimeExceptions, letting them propogate up to the `serve()` method, which can then generate an INTERNAL SERVER ERROR
+response.
 
-The lambda expression creates an object of type ServiceMethod. This is a simple functional interface:
+The lambda expression creates a `Supplier<T>`
 
-```
-@FunctionalInterface
-public interface ServiceMethod<T> {
-  T doService() throws ResponseException;
-}
-```
+The `serve()` method has this signature:
 
-The `serve()` method has this signature: 
+`  public static <T> ResponseEntity<T> serve(HttpStatus successStatus, Supplier<T> method)`
 
-`  public static <T> ResponseEntity<T> serve(HttpStatus successStatus, ServiceMethod<T> method)`
+The only boilerplate code in the example is the `@RequestMapping` annotation and the method signature, both of which are generated by
+Swagger.
 
-The only boilerplate code in the example is the `@RequestMapping` annotation and the method signature, both of which are generated by Swagger.
+### Sample `confirmXxx()` methods.
 
-### Sample `confirmXxx()` methods. 
-All of these may throw a `ResponseException`. I've adopted the convention that all methods that may throw `ResponseException` start with the word *confirm.*
+All of these may throw a `ResponseException`. I've adopted the convention that all methods that may throw `ResponseException` start with the
+word *confirm.*
 
-* `confirmFound(T entity, Object id) throws ResponseException` Confirms the returned entity with specified id is not null. (The `id` parameter is used to generate a more useful error message.)
-* `confirmNeverNull(T object) throws ResponseException` Used for values that are not entities.
-* `confirmNull(Object object) throws ResponseException` This is useful to ensure a resource doesn't already exist.
-* `confirmEqual(T expected, T actual) throws ResponseException`
-* `confirmAndDecodeInteger(final String id) throws ResponseException` This Parses the String into an Integer. A better name might be just `decodeInteger()`, but it starts with `confirm` to keep with the convention that all methods that throw a `ResponseException` start with `confirm`.
+* `<E, ID> E confirmFound(JpaRepository<E, ID> repository, ID id) throws ResponseException` Confirms the returned entity with specified id is not null. This also retrieves and returns the entity.
+* `<T> T confirmNeverNull(T object) throws ResponseException` Used for values that are not entities.
+* `void confirmNull(Object object) throws ResponseException` This is useful to ensure a new resource doesn't already exist.
+* `<T> void confirmEqual(T expected, T actual) throws ResponseException`
+* `Long confirmAndDecodeLong(final String id) throws ResponseException`
+* `Integer confirmAndDecodeInteger(final String id) throws ResponseException` These two parse the String into an Integer or Long. A better name might be
+  just `decodeInteger()`, but it starts with `confirm` to keep with the convention.
 
-People have asked why I didn't use the word *validate,* since it's pretty standard. I decided not to use it to be clear that these methods are not a part of any third-party validation framework.
+People have asked why I didn't use the word *validate,* since it's pretty standard. I decided not to use it to be clear that these methods
+are not a part of any third-party validation framework.
 
-I should also stress that these are just convenience methods. If any developers have cases not handled by one of these, and can't write a simple convenience method to do what they need, they are free to throw a ResponseException directly. Any RuntimeExceptions need not be caught. They will get logged and an INTERNAL_SERVER_ERROR response will be returned.
+I should also stress that these are just convenience methods. If any developers have cases not handled by one of these, and can't write a
+simple convenience method to do what they need, they are free to throw a ResponseException directly. Any RuntimeExceptions need not be
+caught. They will get logged and an INTERNAL_SERVER_ERROR response will be returned.
 
+## Data Model
 
-## Data Model 
 ### Assumptions
 
-A Menu item consists of options. Each menu item has a price, as does each option. (Option prices may be zero.) An order consists of a menu item and a list of options.
+A Menu item consists of options. Each menu item has a price, as does each option. (Option prices may be zero.) An order consists of a menu
+item and a list of options.
 
-An order may calculate a price based on the Menu Item's base cost and the options chosen. 
+An order may calculate a price based on the Menu Item's base cost and the options chosen.
 
-When an order is opened, the time is recorded. (I have no idea if that's useful, but it may help in searching.) At this point, the order may be either canceled or completed. If it's canceled, it's removed from the database. If it's completed, it is marked complete and kept in the database.
+When an order is opened, the time is recorded. (I have no idea if that's useful, but it may help in searching.) At this point, the order may
+be either canceled or completed. If it's canceled, it's removed from the database. If it's completed, it is marked complete and kept in the
+database.
 
-Orders may be searched by ID 
+Orders may be searched by ID
 
-I'm not sure if my API is most useful for a UI developer. I prefer to ask the UI developers what they need, then build the API around their needs. That said, I have APIs to define menu items, and add options to them. I have APIs to create an order, to add options to either an order or a MenuItem, and to search for completed or open orders in a given date range.
+I'm not sure if my API is most useful for a UI developer. I prefer to ask the UI developers what they need, then build the API around their
+needs. That said, I have APIs to define menu items, and add options to them. I have APIs to create an order, to add options to either an
+order or a MenuItem, and to search for completed or open orders in a given date range.
 
 ### JPA Entities
 
 #### 1. MenuItem
-A MenuItem consists of a name, price, and list of MenuItemOptions (below). The list consists of all possible options for this menu item. MenuItem has a One-to-Many relationship with MenuItemOption. It also includes a price.
+
+A MenuItem consists of a name, price, and list of MenuItemOptions (below). The list consists of all possible options for this menu item.
+MenuItem has a One-to-Many relationship with MenuItemOption. It also includes a price.
 
 #### 2. MenuItemOption
-A MenuItemOption adds an option to aMenuItem (below). It also has a delta price, which is the amount the price changes if the guest chooses this option.
+
+A MenuItemOption adds an option to aMenuItem (below). It also has a delta price, which is the amount the price changes if the guest chooses
+this option.
 
 #### 3. CustomerOrder
-A Food order is an actual order. It has a final price, a boolean to record when it has been completed and delivered, and an order date and completion date, and a list of MenuItemOptions. Unlike the MenuItem, the list of options is all the chosen options, rather than the available options. Also, unlike MenuItem, the CustomerOrder has a Many-To-Many relationship with MenuItemOption.
+
+A Food order is an actual order. It has a final price, a boolean to record when it has been completed and delivered, and an order date and
+completion date, and a list of MenuItemOptions. Unlike the MenuItem, the list of options is all the chosen options, rather than the
+available options. Also, unlike MenuItem, the CustomerOrder has a Many-To-Many relationship with MenuItemOption.
 
 ## Testing
-The testing application properties specify an in-memory database, so changes get wiped out from test to test. This greatly facilitates testing.
 
-The Controller classes have public method which are called by the server, and package-level methods that are only for testing. All of these package methods are named `xxxXxxxTestOnly` to discourage their use even if somebody puts a class in the same package. 
+The testing application properties specify an in-memory database, so changes get wiped out from test to test. This greatly facilitates
+testing.
+
+The Controller classes have public method which are called by the server, and package-level methods that are only for testing. All of these
+package methods are named `xxxXxxxTestOnly` to discourage their use even if somebody puts a class in the same package.
 
 ## Code Generation
-Generated using Swagger 2.0 Swing Server, with the following options:
 
-* interface only
-* not null jackson annotation
-* use bean validation [^1]
-* big decimal as string
-* ensure unique params
-* allow unicode identifiers
+Generated using Swagger's OpenAPI Specification OAS 3.0, using the Spring Server generator, with the following options:
 
-* date library: Java 8 using Instant
+* interfaceOnly: True
+* bigDecimalAsString: True
+* dateLibrary: Java 8
 * developer name: Miguel Muñoz
 * title: Pizza Orders
-* library: Spring Boot Server Application
+* generatorName: spring
+* library: spring-boot
 
-[^1] For an example of how to use Bean Validation, see https://www.logicbig.com/tutorials/java-ee-tutorial/bean-validation/cascaded-validation.html
-
-† For an example of how to use Bean Validation, see https://www.logicbig.com/tutorials/java-ee-tutorial/bean-validation/cascaded-validation.html
-
-### Code Generator Bugs
-#### Doubles the path
-The generator creates an application.properties file with the following property:
-
-    server.contextPath=/NeptuneDreams/CustomerOrders/1.0.0
-It also annotates each API class with this annotation:
-
-    @RequestMapping(value = "/NeptuneDreams/CustomerOrders/1.0.0")
-This makes the final path /NeptuneDreams/CustomerOrders/1.0.0/NeptuneDreams/CustomerOrders/1.0.0
-
-The fix is to change the property's value to a single slash.
+### Code Generator Bugs (All are minor)
 
 #### Spurious Optional
-When Java 8 is set, it adds an HttpServletRequest member. It also creates default getter for that property and the ObjectMapper property. Both properties are final and autowired, so they can't possibly have null values, so the Optional wrapper returned by the getters is unnecessary.
+
+When Java 8 is set, it adds a NativeWebRequest member. It also creates default getter for that property and the ObjectMapper property. This default getter wraps the values in an `Optional`.
+Both properties are final and autowired, so they can't possibly have null values, so the Optional wrapper returned by the getters is
+unnecessary.
 
 #### Spurious default methods
-When Java 8 is set, it turns on the defaultInterfaces option, which I would rather be left off. This generates stubs as default methods for each api method. There are two consequences. First, failure to implement a recently added interface doesn't prevent compilation. Second, the stubs return a 510 Not implemented. I would rather they throw an Error. (It also takes too much code to return the 501)
 
-#### Logger
-When Default Methods is set, the API interfaces include a logger, used by the default methods. The logger is neither static, private nor final. Since it's not private, subclasses will inherit it, making it easy to mistakenly log messages with the wrong class name.
-    
+When Java 8 is set, it turns on the defaultInterfaces option, which I would rather be left off. This generates stubs as default methods for
+each api method. There are two consequences. First, failure to implement a recently added interface doesn't prevent compilation. Second, the
+stubs return a 510 Not implemented. I would rather they throw an Error. (It also takes too much code to return the 501)
+
 #### Date option
-When the date library is set to one of the three java 8 values, it turns on Java 8, which is fine, but this activates the three java 8 bugs.
+
+When the date library is set to one of the three java 8 values, it turns on Java 8, which is fine, but this activates the two java 8 bugs above.

@@ -1,13 +1,13 @@
 package com.neptunedreams.engine;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neptunedreams.exception.BadRequest400Exception;
+import com.neptunedreams.exception.Conflict409Exception;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import com.neptunedreams.OpenAPI2SpringBoot;
 import com.neptunedreams.entity.User;
-import com.neptunedreams.exception.BadRequest400Exception;
-import com.neptunedreams.exception.Conflict409Exception;
 import com.neptunedreams.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -8,6 +8,9 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<modules>
 		<module>Gen</module>
+		<module>Common</module>
+		<module>Auth</module>
+		<module>Business</module>
 		<module>Server</module>
 	</modules>
 
@@ -17,7 +20,18 @@
 		<version>2.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>8</java.version>
+		<maven.compiler.source>${java.version}</maven.compiler.source>
+		<maven.compiler.target>${java.version}</maven.compiler.target>
+		<!-- Todo: Try 2.9.2-->
+		<springfox-version>2.7.0</springfox-version>
+		<spring.framework.version>5.3.3</spring.framework.version>
+	</properties>
+
 	<dependencies>
 		<!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
 		<dependency>
@@ -25,6 +39,129 @@
 			<artifactId>annotations</artifactId>
 			<version>20.1.0</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-tomcat</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+			<version>2.3.4.RELEASE</version>
+		</dependency>
+
+		<!--Because I can't launch a memory-only version of mysql, this library uses runtime scope, and the h2 in-memory
+    library uses test scope. -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!--		For JDK 11-->
+
+		<!-- API, java.xml.bind module -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+
+		<!-- Runtime, com.sun.xml.bind module -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>2.3.2</version>
+		</dependency>
+
+		<dependency>
+			<!--Handles serialization/deserialization of new Java Date/Time classes-->
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.10.1</version> <!-- Was 2.6.5-->
+		</dependency>
+		<!-- Bean Validation API support -->
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>1.1.0.Final</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!--	Security-->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+			<version>2.3.2.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+			<version>2.3.4.RELEASE</version>
+		</dependency>
+
+		<!--SpringFox dependencies -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox-version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>3.7.0</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<configuration>
+						<source>${java.version}</source>
+						<target>${java.version}</target>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 </project>

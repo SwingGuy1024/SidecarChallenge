@@ -11,7 +11,7 @@ import org.junit.Test;
 import com.neptunedreams.engine.PojoUtility;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.User;
-import com.neptunedreams.framework.exception.BadRequest400Exception;
+import com.neptunedreams.exception.BadRequest400Exception;
 import com.neptunedreams.model.UserDto;
 
 import static org.junit.Assert.*;

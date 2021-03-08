@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
-import com.neptunedreams.framework.exception.ResponseException;
+import com.neptunedreams.exception.ResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -91,7 +91,6 @@ public enum ResponseUtility {
    * @see Supplier#get() 
    * @see ResponseException
    */
-  @SuppressWarnings("unchecked")
   public static <T> ResponseEntity<T> serve(HttpStatus successStatus, Supplier<T> method) throws ResponseException {
     assert method != null;
     try {
@@ -103,9 +102,9 @@ public enum ResponseUtility {
         log.warn(e.getMessage());
       }
       throw e;
-    } catch (RuntimeException | Error e) {
-      log.error(e.getMessage(), e);
-      throw e;
+      // I used to have another catch clause here, where I caught RuntimeExceptions and Errors, so I could log them. However, they
+      // already get logged by Spring, so I don't have to bother. I still have an uncaughtExceptionHandler installed, but that's
+      // mainly for exceptions thrown by other threads.
     }
   }
   
@@ -133,18 +132,6 @@ public enum ResponseUtility {
         log.debug("{}: {}", hName, getName.apply(hName));
       }
     }
-  }
-  
-  public static String getUriTail(HttpServletRequest request) {
-    String uri = request.getRequestURI();
-    if (uri == null) { // This may happen in unit tests, but not production. This is only used for logging anyway
-      return "";
-    }
-    String path = request.getContextPath();
-    if (uri.startsWith(path)) {
-      return uri.substring(path.length());
-    }
-    return uri;
   }
   
   private static <E> Iterator<E> asIterator(Enumeration<E> e) {

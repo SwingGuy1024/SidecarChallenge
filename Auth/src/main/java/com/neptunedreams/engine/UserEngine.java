@@ -9,6 +9,7 @@ import com.neptunedreams.exception.BadRequest400Exception;
 import com.neptunedreams.exception.Conflict409Exception;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.repository.UserRepository;
+import org.hibernate.LazyInitializationException;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
@@ -132,7 +133,7 @@ public class UserEngine {
    * @return A string consisting of only numeric digits, which means characters for which Character::isDigit returns true.
    */
   @Contract("null -> null; !null -> !null")
-  public static @Nullable String removeNonDigits(String s) {
+  public static @Nullable String removeNonDigits(@Nullable String s) {
     if (s == null) {
       return null;
     }
@@ -159,15 +160,17 @@ public class UserEngine {
     }
   }
 
-  private boolean isRealUser(User candidate) {
-    // This is a precaution against a proxy entity that's a stand in for a null value. (Yes, I've seen this happen with Hibernate.) 
+  // This method is a precaution against a proxy entity that's a stand in for a null value. This can happen with Spring Data's 
+  // repositories, if the user calls getOne() instead of findById(). Although I don't use getOne in the code, it could creep into the
+  // code at some future date, so this is written to account for it. This methods is not private to make it reachable by unit tests.
+  boolean isRealUser(User candidate) {
     if (candidate == null) {
       return false;
     }
     try {
       //noinspection ResultOfMethodCallIgnored
       candidate.getEmail(); // force an exception for a missing user
-    } catch (RuntimeException e) { // This should probably be HibernateException, but I won't know for sure until I see it again.
+    } catch (LazyInitializationException e) {
       log.debug("Error of {}: {}", e.getClass(), e.getLocalizedMessage());
       return false;
     }

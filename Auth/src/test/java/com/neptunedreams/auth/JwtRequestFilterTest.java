@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import com.neptunedreams.OpenAPI2SpringBoot;
 import com.neptunedreams.engine.Role;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -42,7 +43,7 @@ public class JwtRequestFilterTest {
   private static final String NOT_FOUND = "NotFound";
 
   @SuppressWarnings("StringConcatenation")
-  @Test
+  @Test(expected = CredentialsExpiredException.class)
   public void testFilterExpired() throws ServletException, IOException {
     // current expiration time is 5 hours, which is 18,000,000 milliseconds
     String user = VALID_USER;

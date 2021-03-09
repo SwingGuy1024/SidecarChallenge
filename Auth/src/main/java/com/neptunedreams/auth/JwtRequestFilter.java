@@ -13,6 +13,7 @@ import io.jsonwebtoken.security.SignatureException;
 import com.neptunedreams.model.UserAuthority;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -92,16 +93,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       // specified in the UsernamePasswordAuthenticationToken, which would be more helpful. Instead, we notify the caller by setting
       // a custom header in the Response.
 
-      final UsernamePasswordAuthenticationToken expired = new UsernamePasswordAuthenticationToken(UNKNOWN_USER, "Expired Token");
-      contextSupplier.get().setAuthentication(expired);
-
       // This is the only way to tell the caller that the token has timed out. Spring Security cleans all information out from any
       // exception I throw, so that doesn't work. This is safe because I only get the ExpiredJwtException when it has a valid signature.
       response.setHeader("JwtExpiredToken", "EXPIRED");
-      return;
+      throw new CredentialsExpiredException("Expired", e);
 
-      // Above: I tried throwing a CredentialsExpiredException, which extends AuthorizationException, in the hope that it would get
-      // caught by the JwtAuthenticationEntryPoint class. It didn't work. That class never saw this one. I'm not sure what good the
+      // Above: I tried catching the CredentialsExpiredException, which extends AuthorizationException, in the
+      // JwtAuthenticationEntryPoint class. It didn't work. That class never saw this it. I'm not sure what good the
       // JwtAuthenticationEntryPoint class does me. Early in the development process, it was catching things, but not anymore.
     }
     

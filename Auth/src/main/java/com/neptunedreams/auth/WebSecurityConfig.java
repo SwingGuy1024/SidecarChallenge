@@ -36,8 +36,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
   
   private final JwtUserDetailsService jwtUserDetailsService;
 
-  private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
   private final JwtRequestFilter jwtRequestFilter;
 
   private final PasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -54,14 +52,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
   @Autowired
   public WebSecurityConfig(
-      final JwtUserDetailsService jwtUserDetailsService,
-      final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint
-//      final JwtRequestFilter jwtRequestFilter
+      final JwtUserDetailsService jwtUserDetailsService
   ) {
     super();
     this.jwtUserDetailsService = jwtUserDetailsService;
-    this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
-//    this.jwtRequestFilter = jwtRequestFilter;
     jwtRequestFilter = new JwtRequestFilter();
   }
 

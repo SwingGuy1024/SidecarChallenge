@@ -3,13 +3,14 @@ package com.neptunedreams.engine;
 import java.util.function.Function;
 import javax.persistence.PersistenceException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neptunedreams.auth.JwtTokenUtil;
 import com.neptunedreams.entity.User;
 import com.neptunedreams.exception.BadRequest400Exception;
 import com.neptunedreams.exception.Conflict409Exception;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.repository.UserRepository;
-import com.neptunedreams.auth.JwtTokenUtil;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +40,7 @@ import static org.apache.logging.log4j.util.Strings.*;
  */
 @Component
 public class UserEngine {
-  private static final Logger log = LoggerFactory.getLogger(UserEngine.class);
+  private static final @NonNls Logger log = LoggerFactory.getLogger(UserEngine.class);
 
   private final UserRepository userRepository;
   private final ObjectMapper objectMapper;
@@ -150,7 +151,7 @@ public class UserEngine {
     stringBuilder.append((char) i);
   }
 
-  private void throwConflictIfExists(String candidateValue, Function<String, User> userValueSupplier, String field) {
+  private void throwConflictIfExists(String candidateValue, Function<String, User> userValueSupplier, @NonNls String field) {
     if (!isBlank(candidateValue)) {
       if (isRealUser(userValueSupplier.apply(candidateValue))) {
         throw new Conflict409Exception(String.format("%s already in use", field));

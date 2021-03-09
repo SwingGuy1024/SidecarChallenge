@@ -33,11 +33,6 @@ public enum JwtTokenUtil {
   private final SignatureAlgorithm HS_512;
   private final Key key;
 
-  public static JwtTokenUtil getInstance() {
-    log.trace("Getting JwtTokenUtil instance");
-    return instance;
-  }
-  
   JwtTokenUtil() {
     HS_512 = SignatureAlgorithm.HS512;
     // This is fine for a single server, but I wonder if it still works after deploying it in the cloud, where multiple servers can
@@ -98,11 +93,7 @@ public enum JwtTokenUtil {
   
   private String doGenerateToken(Map<String, Object> claims, String subject) {
     final long now = System.currentTimeMillis();
-    return doGenerateToken(claims, subject, now);
-  }
-  
-  private String doGenerateToken(Map<String, Object> claims, String subject, long issueTimeMillis) {
-    return getToken(claims, subject, issueTimeMillis);
+    return getToken(claims, subject, now);
   }
   
   private String getToken(final Map<String, Object> claims, final String subject, final long timeMillis) {
@@ -129,7 +120,7 @@ public enum JwtTokenUtil {
   public String generateExpiredTokenForTesting(String username, String role) {
     //noinspection MagicNumber
     long expiredTimeMillis = System.currentTimeMillis() - JWT_TOKEN_VALIDITY_MILLIS - 1000L;
-    return doGenerateToken(createDefaultClaimsForUser(role), username, expiredTimeMillis);
+    return getToken(createDefaultClaimsForUser(role), username, expiredTimeMillis);
   }
 
   private Map<String, Object> createDefaultClaimsForUser(final String role) {
@@ -159,19 +150,13 @@ public enum JwtTokenUtil {
     }
 
     String role = getRoleFromToken(token);
-    String duplicateToken = doGenerateToken(createDefaultClaimsForUser(role), username, issuedAt.getTime());
+    String duplicateToken = getToken(createDefaultClaimsForUser(role), username, issuedAt.getTime());
     return duplicateToken.equals(token);
   }
   
   // Package method for testing only
 
-  // Test-only methods with package access only.
   String testOnlyGenerateToken(String username, String role, long millis) {
-    Map<String, Object> claims = createDefaultClaimsForUser(role);
-    return getToken(claims, username, millis);
-  }
-  
-  String testOnlyGenerateTokenFromTime(String username, String role, long millis) {
-    return doGenerateToken(createDefaultClaimsForUser(role), username, millis);
+    return getToken(createDefaultClaimsForUser(role), username, millis);
   }
 }

@@ -35,7 +35,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
   static final String BEARER_ = "Bearer ";
   static final String UNKNOWN_USER = "Unknown User";
 
-  private final JwtTokenUtil jwtTokenUtil = JwtTokenUtil.getInstance();
+  private final JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
   private Supplier<SecurityContext> contextSupplier = SecurityContextHolder::getContext;
 
   public JwtRequestFilter() {
@@ -75,8 +75,12 @@ public class JwtRequestFilter extends OncePerRequestFilter {
   private void processFilter(final HttpServletRequest request, final HttpServletResponse response, final String jwtToken) {
     String username;
     try {
-      // This validates the token as well
+      // This validates the token as well -- it will throw one of two exceptions if it's not valid
       username = jwtTokenUtil.getUsernameFromToken(jwtToken); // will throw ExpiredJwtException if expired
+    } catch (SignatureException se) {
+      // This shouldn't happen unless someone is trying to hack in!
+      log.warn("Invalid Token: {}", jwtToken);
+      return;
     } catch (ExpiredJwtException e) {
       // The JWT library call does not test for an expired token or throw this exception until after it has validated the signature.
       // So we know the token is valid, and nobody is trying to hack in. We can safely inform the caller that they need to log
@@ -96,13 +100,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       response.setHeader("JwtExpiredToken", "EXPIRED");
       return;
 
-//      return;
       // Above: I tried throwing a CredentialsExpiredException, which extends AuthorizationException, in the hope that it would get
       // caught by the JwtAuthenticationEntryPoint class. It didn't work. That class never saw this one. I'm not sure what good the
       // JwtAuthenticationEntryPoint class does me. Early in the development process, it was catching things, but not anymore.
-    } catch (SignatureException se) {
-      log.warn("Invalid Token: {}", jwtToken);
-      return;
     }
     
     // At this point, we know the token is valid, because it did not throw an exception when getting the username.
@@ -121,22 +121,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         log.trace("user Found with {}", authorities.iterator().next());
       }
 
-      // if token is valid configure Spring Security to manually set authentication
-      if (jwtTokenUtil.validateToken(jwtToken)) {
+      // token is valid, so configure Spring Security to manually set authentication
 
-        if (log.isTraceEnabled() && !authorities.isEmpty()) {
-          log.trace("User Authenticated with first authorityCount = {}", authorities.size());
-          log.trace("First authority: {}", authorities.iterator().next());
-        }
-        UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
-            = new UsernamePasswordAuthenticationToken(username, null, authorities);
-        usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-        // After setting the Authentication in the context, we specify that the current user is authenticated.
-        // So it passes the Spring Security Configurations successfully.
-        context.setAuthentication(usernamePasswordAuthenticationToken);
-      } else {
-        log.trace("Authentication failed");
+      if (log.isTraceEnabled() && !authorities.isEmpty()) {
+        log.trace("User Authenticated with first authorityCount = {}", authorities.size());
+        log.trace("First authority: {}", authorities.iterator().next());
       }
+      UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken 
+          = new UsernamePasswordAuthenticationToken(username, null, authorities);
+      usernamePasswordAuthenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+      // After setting the Authentication in the context, we specify that the current user is authenticated.
+      // So it passes the Spring Security Configurations successfully.
+      context.setAuthentication(usernamePasswordAuthenticationToken);
     }
   }
 

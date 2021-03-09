@@ -121,7 +121,7 @@ public class UserEngine {
       throw new AuthorizationServiceException(USER_PASSWORD_COMBINATION_NOT_FOUND);
     }
     final Role role = storedUser.getRole();
-    final String token = JwtTokenUtil.getInstance().generateToken(username, role.toString());
+    final String token = JwtTokenUtil.instance.generateToken(username, role.toString());
     log.info("Login success: {}  Role: {}  Token: {}", username, role, token);
     return token;
   }

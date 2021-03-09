@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
  */
 public class JwtTokenUtilTest {
 
-  private static final int ONE_HOUR_MILLIS = 3_600_000;
+  private static final long ONE_HOUR_MILLIS = JWT_TOKEN_VALIDITY_MILLIS/5L;
 
   @Test
   public void testGenerateToken() {
@@ -44,8 +44,7 @@ public class JwtTokenUtilTest {
   public void testExpiredToken() {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
     User adminUserOne = makeUser("adminUserOne", "passwordOne", Role.ADMIN);
-    long tooLongAgo = System.currentTimeMillis() - JWT_TOKEN_VALIDITY_MILLIS - 1000;
-    String expiredToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), Role.ADMIN.toString(), tooLongAgo);
+    String expiredToken = jwtTokenUtil.generateExpiredTokenForTesting(adminUserOne.getUsername(), Role.ADMIN.toString());
     assertFalse(jwtTokenUtil.validateToken(expiredToken));
   }
   
@@ -54,7 +53,7 @@ public class JwtTokenUtilTest {
     JwtTokenUtil jwtTokenUtil = JwtTokenUtil.instance;
     User adminUserOne = makeUser("adminUserOne", "passwordOne", Role.ADMIN);
     long oneHourAgo = System.currentTimeMillis() - ONE_HOUR_MILLIS;
-    String validToken = jwtTokenUtil.testOnlyGenerateTokenFromTime(adminUserOne.getUsername(), Role.ADMIN.toString(), oneHourAgo);
+    String validToken = jwtTokenUtil.testOnlyGenerateToken(adminUserOne.getUsername(), Role.ADMIN.toString(), oneHourAgo);
     char[] chars = validToken.toCharArray();
     int length = chars.length;
     chars[length-1]++; // change the last character.

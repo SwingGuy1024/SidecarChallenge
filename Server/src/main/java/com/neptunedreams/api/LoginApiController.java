@@ -52,7 +52,7 @@ public class LoginApiController implements LoginApi {
         doDemoStartup();
         log.trace("LoginApiController");
         if (log.isDebugEnabled()) {
-            log.debug("Expired Token for testing: {}", JwtTokenUtil.getInstance().generateExpiredTokenForTesting("ADMIN", "ADMIN"));
+            log.debug("Expired Token for testing: {}", JwtTokenUtil.instance.generateExpiredTokenForTesting("ADMIN", "ADMIN"));
         }
     }
 

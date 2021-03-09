@@ -64,6 +64,18 @@ public class JwtRequestFilterTest {
     String token = JwtRequestFilter.BEARER_ + JwtTokenUtil.instance.testOnlyGenerateToken(VALID_USER, "ADMIN", millis);
     runTest(VALID_USER, token, true);
   }
+
+  @Test
+  public void testInvalidToken() throws ServletException, IOException {
+    long millis = System.currentTimeMillis();
+    final String adminToken1 = JwtTokenUtil.instance.testOnlyGenerateToken(VALID_USER, "ADMIN", millis);
+    final String adminToken2 = JwtTokenUtil.instance.testOnlyGenerateToken("Cheat", "ADMIN", millis);
+    String[] token1Parts = adminToken1.split("\\.");
+    String[] token2Parts = adminToken2.split("\\.");
+    String invalidToken = token1Parts[0] + '.' + token2Parts[1] + '.' + token1Parts[2];
+    String bearerToken = JwtRequestFilter.BEARER_ + invalidToken;
+    runTest(VALID_USER, bearerToken, false);
+  }
   
   private void runTest(final String user, String bearerToken, boolean authenticationExpected) throws ServletException, IOException {
     runTest(user, user, bearerToken, authenticationExpected);

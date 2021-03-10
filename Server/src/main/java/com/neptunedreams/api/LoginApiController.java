@@ -49,10 +49,10 @@ public class LoginApiController implements LoginApi {
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.userEngine = userEngine;
-        doDemoStartup();
         log.trace("LoginApiController");
         if (log.isDebugEnabled()) {
             log.debug("Expired Token for testing: {}", JwtTokenUtil.instance.generateExpiredTokenForTesting("ADMIN", "ADMIN"));
+            doDemoStartup();
         }
     }
 

@@ -64,6 +64,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     log.trace("configure(AuthenticationBuilder)");
     auth
         .userDetailsService(jwtUserDetailsService)
+        // Authentication provider would go here. Since we're authenticating
+        // through an endpoint, we don't need to specify one.
         .passwordEncoder(passwordEncoder());
   }
 

@@ -54,6 +54,13 @@ This design is in the same folder as this README.md file, called **Part 1 — Pi
 
 This doesn't exactly implement the Design I produced in the Part 1 of the assignment. The biggest change is the menu structure. The design calls for a tree structure of Menu Items. This implements MenuItems with separate MenuItemOptions, in a one-to-many relationship.
 
+### Known Design Defects
+This project  was created quickly in response to a time-limited coding challenge, so I didn't have the time to implement the database structure properly. Here are two chief changes I would make in a professional product:
+   
+1. Menu Items: The current menu structure uses a one-to-one relationship between nodes and subnodes, and treats menu items and menu item options as separate entities. In a real system, there would be no difference between them, and menu items would have a many to many relationship with their parent menu item. This would allow menu options, such as dressing on salad or pizza toppings, to be shared by multiple different salads or pizzas.
+
+1. Orders. The order structure would also be a tree structure, with each order instance wrapping a menu item instance. The order tree would be completely separate from the menu item tree, to allow it to be a subset of the menu item. This is because a menu item contains every possible option, but an order item contains only the ones the customer has chosen. Consequently, parents and children do not need to have a many-to-many relationship. But in an order, every selected item would have the same order number. This order number is how the system distinguishes one order from the next.
+
 ### API Design:
 #### General
 The APIs are implemented with a call to a serve method, which takes a lambda expression that delivers the requested data. This is packed into a ResponseEntity object and returned. I did this to separate the server-related classes from the implementation, so the implementation code does not need to know it's running on a server, unless it has to throw an Exception. I did this partly because past servers I've worked on have been very inconsistent in how they log errors, return results, and return errors. The `serve()` method, and some convenience methods that delgate to it, is in the `ResponseUtility` class, and other useful utilities are in the PojoUtilities class (See the [**Service Implementations**](#Service Implementations) section below for more details.) At some point, I'd like to write generators for OpenAPI to encourage this design in all APIs.

@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
 import org.junit.Assert;
@@ -88,8 +89,8 @@ public class IntegrationTest {
     
     List<MenuItemDto> allItems = dataEngine.getAllMenuItems();
     System.out.println(allItems);
-    Assert.assertThat(allItems, Matchers.hasSize(2));
-    
+    MatcherAssert.assertThat(allItems, Matchers.hasSize(2));
+
     findById(saladId, allItems);
     MenuItemDto pizza = findById(pizzaId, allItems);
     assertEquals(pizzaId, pizza.getId());

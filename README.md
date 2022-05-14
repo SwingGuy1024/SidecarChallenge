@@ -63,7 +63,7 @@ This project  was created quickly in response to a time-limited coding challenge
 
 ### API Design:
 #### General
-The APIs are implemented with a call to a serve method, which takes a lambda expression that delivers the requested data. This is packed into a ResponseEntity object and returned. I did this to separate the server-related classes from the implementation, so the implementation code does not need to know it's running on a server, unless it has to throw an Exception. I did this partly because past servers I've worked on have been very inconsistent in how they log errors, return results, and return errors. The `serve()` method, and some convenience methods that delgate to it, is in the `ResponseUtility` class, and other useful utilities are in the PojoUtilities class (See the [**Service Implementations**](#Service Implementations) section below for more details.) At some point, I'd like to write generators for OpenAPI to encourage this design in all APIs.
+The APIs are implemented with a call to a serve method, which takes a lambda expression that delivers the requested data. This is packed into a ResponseEntity object and returned. I did this to separate the server-related classes from the implementation, so the implementation code does not need to know it's running on a server, unless it has to throw an Exception. I did this partly because past servers I've worked on have been very inconsistent in how they log errors, return results, and return errors. The `serve()` method, and some convenience methods that delgate to it, is in the `ResponseUtility` class, and other useful utilities are in the PojoUtilities class (See the Service Implementations section below for more details.) At some point, I'd like to write generators for OpenAPI to encourage this design in all APIs.
 
 #### Developer Rules for error responses:
 1. Return an error response only by throwing an annotated Exception. Exceptions are annotated with the `@HttpStatus` annotation, which specifies the status to return. All of these exceptions extend ResponseException. If there's no Exception for the error response you want to send, add one. Be sure to extend `ResponseException` and annotate it with `@HttpStatus`.
@@ -105,7 +105,7 @@ Then run the application. Anytime you use the cache, the monitor will print info
 
 ## 5. APIs
 
-(The most important part of this demo is described in the [**Service Implementations**](#Service Implementations) section, below.)
+(The most important part of this demo is described in the Service Implementations section, below.)
 
 This uses maven to build. It has been tested using Maven v3.6.3 and Java 1.8.0_212. Maven uses Java 9.0.4
 
@@ -121,9 +121,9 @@ You may change the default port value in application.properties
 To ensure consistency in how the services are written, and to reduce the amount of boilerplate code, all the services use a variant of
 the `ResponseUtility.serve()` method. This allows the service to focus solely on the task of generating the service data, and not worry
 about creating the ResponseEntity or generating an error response. In case of an error, the service need only throw one of the subclasses of ResponseException,which all include an HttpStatus value. The `PojoUtilities` class has several convenience methods to
-simplify this, all of which throw a ResponseException. By convention, all these methods begin with the word "confirm." For example, if a
+simplify this, all of which throw a ResponseException. By convention, most these methods begin with the word "confirm." For example, if a
 service requests an Entity with a specific ID, the service should call 
-`PojoUtility.confirmFound(entity, id);` If the entity doesn't exist, the `confirmFound()` method will throw a ResponseException with a 
+`PojoUtility.findOrThrow404(entity, id);` If the entity doesn't exist, the `findOrThrow404()` method will throw a ResponseException with a 
 NOT_FOUND status, and include the id in the error message.
 
 So a service method that needs to return an instance of `MenuItemDto` would look something like this:
@@ -147,13 +147,13 @@ the `DataEngine` class:
 1  public class DataEngine {
 2
 3    MenuItem getMenuItemFromId(int id) {
-4      MenuItem menuItem = confirmFound(menuItemRepository, id);  // throws NotFound404Exception extends ResponseException
+4      MenuItem menuItem = findOrThrow404(menuItemRepository, id);  // throws NotFound404Exception extends ResponseException
 5      return menuItem;
 6   });
 7 }
 ```
 
-On line 6, we test for null, using the `confirmFound()` method. If no `menuItem` exists with the specified id, it will throw `ResponseException` with
+On line 6, we test for null, using the `findOrThrow404()` method. If no `menuItem` exists with the specified id, it will throw `ResponseException` with
 an `HttpStatus` of `NOT_FOUND`. We don't need to catch it, because it's annotated with `@ResponseStatus(HttpStatus.NOT_FOUND)`, so the
 server will use that status code in its response. But the `serveOK()` method, called in the previous method, catches it for logging purposes, then rethrows it.
 
@@ -162,7 +162,7 @@ The call to the `serve()` method takes care of five boilerplate details:
 1. It adds the return value (an instance of MenuItemDto) to the `ResponseEntity` on successful completion.
 1. It sets the specified HttpStatus, which in this example is `HttpStatus.OK`.
 1. It generates the proper error response, with an error status code taken from the `ResponseException` thrown by the lambda expression. In
-   this case, this is a `NotFound404Exception` thrown by the`confirmFound()` method. The `NotFound404Exception` method extends `ResponseException`
+   this case, this is a `NotFound404Exception` thrown by the`findOrThrow404()` method. The `NotFound404Exception` method extends `ResponseException`
    , as do all the others.
 1. It logs the error message and exception.
 1. It catches any RuntimeExceptions and returns a response of Internal Server Error.
@@ -186,7 +186,7 @@ Swagger.
 All of these may throw a `ResponseException`. I've adopted the convention that all methods that may throw `ResponseException` start with the
 word *confirm.*
 
-* `<E, ID> E confirmFound(JpaRepository<E, ID> repository, ID id) throws ResponseException` Confirms the returned entity with specified id is not null. This also retrieves and returns the entity.
+* `<E, ID> E findOrThrow404(JpaRepository<E, ID> repository, ID id) throws ResponseException` Confirms the returned entity with specified id is not null. This also retrieves and returns the entity.
 * `<T> T confirmNeverNull(T object) throws ResponseException` Used for values that are not entities.
 * `void confirmNull(Object object) throws ResponseException` This is useful to ensure a new resource doesn't already exist.
 * `<T> void confirmEqual(T expected, T actual) throws ResponseException`

@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static com.neptunedreams.engine.PojoUtility.*;
+import static com.neptunedreams.framework.PojoUtility.*;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -44,7 +44,7 @@ public class DataEngine {
   }
 
   public MenuItemDto getMenuItemDto(final Integer id) {
-    MenuItem menuItem = confirmFound(menuItemRepositoryWrapper, id);
+    MenuItem menuItem = findOrThrow404(menuItemRepositoryWrapper, id);
     return objectMapper.convertValue(menuItem, MenuItemDto.class);
   }
 
@@ -59,7 +59,7 @@ public class DataEngine {
   public Integer addOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
     confirmNotEmpty(optionDto.getName()); // throws ResponseException
     MenuItemOption menuItemOption = objectMapper.convertValue(optionDto, MenuItemOption.class);
-    final MenuItem menuItem = confirmFound(menuItemRepositoryWrapper, menuItemId);
+    final MenuItem menuItem = findOrThrow404(menuItemRepositoryWrapper, menuItemId);
     menuItemOption.setMenuItem(menuItem);
     MenuItemOption savedOption = menuItemOptionRepositoryWrapper.save(menuItemOption);
     final Integer newId = savedOption.getId();
@@ -110,7 +110,7 @@ public class DataEngine {
     log.trace("Deleting menuItemOption with id {}", optionId);
 
 
-    MenuItemOption itemToDelete = confirmFound(menuItemOptionRepositoryWrapper, optionId);
+    MenuItemOption itemToDelete = findOrThrow404(menuItemOptionRepositoryWrapper, optionId);
 
     // Before I can successfully delete the menuItemOption, I first have to set its menuItem to null. If I don't
     // do that, the delete call will fail. It doesn't help to set Cascade to Remove in the @ManyToOne annotation in 

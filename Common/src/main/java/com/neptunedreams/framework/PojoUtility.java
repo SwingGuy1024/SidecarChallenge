@@ -1,4 +1,4 @@
-package com.neptunedreams.engine;
+package com.neptunedreams.framework;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
@@ -88,6 +88,7 @@ public enum PojoUtility {
 
   /**
    * Retrieves an entity by its ID. First tests the entity for existence, and throws a NotFound404Exception if it's not in the table.
+   * This should only be used for entity objects. For non-entity objects, use confirmNeverNull()
    *
    * @param repository The repository
    * @param id The id
@@ -96,8 +97,9 @@ public enum PojoUtility {
    * @return The entity with the provided id
    * @link https://www.javacodemonk.com/difference-between-getone-and-findbyid-in-spring-data-jpa-3a96c3ff
    * @throws NotFound404Exception if the entity with the specified id is not found
+   * @see #confirmObjectNeverNull(Object)
    */
-  public static <E, ID> E confirmFound(JpaRepository<E, ID> repository, ID id) throws ResponseException {
+  public static <E, ID> E findOrThrow404(JpaRepository<E, ID> repository, ID id) throws ResponseException {
     // We use findById() instead of getOne() because getOne returns a lazily loadable value even if it didn't find anything. That
     // delays the exception until the code tries to use the object. findById() returns an empty Optional if it didn't find anything,
     // which makes our code cleaner.
@@ -108,17 +110,19 @@ public enum PojoUtility {
 
   /**
    * Use when a non-entity object should not be null. Throws a BadRequest400Exception if null. If testing for an entity, you 
-   * should use confirmFound(T object, Object id), which return a NOT_FOUND (404).
+   * should use findOrThrow404(T object, Object id), which return a NOT_FOUND (404).
    * @param object The non-entity object to test.
    * @param <T> The object type
    * @return object, only if it's not null
    * @throws ResponseException BAD_REQUEST (400) if object is null
+   * @see #findOrThrow404(JpaRepository, Object) 
    */
-  public static <T> T confirmNeverNull(@Nullable T object) throws ResponseException {
+  public static <T> T confirmObjectNeverNull(@Nullable T object) throws ResponseException {
     if (object == null) {
       throw new BadRequest400Exception("Missing object");
     }
-    assert !isEntityAssertion(object) : String.format("This method is not for entity objects. Use confirmFound(): %s", getEntityClass(object));
+    assert !isEntityAssertion(object) : String.format(
+        "This method is not for entity objects. Use findOrThrow404(): %s", getEntityClass(object));
     return object;
   }
 

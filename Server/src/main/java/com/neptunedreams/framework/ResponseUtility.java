@@ -76,7 +76,7 @@ public enum ResponseUtility {
    *   public ResponseEntity{@literal <MenuItemDto>} getMenuItem(@PathVariable("id") final Integer id) {
    *     return serve(HttpStatus.OK, nativeWebRequest, () -> {
    *       MenuItem menuItem = menuItemRepository.findOne(id);
-   *       confirmFound(menuItem, id); // throws NotFound404Exception if null
+   *       findOrThrow404(menuItem, id); // throws NotFound404Exception if null
    *       MenuItemDto dto = objectMapper.convertValue(menuItem, MenuItemDto.class);
    *       return dto;
    *     });

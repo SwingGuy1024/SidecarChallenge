@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.hamcrest.MatcherAssert;
 import org.hibernate.Hibernate;
 import org.junit.After;
 import org.junit.Test;
@@ -30,7 +31,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import static com.neptunedreams.engine.PojoUtility.*;
+import static com.neptunedreams.framework.PojoUtility.*;
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -79,7 +80,7 @@ public class AdminApiControllerTest {
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
     final Integer id = Integer.valueOf(Objects.requireNonNull(responseEntity.getBody()));
     assertNotNull(id);
-    MenuItem item = confirmFound(menuItemRepositoryWrapper, id);
+    MenuItem item = findOrThrow404(menuItemRepositoryWrapper, id);
     Hibernate.initialize(item);
     assertEquals("0.50", item.getItemPrice().toString());
     assertEquals("GoodItem", item.getName());
@@ -88,7 +89,7 @@ public class AdminApiControllerTest {
     for (MenuItemOption option : optionList) {
       foodOptionSet.add(option.getName());
     }
-    assertThat(foodOptionSet, hasItems("olives", "pepperoni"));
+    MatcherAssert.assertThat(foodOptionSet, hasItems("olives", "pepperoni"));
     assertEquals(2, foodOptionSet.size());
 
   }
@@ -145,13 +146,13 @@ public class AdminApiControllerTest {
     assertNotNull(id);
     System.out.printf("Body: <%s>%n", id);
 
-    MenuItem item = confirmFound(menuItemRepositoryWrapper, id);
+    MenuItem item = findOrThrow404(menuItemRepositoryWrapper, id);
     Hibernate.initialize(item);
     List<String> nameList = new LinkedList<>();
     for (MenuItemOption option : item.getAllowedOptions()) {
       nameList.add(option.getName());
     }
-    assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
+    MatcherAssert.assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
 
 
     try {
@@ -164,7 +165,7 @@ public class AdminApiControllerTest {
     Integer removedId = removedOption.getId();
     assertNotNull(removedId);
     assertTrue(hasName(item, removedName));
-    assertNotNull(confirmFound(menuItemOptionRepositoryWrapper, removedId));
+    assertNotNull(findOrThrow404(menuItemOptionRepositoryWrapper, removedId));
     ResponseEntity<Void> goodResponse = adminApiController.deleteOption(removedOption.getId());
 
     assertEquals(HttpStatus.OK, goodResponse.getStatusCode());
@@ -174,10 +175,10 @@ public class AdminApiControllerTest {
       System.out.println(option);
     }
 
-    item = confirmFound(menuItemRepositoryWrapper, id);
+    item = findOrThrow404(menuItemRepositoryWrapper, id);
     assertFalse(hasName(item, removedName));
     try {
-      confirmFound(menuItemOptionRepositoryWrapper, removedId);
+      findOrThrow404(menuItemOptionRepositoryWrapper, removedId);
       fail("Item not removed");
     } catch (NotFound404Exception ignored) { }
   }

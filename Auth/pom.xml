@@ -12,6 +12,9 @@
   <packaging>jar</packaging>
 
   <artifactId>Auth</artifactId>
+  <properties>
+    <jwt-version>0.11.2</jwt-version>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -28,18 +31,18 @@
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-api</artifactId>
-      <version>0.11.2</version>
+      <version>${jwt-version}</version>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
-      <version>0.11.2</version>
+      <version>${jwt-version}</version>
       <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
-      <version>0.11.2</version>
+      <version>${jwt-version}</version>
       <scope>runtime</scope>
     </dependency>
 

@@ -6,9 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
-import com.neptunedreams.engine.PojoUtility;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.User;
 import com.neptunedreams.exception.BadRequest400Exception;
@@ -21,13 +21,14 @@ import static org.junit.Assert.*;
  * <p>Date: 1/9/21
  * <p>Time: 12:34 PM
  *
+ * TODO: Move this class to Common. Add test-only DTOs and entities for testing purposes.
  * @author Miguel Mu\u00f1oz
  */
 public class PojoUtilityTest {
   @Test(expected = AssertionError.class)
   public void neverNullAssertionTest() {
     // NOTE: This test assumes assertions are turned on during testing. If assertions are off, this test will fail.
-    PojoUtility.confirmNeverNull(new MenuItem());
+    PojoUtility.confirmObjectNeverNull(new MenuItem());
     testIfAssertionsAreOn(); // makes test pass if assertions are off.
   }
 
@@ -87,14 +88,14 @@ public class PojoUtilityTest {
   @Test
   public void testConfirmNeverNull() {
     String text = "0text".substring(1);
-    String confirmed = PojoUtility.confirmNeverNull(text);
+    String confirmed = PojoUtility.confirmObjectNeverNull(text);
     assertEquals("1text".substring(1), confirmed);
   }
   
   @Test(expected = BadRequest400Exception.class)
   public void testConfirmNeverNull2() {
     //noinspection unused
-    User confirmed = PojoUtility.confirmNeverNull(null);
+    User confirmed = PojoUtility.confirmObjectNeverNull(null);
     fail();
   }
 
@@ -102,11 +103,11 @@ public class PojoUtilityTest {
   public void testEntityAssertion() {
     try {
       //noinspection unused
-      MenuItem confirmed = PojoUtility.confirmNeverNull(new TestClass());
+      MenuItem confirmed = PojoUtility.confirmObjectNeverNull(new TestClass());
       fail();
     } catch (AssertionError e) {
       System.out.printf("testEntityAssertion: %s%n", e.getMessage());
-      assertThat(e.getMessage(), Matchers.containsString("MenuItem"));
+      MatcherAssert.assertThat(e.getMessage(), Matchers.containsString("MenuItem"));
     }
   }
 
@@ -136,7 +137,7 @@ public class PojoUtilityTest {
     try {
       PojoUtility.confirmEqual(msg, "this", "that");
     } catch (BadRequest400Exception e) {
-      assertThat(e.getMessage(), Matchers.containsString(msg));
+      MatcherAssert.assertThat(e.getMessage(), Matchers.containsString(msg));
     }
   }
   
@@ -183,8 +184,8 @@ public class PojoUtilityTest {
   @Test
   public void testAsSet() {
     Set<String> set = PojoUtility.asSet("Red", "White", "Blue");
-    assertThat(set, Matchers.containsInAnyOrder("Red", "White", "Blue"));
-    assertThat(set, Matchers.hasSize(3));
+    MatcherAssert.assertThat(set, Matchers.containsInAnyOrder("Red", "White", "Blue"));
+    MatcherAssert.assertThat(set, Matchers.hasSize(3));
   }
   
   private static UserDto makeUser(String name, String pw) {

@@ -44,6 +44,18 @@
                 <dateLibrary>java8</dateLibrary>
                 <interfaceOnly>true</interfaceOnly>
                 <library>spring-boot</library>
+                <documentationProvider>springdoc</documentationProvider>
+                
+                <!-- Experimental: -->
+                <!--<returnSuccessCode>false</returnSuccessCode>-->
+                
+                <!--<legacyDiscriminatorBehavior>false</legacyDiscriminatorBehavior>-->
+                <!--<singleContentTypes>true</singleContentTypes>-->
+                <!--<useSpringController>true</useSpringController>-->
+
+                <!-- Don't use -->
+                <!--<virtualService>true</virtualService>--> <!-- Requires an additional unknown dependency. -->
+                <!--<useSpringController>true</useSpringController>--> <!--Does nothing.-->
               </configOptions>
             </configuration>
           </execution>

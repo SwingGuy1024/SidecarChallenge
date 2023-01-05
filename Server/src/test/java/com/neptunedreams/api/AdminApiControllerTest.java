@@ -9,6 +9,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
+import javax.validation.ConstraintViolationException;
+import com.neptunedreams.repository.MenuItemOptionRepository;
+import com.neptunedreams.repository.MenuItemRepository;
 import org.hamcrest.MatcherAssert;
 import org.hibernate.Hibernate;
 import org.junit.After;
@@ -22,17 +26,17 @@ import com.neptunedreams.exception.NotFound404Exception;
 import com.neptunedreams.exception.ResponseException;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
-import com.neptunedreams.repository.MenuItemOptionRepositoryWrapper;
-import com.neptunedreams.repository.MenuItemRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static com.neptunedreams.framework.PojoUtility.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.hasItems;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 
 /**
@@ -52,13 +56,13 @@ public class AdminApiControllerTest {
   private AdminApiController adminApiController;
 
   @Autowired
-  private MenuItemRepositoryWrapper menuItemRepositoryWrapper;
+  private MenuItemRepository menuItemRepository;
 
   @Autowired
-  private MenuItemOptionRepositoryWrapper menuItemOptionRepositoryWrapper;
+  private MenuItemOptionRepository menuItemOptionRepository;
 
   @Test(expected = BadRequest400Exception.class)
-  public void testAddMenuItemBadInput() {
+  public void testAddMenuItemBadInputEmptyOptionName() {
     MenuItemOptionDto menuItemOption = new MenuItemOptionDto();
     menuItemOption.setName("");
     menuItemOption.setDeltaPrice(new BigDecimal("5.00"));
@@ -67,10 +71,36 @@ public class AdminApiControllerTest {
     menuItemDto.setAllowedOptions(Collections.singletonList(menuItemOption));
     menuItemDto.setName("BadItem");
     menuItemDto.setItemPrice(new BigDecimal("0.50"));
-//    try {
-      ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
-      fail(responseEntity.toString());
-//    } catch (BadRequest400Exception ignored) { }
+    ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    fail(responseEntity.toString());
+  }
+
+  @Test(expected = ConstraintViolationException.class)
+  public void testAddMenuItemBadInputMissingPrice() {
+    MenuItemOptionDto menuItemOption = new MenuItemOptionDto();
+    menuItemOption.setName("BadOption");
+//    menuItemOption.setDeltaPrice(new BigDecimal("5.00"));
+
+    MenuItemDto menuItemDto = new MenuItemDto();
+    menuItemDto.setAllowedOptions(Collections.singletonList(menuItemOption));
+    menuItemDto.setName("BadItem");
+    menuItemDto.setItemPrice(new BigDecimal("0.50"));
+    ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    fail(responseEntity.toString());
+  }
+
+  @Test(expected = NumberFormatException.class)
+  public void testAddMenuItemBadInputEmptyPrice() {
+    MenuItemOptionDto menuItemOption = new MenuItemOptionDto();
+    menuItemOption.setName("BadOption");
+    menuItemOption.setDeltaPrice(new BigDecimal(""));
+
+    MenuItemDto menuItemDto = new MenuItemDto();
+    menuItemDto.setAllowedOptions(Collections.singletonList(menuItemOption));
+    menuItemDto.setName("BadItem");
+    menuItemDto.setItemPrice(new BigDecimal("0.50"));
+    ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
+    fail(responseEntity.toString());
   }
 
   @Test
@@ -78,9 +108,8 @@ public class AdminApiControllerTest {
     MenuItemDto menuItemDto = makeMenuItem();
     ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
     assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
-    final Integer id = Integer.valueOf(Objects.requireNonNull(responseEntity.getBody()));
-    assertNotNull(id);
-    MenuItem item = findOrThrow404(menuItemRepositoryWrapper, id);
+    final int id = Integer.parseInt(Objects.requireNonNull(responseEntity.getBody()));
+    MenuItem item = findOrFail(menuItemRepository, id);
     Hibernate.initialize(item);
     assertEquals("0.50", item.getItemPrice().toString());
     assertEquals("GoodItem", item.getName());
@@ -138,52 +167,64 @@ public class AdminApiControllerTest {
 
   // Test of deleteOption()
 
-  @Test
+  @Test(expected = NotFound404Exception.class)
+  public void testDeleteBadOptionId() {
+    ResponseEntity<Void> badResponseTwo = adminApiController.deleteOption(100000);
+    fail(badResponseTwo.toString());
+  }
+
+  @Test(expected = NotFound404Exception.class)
   public void testDeleteOption() throws ResponseException {
     MenuItemDto menuItemDto = createPizzaMenuItem();
     ResponseEntity<String> responseEntity = adminApiController.addMenuItem(menuItemDto);
-    final Integer id = Integer.valueOf(Objects.requireNonNull(responseEntity.getBody()));
-    assertNotNull(id);
+    final int id = Integer.parseInt(Objects.requireNonNull(responseEntity.getBody()));
     System.out.printf("Body: <%s>%n", id);
 
-    MenuItem item = findOrThrow404(menuItemRepositoryWrapper, id);
+    MenuItem item = findOrFail(menuItemRepository, id);
     Hibernate.initialize(item);
-    List<String> nameList = new LinkedList<>();
-    for (MenuItemOption option : item.getAllowedOptions()) {
-      nameList.add(option.getName());
-    }
-    MatcherAssert.assertThat(nameList, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
-
-
-    try {
-      ResponseEntity<Void> badResponseTwo = adminApiController.deleteOption(100000);
-      fail(badResponseTwo.toString());
-    } catch (NotFound404Exception ignored) { }
+    Set<String> nameSet = item.getAllowedOptions()
+            .stream()
+            .map(MenuItemOption::getName)
+            .collect(Collectors.toSet());
+    assertThat(nameSet, hasItems("pepperoni", "sausage", "mushrooms", "bell peppers", "olives", "onions"));
 
     MenuItemOption removedOption = item.getAllowedOptions().iterator().next();
     String removedName = removedOption.getName();
     Integer removedId = removedOption.getId();
     assertNotNull(removedId);
-    assertTrue(hasName(item, removedName));
-    assertNotNull(findOrThrow404(menuItemOptionRepositoryWrapper, removedId));
+    assertTrue(itemHasOptionName(item, removedName));
+    assertNotNull(findOrFail(menuItemOptionRepository, removedId));
     ResponseEntity<Void> goodResponse = adminApiController.deleteOption(removedOption.getId());
 
     assertEquals(HttpStatus.OK, goodResponse.getStatusCode());
 
-    List<MenuItemOption> allOptions = menuItemOptionRepositoryWrapper.findAll();
+    List<MenuItemOption> allOptions = menuItemOptionRepository.findAll();
     for (MenuItemOption option : allOptions) {
       System.out.println(option);
     }
 
-    item = findOrThrow404(menuItemRepositoryWrapper, id);
-    assertFalse(hasName(item, removedName));
-    try {
-      findOrThrow404(menuItemOptionRepositoryWrapper, removedId);
-      fail("Item not removed");
-    } catch (NotFound404Exception ignored) { }
+    item = findOrFail(menuItemRepository, id);
+    assertFalse(itemHasOptionName(item, removedName));
+    findOrThrow404(menuItemOptionRepository, removedId);
   }
 
-  public static MenuItemDto createPizzaMenuItem() {
+  /*
+   * This is for tests that need to repeatedly call findOrThrow404() when the test requires that it succeed,
+   * but the test is annotated with @Test(expected = NotFound404Exception.class) because at the end, it needs
+   * the findOrThrow404() to fail. This way, if one of the earlier call fails when it's supposed to succeed,
+   * the test still fails.
+   */
+  private static <T> T findOrFail(JpaRepository<T, Integer> repository, int id) {
+    T entity = null;
+    try {
+      return findOrThrow404(repository, id);
+    } catch (ResponseException ignored) {
+      fail("ID=" + id);
+    }
+    return entity;
+  }
+
+  private static MenuItemDto createPizzaMenuItem() {
     MenuItemDto menuItemDto = new MenuItemDto();
     menuItemDto.setName("Pizza");
     menuItemDto.setAllowedOptions(new LinkedList<>());
@@ -197,27 +238,24 @@ public class AdminApiControllerTest {
     return menuItemDto;
   }
 
-  private static boolean hasName(MenuItem item, String optionName) {
-    for (MenuItemOption option : item.getAllowedOptions()) {
-      if (Objects.equals(option.getName(), optionName)) {
-        return true;
-      }
-    }
-    return false;
+  private static boolean itemHasOptionName(MenuItem item, String optionName) {
+    return item.getAllowedOptions()
+            .stream()
+            .anyMatch(option -> Objects.equals(option.getName(), optionName));
   }
 
   @After
   public void tearDown() {
-    List<MenuItem> menuItems = menuItemRepositoryWrapper.findAll();
+    List<MenuItem> menuItems = menuItemRepository.findAll();
     for (MenuItem menuItem : menuItems) {
       Collection<MenuItemOption> ops = menuItem.getAllowedOptions();
       menuItem.setAllowedOptions(new LinkedList<>());
-      menuItemRepositoryWrapper.save(menuItem);
-      menuItemOptionRepositoryWrapper.deleteInBatch(ops);
+      menuItemRepository.save(menuItem);
+      menuItemOptionRepository.deleteInBatch(ops);
     }
-    menuItemRepositoryWrapper.deleteInBatch(menuItems);
+    menuItemRepository.deleteInBatch(menuItems);
 
-    List<MenuItemOption> optionList = menuItemOptionRepositoryWrapper.findAll();
-    menuItemOptionRepositoryWrapper.deleteInBatch(optionList);
+    List<MenuItemOption> optionList = menuItemOptionRepository.findAll();
+    menuItemOptionRepository.deleteInBatch(optionList);
   }
 }

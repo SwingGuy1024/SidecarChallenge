@@ -80,7 +80,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
       username = jwtTokenUtil.getUsernameFromToken(jwtToken); // will throw ExpiredJwtException if expired
     } catch (SignatureException se) {
       // This shouldn't happen unless someone is trying to hack in!
-      log.warn("Invalid Token: {}", jwtToken);
+      log.warn("Invalid JWT Token: {}", jwtToken);
       return;
     } catch (ExpiredJwtException e) {
       // The JWT library call does not test for an expired token or throw this exception until after it has validated the signature.

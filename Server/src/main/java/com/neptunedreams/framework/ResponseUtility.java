@@ -2,10 +2,16 @@ package com.neptunedreams.framework;
 
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.ValidationException;
+import com.neptunedreams.exception.BadRequest400Exception;
+import com.neptunedreams.exception.InternalError500Exception;
+import com.neptunedreams.exception.NotFound404Exception;
 import com.neptunedreams.exception.ResponseException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -24,13 +30,21 @@ public enum ResponseUtility {
   private static final Logger log = LoggerFactory.getLogger(ResponseUtility.class);
 
   /**
-   * Serves a method to create an entity, using HttpStatus.CREATED as the response if successful. This method delegates the work to 
-   * serve(), but also translates the returned integer into a String. This is designed for endpoints that create an entity and return 
-   * its id. Unlike the other {@code serveXxx()} methods, it does not take a {@code Supplier} of the same type as the ResponseEntity.
-   * Instead, it should be called with a method that returns a numerical ID of the new entity, which it translates to a String.
-   * @param method The service method that does the work of the service, and returns an id as a Number (an Integer or Long)
-   * @return A {@literal ResponseEntity<String>} holding the value of the id returned by the ServiceMethod's get() method, converted 
-   * to a String.
+   * <p>Serves a method to create an entity, using HttpStatus.CREATED as the response if successful. This method delegates
+   * the work to serve(), but also translates the returned integer into a String. This is designed for endpoints that
+   * create an entity and return its id. Unlike the other {@code serveXxx()} methods, it does not take a
+   * {@code Supplier} of the same type as the ResponseEntity. Instead, it should be called with a method that returns
+   * a numerical ID of the new entity, which it translates to a String.</p>
+   * <p>For example:</p>
+   * <pre>
+   * {@literal @Override}
+   *  public {@literal ResponseEntity<String>} addMenuItemOption(Integer menuItemId, MenuItemOptionDto optionDto) {
+   *    return serveCreatedEntity(() -> dataEngine.addOption(menuItemId, optionDto)); // addOption() returns Integer
+   *  }
+   * </pre>
+   * @param method The service method that does the work of the service, and returns an id as a Number (an Integer or
+   *              Long) @return A {@literal ResponseEntity<String>} holding the value of the id returned by the
+   *              ServiceMethod's get() method, converted to a String.
    * @throws ResponseException if the method fails
    * @see #serve(HttpStatus, Supplier)
    * @see Supplier#get() 
@@ -43,6 +57,7 @@ public enum ResponseUtility {
   /**
    * Serve the data, using HttpStatus.OK as the response if successful. This method delegates the work to serve().
    *
+   * Note: When the supplier returns nothing, the implementing method should return Void instead of void.
    * @param <T>    The return type
    * @param method The service method that does the work of the service, and returns an instance of type T
    * @return A {@literal ResponseEntity<T>} holding the value returned by the ServiceMethod's doService() method.
@@ -92,7 +107,6 @@ public enum ResponseUtility {
    * @see ResponseException
    */
   public static <T> ResponseEntity<T> serve(HttpStatus successStatus, Supplier<T> method) throws ResponseException {
-    assert method != null;
     try {
       return new ResponseEntity<>(method.get(), successStatus);
     } catch (ResponseException e) {
@@ -101,13 +115,38 @@ public enum ResponseUtility {
       } else if (log.isWarnEnabled()) {
         log.warn(e.getMessage());
       }
-      throw e;
-      // I used to have another catch clause here, where I caught RuntimeExceptions and Errors, so I could log them. However, they
-      // already get logged by Spring, so I don't have to bother. I still have an uncaughtExceptionHandler installed, but that's
-      // mainly for exceptions thrown by other threads.
+      throw e; // Generates a 500 - Bad Request
+    } catch (ValidationException | NumberFormatException ve) {
+      if (log.isErrorEnabled()) {
+        log.error(ve.getMessage(), ve);
+      }
+      throw new BadRequest400Exception(ve);
+    } catch (RuntimeException re) {
+      // RuntimeExceptions generate a 500 response.
+      if (log.isErrorEnabled()) {
+        log.error(re.getMessage(), re);
+      }
+      throw new InternalError500Exception(re);
     }
   }
-  
+
+  /**
+   * Used to serve methods that wrap their result inside an {@literal Optional<T>}. This method checks the optional and throws a 
+   * 404 Not Found if the Optional has no value.
+   * @param successStatus The status to return on success.
+   * @param method The method to retrieve the Optional result
+   * @param entityClass The class of the entity to be returned (for generating useful error messages)
+   * @param <T> The type being returned
+   * @return The instance of T held in the Optional value returned by {@code method}
+   */
+  public static <T> ResponseEntity<T> serveOptional(HttpStatus successStatus, Supplier<Optional<T>> method, Class<T> entityClass) {
+    return serve(successStatus, () -> method.get().orElseThrow(() -> new NotFound404Exception(entityClass)));
+  }
+
+  public static <T> ResponseEntity<T> serveOkOptional(Supplier<Optional<T>> method, Class<T> entityClass) {
+    return serveOptional(HttpStatus.OK, method, entityClass);
+  }
+
   @SuppressWarnings("unused")
   public static void logHeaders(HttpServletRequest request, String label) {
     log.debug("logHeaders from {}", label);
@@ -134,11 +173,15 @@ public enum ResponseUtility {
     }
   }
   
-  private static <E> Iterator<E> asIterator(Enumeration<E> e) {
+  public static <E> Iterator<E> asIterator(Enumeration<E> e) {
     return new Iterator<E>() {
       @Override public boolean hasNext() { return e.hasMoreElements();}
       @Override public E next() { return e.nextElement();}
     };
+  }
+  
+  public static <E> Iterable<E> asIterable(Enumeration<E> e) {
+    return () -> asIterator(e);
   }
 
   private static int countTokens(Iterator<?> enumeration) {

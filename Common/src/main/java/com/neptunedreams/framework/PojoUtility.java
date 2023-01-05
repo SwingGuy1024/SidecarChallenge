@@ -8,19 +8,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import javax.persistence.Entity;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neptunedreams.exception.BadRequest400Exception;
 import com.neptunedreams.exception.NotFound404Exception;
 import com.neptunedreams.exception.ResponseException;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * By convention, all methods that may throw a ResponseException begin with the word confirm
+ * By convention, most methods that may throw a ResponseException begin with the word confirm
  * <p>Created by IntelliJ IDEA.
  * <p>Date: 2/11/18
  * <p>Time: 10:26 PM
@@ -37,8 +39,6 @@ public enum PojoUtility {
   public static final DateTimeFormatter DATE_TIME_FMT = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
   public static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ISO_LOCAL_DATE;
 
-  private static final Iterable<Object> emptyIterable = Collections.emptyList();
-
   /**
    * Returns the provided collection. If the collection is null, returns an unmodifiable empty List. This lets you
    * iterate over any collection without checking it for null: 
@@ -48,16 +48,15 @@ public enum PojoUtility {
    * @param <T> The type of the collection members
    * @return the supplied Iterable, or if it's null, an unmodifiable empty Iterable.
    */
-  @SuppressWarnings("unchecked") // always empty, so there are no values to cast incorrectly.
   public static <T> Iterable<T> skipNull(@Nullable Iterable<T> iterable) {
     if (iterable == null) {
-      return (Iterable<T>) emptyIterable;
+      return Collections.emptyList(); // immutable
     }
     return iterable;
   }
 
   /**
-   * Converts the String Id value to a Integer, throwing an exception if it can't.
+   * Converts the String Id value to an Integer, throwing an exception if it can't.
    *
    * @param id The id as a String
    * @return the id as a Integer value
@@ -87,8 +86,9 @@ public enum PojoUtility {
   }
 
   /**
-   * Retrieves an entity by its ID. First tests the entity for existence, and throws a NotFound404Exception if it's not in the table.
-   * This should only be used for entity objects. For non-entity objects, use confirmNeverNull()
+   * Retrieves an entity by its ID. First tests the entity for existence, and throws a NotFound404Exception if it's not
+   * in the table. This should only be used for Entities, because it throws a 404 (Not Found) on failure. For
+   * non-entities, use confirmNotNull()
    *
    * @param repository The repository
    * @param id The id
@@ -97,7 +97,7 @@ public enum PojoUtility {
    * @return The entity with the provided id
    * @link https://www.javacodemonk.com/difference-between-getone-and-findbyid-in-spring-data-jpa-3a96c3ff
    * @throws NotFound404Exception if the entity with the specified id is not found
-   * @see #confirmObjectNeverNull(Object)
+   * @see #confirmNotNull 
    */
   public static <E, ID> E findOrThrow404(JpaRepository<E, ID> repository, ID id) throws ResponseException {
     // We use findById() instead of getOne() because getOne returns a lazily loadable value even if it didn't find anything. That
@@ -109,21 +109,42 @@ public enum PojoUtility {
   }
 
   /**
-   * Use when a non-entity object should not be null. Throws a BadRequest400Exception if null. If testing for an entity, you 
-   * should use findOrThrow404(T object, Object id), which return a NOT_FOUND (404).
+   * Use when a non-entity object should not be null. Throws a BadRequest400Exception if null. If testing for an
+   * entity by its id, you should use findOrThrow404(T object, Object id), which return a NOT_FOUND (404).
    * @param object The non-entity object to test.
    * @param <T> The object type
    * @return object, only if it's not null
    * @throws ResponseException BAD_REQUEST (400) if object is null
    * @see #findOrThrow404(JpaRepository, Object) 
    */
-  public static <T> T confirmObjectNeverNull(@Nullable T object) throws ResponseException {
+  public static <T> T confirmNotNull(@Nullable T object) throws ResponseException {
     if (object == null) {
       throw new BadRequest400Exception("Missing object");
     }
-    assert !isEntityAssertion(object) : String.format(
-        "This method is not for entity objects. Use findOrThrow404(): %s", getEntityClass(object));
+    assert !isEntityAssertion(object) : getNonEntityErrorMessage(object);
     return object;
+  }
+
+  /**
+   * Use when a non-entity object should not be null. Throws a BadRequest400Exception if null. If testing for an
+   * entity by its id, you should use findOrThrow404(T object, Object id), which return a NOT_FOUND (404).
+   * @param object The non-entity object to test.
+   * @param label A String to identify the bad value, usually a property name, like ID.
+   * @param <T> The object type
+   * @return object, only if it's not null
+   * @throws ResponseException BAD_REQUEST (400) if object is null
+   */
+  public static <T> T confirmNotNull(@Nullable T object, String label) throws ResponseException {
+    if (object == null) {
+      throw new BadRequest400Exception(String.format("Missing object: %s", label));
+    }
+    assert !isEntityAssertion(object) : getNonEntityErrorMessage(object);
+    return object;
+  }
+
+  private static <T> String getNonEntityErrorMessage(final @NotNull T object) {
+    return String.format(
+        "This method is not for entity objects. Use findOrThrow404(): %s", getEntityClass(object));
   }
 
 //   This used to work. Then it broke, and now it works again.
@@ -159,6 +180,36 @@ public enum PojoUtility {
   }
   
   /**
+   * Converts the array or ordered elements into a Set of the type specified by the constructor. For
+   * example, to construct a TreeSet from three elements, you could do this:
+   * <pre>
+   *     {@literal Set<String>} set = asSet(TreeSet::new, "Red", "White", "Blue");
+   * </pre>
+   * @param constructor The constructor or other function to convert a List to a Set
+   * @param array the items of type T, or an array of type T
+   * @param <T> The type of items in the Set
+   * @return A Set of the type generated by {@code constructor}, containing the elements in {@code array}.
+   */
+  @SafeVarargs
+  public static <T> Set<T> asSet(Function<List<T>, Set<T>> constructor, T... array) {
+    return constructor.apply(Arrays.asList(array));
+  }
+
+  /**
+   * Converts the array or ordered elements into a Set. For example, you could do this:
+   * <pre>
+   *     {@literal Set<String>} set = toSet("Red", "White", "Blue");
+   * </pre>
+   *
+   * @param array       the items of type T, or an array of type T
+   * @param <T>         The type of items in the Set
+   * @return A Set containing the elements in {@code array}.
+   */
+  public static <T> Set<T> toSet(T... array) {
+    return new HashSet<>(Arrays.asList(array));
+  }
+
+  /**
    * Use when a value should be null. For example, if a field should not be initialized, such as the ID of an entity 
    * that is about to be created, or an end-time for an operation that has not yet ended.
    * @param object The object that should be null.
@@ -168,6 +219,19 @@ public enum PojoUtility {
     if (object != null) {
 	    //noinspection StringConcatenation
 	    throw new BadRequest400Exception("non-null value: " + object);
+    }
+  }
+
+  /**
+   * Use when a value should be null. For example, if a field should not be initialized, such as the ID of an entity
+   * that is about to be created, or an end-time for an operation that has not yet ended.
+   * @param object The object that should be null.
+   * @param label A String to identify the bad value, usually a property name, like ID.
+   * @throws ResponseException BAD_REQUEST (400) if the object is not null.
+   */
+  public static void confirmNull(@Nullable Object object, String label) throws ResponseException {
+    if (object != null) {
+      throw new BadRequest400Exception(String.format("Non null field %s = %s", label, object));
     }
   }
 
@@ -203,13 +267,30 @@ public enum PojoUtility {
   /**
    * Returns the String. Throws a ResponseException if the String is null or empty. 
    * The return value is usually not used, since this is just to test for valid data.
+   * It returns the first parameter, so it may be used in function chaining.
    * @param s The String
    * @return s
    * @throws ResponseException BAD_REQUEST (400) if the String is null or empty
    */
   public static String confirmNotEmpty(@Nullable String s) throws ResponseException {
     if ((s == null) || s.isEmpty()) {
-      throw new BadRequest400Exception(String.format("Null or empty value: \"%s\"", s));
+      throw new BadRequest400Exception("Null or empty value.");
+    }
+    return s;
+  }
+
+  /**
+   * Returns the String. Throws a ResponseException if the String is null or empty.
+   * The return value is usually not used, since this is just to test for valid data.
+   * It returns the first parameter, so it may be used in function chaining.
+   * @param s The String
+   * @param label The label to describe the empty value in the exception message.
+   * @return s
+   * @throws ResponseException BAD_REQUEST (400) if the String is null or empty
+   */
+  public static String confirmNotEmpty(@Nullable String s, String label) throws ResponseException {
+    if ((s == null) || s.isEmpty()) {
+      throw new BadRequest400Exception(String.format("Null or empty value for : \"%s\"", label));
     }
     return s;
   }

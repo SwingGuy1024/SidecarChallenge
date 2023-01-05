@@ -35,17 +35,19 @@ public class ApiOriginFilter implements javax.servlet.Filter {
     if (log.isDebugEnabled()) {
       if (request instanceof RequestFacade) {
         RequestFacade facade = (RequestFacade) request;
-        log.debug("Request URI: {}", charFilter(facade.getRequestURI()));
+        String method = facade.getMethod();
+        log.debug("RF Request URI: {} {}", method, charFilter(facade.getRequestURI()));
       } else if (request instanceof HttpServletRequestWrapper) {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) ((HttpServletRequestWrapper)request).getRequest();
-        log.debug(httpServletRequest.getRequestURI());
-      } else if ((request instanceof ServletRequestWrapper) && (((ServletRequestWrapper) request).getRequest() instanceof HttpServletRequest)) {
+        HttpServletRequest hsr = (HttpServletRequest) ((HttpServletRequestWrapper)request).getRequest();
+        log.debug("HW Request URI: {} {}", hsr.getMethod(), hsr.getRequestURI());
+      } else if ((request instanceof ServletRequestWrapper)
+              && (((ServletRequestWrapper) request).getRequest() instanceof HttpServletRequest)) {
         final ServletRequest wrapped = ((ServletRequestWrapper) request).getRequest();
         final HttpServletRequest hsr = (HttpServletRequest) wrapped;
         String uri = hsr.getRequestURI();
-        log.debug(charFilter(uri));
+        log.debug("SW Request URI: {} {}", hsr.getMethod(), charFilter(uri));
       } else {
-        log.debug("Request of {}", request.getClass());
+        log.debug("Request URI:    ??? {}", request.getClass());
       }
     }
 
@@ -67,7 +69,7 @@ public class ApiOriginFilter implements javax.servlet.Filter {
   private static final Pattern CLOSE_BRACE_PATTERN = Pattern.compile("%7D");
 
   /**
-   *  Replace %7B and %7D with curly braces in url paths
+   *  Replace "%7B" and "%7D" with curly braces in url paths
    * @param request The request string
    * @return the corrected String
    */

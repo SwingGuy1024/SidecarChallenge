@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 /**
  * <p>Created by IntelliJ IDEA.
@@ -21,7 +23,10 @@ import javax.persistence.OneToMany;
 @Entity
 public class MenuItem implements Serializable {
   private Integer id;
+
+  @NotEmpty
   private String name;
+  @NotNull
   private BigDecimal itemPrice;
   private Collection<MenuItemOption> allowedOptions = new LinkedList<>();
 

@@ -16,6 +16,8 @@ public class NotFound404Exception extends ResponseException {
 	public NotFound404Exception(final String message) {
 		super(message);
 	}
+	
+	public NotFound404Exception(final Class<?> entityClass) { super(entityClass.getSimpleName()); }
 
 	/**
 	 * Construct a NotFound404Exception from an entity class and an ID, with a descriptive message containing both.

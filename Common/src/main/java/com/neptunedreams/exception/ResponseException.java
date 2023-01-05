@@ -23,7 +23,7 @@ public abstract class ResponseException extends RuntimeException {
 	private final HttpStatus httpStatus;
 
 	/**
-	 * Create a ResponseException with the specified status and error message
+	 * Create a ResponseException with the specified status and error message.
 	 *
 	 * @param message the message
 	 */
@@ -33,7 +33,7 @@ public abstract class ResponseException extends RuntimeException {
 	}
 
 	/**
-	 * Create a ResponseException with the specified status, error message, and cause
+	 * Create a ResponseException with the specified status, error message, and cause.
 	 *
 	 * @param message the message
 	 * @param cause   the cause
@@ -41,6 +41,15 @@ public abstract class ResponseException extends RuntimeException {
 	@SuppressWarnings("WeakerAccess")
 	public ResponseException(String message, Throwable cause) {
 		super(clean(message), cause);
+		httpStatus = extractStatus(getClass());
+	}
+
+	/**
+	 * Wrap another Exception or Error in a ResponseException.
+	 * @param t The Exception or Error
+	 */
+	public ResponseException(Throwable t) {
+		super(t);
 		httpStatus = extractStatus(getClass());
 	}
 
@@ -77,8 +86,11 @@ public abstract class ResponseException extends RuntimeException {
 	 */
 	private static <E extends ResponseException> HttpStatus extractStatus(Class<E> exceptionClass) {
 		ResponseStatus responseStatus = exceptionClass.getDeclaredAnnotation(ResponseStatus.class);
+		if (responseStatus == null) {
+			throw new IllegalStateException("Missing ResponseStatus annotation on subclass of ResponseException.");
+		}
 		return responseStatus.value();
 	}
-	
+
 	private static String clean(String s) { return (s == null) ? "" : s; }
 }

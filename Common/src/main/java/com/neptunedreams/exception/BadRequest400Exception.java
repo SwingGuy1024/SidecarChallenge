@@ -20,4 +20,8 @@ public class BadRequest400Exception extends ResponseException {
 	public BadRequest400Exception(String message, Throwable cause) {
 		super(message, cause);
 	}
+
+	public BadRequest400Exception(Throwable t) {
+		super(t.getMessage(), t);
+	}
 }

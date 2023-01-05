@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 import com.fasterxml.jackson.core.type.TypeReference;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
@@ -28,7 +29,7 @@ public class PojoUtilityTest {
   @Test(expected = AssertionError.class)
   public void neverNullAssertionTest() {
     // NOTE: This test assumes assertions are turned on during testing. If assertions are off, this test will fail.
-    PojoUtility.confirmObjectNeverNull(new MenuItem());
+    PojoUtility.confirmNotNull(new MenuItem());
     testIfAssertionsAreOn(); // makes test pass if assertions are off.
   }
 
@@ -88,14 +89,14 @@ public class PojoUtilityTest {
   @Test
   public void testConfirmNeverNull() {
     String text = "0text".substring(1);
-    String confirmed = PojoUtility.confirmObjectNeverNull(text);
+    String confirmed = PojoUtility.confirmNotNull(text);
     assertEquals("1text".substring(1), confirmed);
   }
   
   @Test(expected = BadRequest400Exception.class)
   public void testConfirmNeverNull2() {
     //noinspection unused
-    User confirmed = PojoUtility.confirmObjectNeverNull(null);
+    PojoUtility.confirmNotNull(null);
     fail();
   }
 
@@ -103,12 +104,17 @@ public class PojoUtilityTest {
   public void testEntityAssertion() {
     try {
       //noinspection unused
-      MenuItem confirmed = PojoUtility.confirmObjectNeverNull(new TestClass());
-      fail();
+      PojoUtility.confirmNotNull(new MenuItem());
+      fail(); // Should fail when used on an Entity.
     } catch (AssertionError e) {
       System.out.printf("testEntityAssertion: %s%n", e.getMessage());
       MatcherAssert.assertThat(e.getMessage(), Matchers.containsString("MenuItem"));
     }
+  }
+
+  @Test(expected = BadRequest400Exception.class)
+  public void testEntityAssertionFail() {
+    PojoUtility.confirmNotNull(null);
   }
 
   @Test
@@ -187,7 +193,14 @@ public class PojoUtilityTest {
     MatcherAssert.assertThat(set, Matchers.containsInAnyOrder("Red", "White", "Blue"));
     MatcherAssert.assertThat(set, Matchers.hasSize(3));
   }
-  
+
+  @Test
+  public void testAsSet2() {
+    Set<String> set = PojoUtility.asSet(TreeSet::new, "Red", "White", "Blue");
+    assertThat(set, Matchers.containsInRelativeOrder("Blue", "Red", "White"));
+    assertThat(set, Matchers.hasSize(3));
+  }
+
   private static UserDto makeUser(String name, String pw) {
     UserDto userDto = new UserDto();
     userDto.setUsername(name);

@@ -12,7 +12,10 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.neptunedreams.framework.PojoUtility;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.jetbrains.annotations.Nullable;
@@ -30,7 +33,9 @@ public class MenuItemOption implements Serializable {
   private Integer id;
   @Nullable
   private MenuItem menuItem;
+  @NotNull
   private BigDecimal deltaPrice;
+  @NotEmpty
   private String name;
   private Collection<CustomerOrder> orders = new LinkedList<>();
 
@@ -132,4 +137,12 @@ public class MenuItemOption implements Serializable {
         ", name='" + name + '\'' +
         '}';
   }
+
+  public static void main(String[] args) {
+    System.out.println("String");
+    System.out.printf("isStringEntity: %s%n", PojoUtility.confirmNotNull("String")); // NON-NLS
+    System.out.println("MenuItemOption:");
+    System.out.printf("isEntity: %s%n", PojoUtility.confirmNotNull(new MenuItemOption())); // NON-NLS
+  }
+
 }

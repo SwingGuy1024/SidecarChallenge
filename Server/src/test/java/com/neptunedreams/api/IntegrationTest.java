@@ -5,10 +5,11 @@ import java.util.LinkedList;
 import java.util.List;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.neptunedreams.repository.MenuItemOptionRepository;
+import com.neptunedreams.repository.MenuItemRepository;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
@@ -18,8 +19,6 @@ import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.MenuItemOption;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
-import com.neptunedreams.repository.MenuItemOptionRepositoryWrapper;
-import com.neptunedreams.repository.MenuItemRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,18 +57,18 @@ public class IntegrationTest {
   private static final ObjectMapper objectMapper = new ObjectMapper();
 
   @Autowired
-  private MenuItemRepositoryWrapper menuItemRepositoryWrapper;
+  private MenuItemRepository menuItemRepository;
 
   @Autowired
-  private MenuItemOptionRepositoryWrapper menuItemOptionRepositoryWrapper;
+  private MenuItemOptionRepository menuItemOptionRepository;
 
   @Autowired
   private DataEngine dataEngine;
   
   @Test
   public void buildMenuTest() throws JsonProcessingException {
-    assertNotNull(menuItemRepositoryWrapper);
-    assertNotNull(menuItemOptionRepositoryWrapper);
+    assertNotNull(menuItemRepository);
+    assertNotNull(menuItemOptionRepository);
     assertNotNull(dataEngine);
 
     MenuItemDto caesarItemDto = buildMenuItem(LARGE_CAESAR_SALAD);
@@ -101,7 +100,7 @@ public class IntegrationTest {
     assertEquals(anchoviesId, anchovies.getId());
   }
   
-  private MenuItemDto findById(int id, Collection<MenuItemDto> menuItemDtos) {
+  private static MenuItemDto findById(int id, Collection<MenuItemDto> menuItemDtos) {
     for (MenuItemDto dto: menuItemDtos) {
       if (dto.getId() == id) {
         return dto;
@@ -110,7 +109,7 @@ public class IntegrationTest {
     throw new AssertionError(String.format("MenuItemDto with id %d not found", id));
   }
   
-  private MenuItemOptionDto findById(int id, MenuItemDto menuItem) {
+  private static MenuItemOptionDto findById(int id, MenuItemDto menuItem) {
     for (MenuItemOptionDto dto: menuItem.getAllowedOptions()) {
       if (dto.getId() == id) {
         return dto;
@@ -177,16 +176,16 @@ public class IntegrationTest {
 
   @After
   public void tearDown() {
-    List<MenuItem> menuItems = menuItemRepositoryWrapper.findAll();
+    List<MenuItem> menuItems = menuItemRepository.findAll();
     for (MenuItem menuItem: menuItems) {
       Collection<MenuItemOption> ops = menuItem.getAllowedOptions();
       menuItem.setAllowedOptions(new LinkedList<>());
-      menuItemRepositoryWrapper.save(menuItem);
-      menuItemOptionRepositoryWrapper.deleteInBatch(ops);
+      menuItemRepository.save(menuItem);
+      menuItemOptionRepository.deleteInBatch(ops);
     }
-    menuItemRepositoryWrapper.deleteInBatch(menuItems);
+    menuItemRepository.deleteInBatch(menuItems);
 
-    List<MenuItemOption> optionList = menuItemOptionRepositoryWrapper.findAll();
-    menuItemOptionRepositoryWrapper.deleteInBatch(optionList);
+    List<MenuItemOption> optionList = menuItemOptionRepository.findAll();
+    menuItemOptionRepository.deleteInBatch(optionList);
   }
 }

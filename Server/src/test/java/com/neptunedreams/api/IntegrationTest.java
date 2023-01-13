@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import com.neptunedreams.OpenAPI2SpringBoot;
-import com.neptunedreams.engine.DataEngine;
+import com.neptunedreams.service.MenuService;
 import com.neptunedreams.entity.MenuItem;
 import com.neptunedreams.entity.MenuItemOption;
 import com.neptunedreams.model.MenuItemDto;
@@ -63,30 +63,30 @@ public class IntegrationTest {
   private MenuItemOptionRepository menuItemOptionRepository;
 
   @Autowired
-  private DataEngine dataEngine;
+  private MenuService menuService;
   
   @Test
   public void buildMenuTest() throws JsonProcessingException {
     assertNotNull(menuItemRepository);
     assertNotNull(menuItemOptionRepository);
-    assertNotNull(dataEngine);
+    assertNotNull(menuService);
 
     MenuItemDto caesarItemDto = buildMenuItem(LARGE_CAESAR_SALAD);
     log.debug("Large Caesar Salad: \n{}", LARGE_CAESAR_SALAD);
 
-    Integer saladId = dataEngine.addMenuItemFromDto(caesarItemDto);
+    Integer saladId = menuService.addMenuItemFromDto(caesarItemDto);
     
     MenuItemDto pizzaItemDto = buildMenuItem(PIZZA_14_INCH);
     log.debug("Pizza - 14 inch\n{}", PIZZA_14_INCH);
-    Integer pizzaId = dataEngine.addMenuItemFromDto(pizzaItemDto);
+    Integer pizzaId = menuService.addMenuItemFromDto(pizzaItemDto);
 
     MenuItemOptionDto onionsDto = buildMenuItemOption(ONIONS_OPTION);
-    Integer onionId = dataEngine.addOption(pizzaId, onionsDto);
+    Integer onionId = menuService.addOption(pizzaId, onionsDto);
     
     MenuItemOptionDto anchoviesDto = buildMenuItemOption(ANCHOVIES_OPTION);
-    Integer anchoviesId = dataEngine.addOption(pizzaId, anchoviesDto);
+    Integer anchoviesId = menuService.addOption(pizzaId, anchoviesDto);
     
-    List<MenuItemDto> allItems = dataEngine.getAllMenuItems();
+    List<MenuItemDto> allItems = menuService.getAllMenuItems();
     System.out.println(allItems);
     MatcherAssert.assertThat(allItems, Matchers.hasSize(2));
 

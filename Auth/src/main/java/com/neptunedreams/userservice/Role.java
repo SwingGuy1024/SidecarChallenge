@@ -1,4 +1,4 @@
-package com.neptunedreams.engine;
+package com.neptunedreams.userservice;
 
 import java.util.Locale;
 import com.fasterxml.jackson.annotation.JsonCreator;

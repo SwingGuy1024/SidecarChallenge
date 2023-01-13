@@ -1,4 +1,4 @@
-package com.neptunedreams.engine;
+package com.neptunedreams.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NonNls;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import static com.neptunedreams.framework.PojoUtility.*;
 
@@ -25,15 +25,15 @@ import static com.neptunedreams.framework.PojoUtility.*;
  *
  * @author Miguel Mu\u00f1oz
  */
-@Component
-public class DataEngine {
-  private static final @NonNls Logger log = LoggerFactory.getLogger(DataEngine.class);
+@Service
+public class MenuService {
+  private static final @NonNls Logger log = LoggerFactory.getLogger(MenuService.class);
   private final MenuItemRepository menuItemRepository;
   private final MenuItemOptionRepository menuItemOptionRepository;
   private final ObjectMapper objectMapper;
 
   @Autowired
-  public DataEngine(
+  public MenuService(
       final MenuItemRepository menuItemRepository,
       final MenuItemOptionRepository menuItemOptionRepository,
       final ObjectMapper objectMapper

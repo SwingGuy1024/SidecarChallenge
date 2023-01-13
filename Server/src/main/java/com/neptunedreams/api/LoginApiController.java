@@ -4,8 +4,8 @@ import java.util.Optional;
 import javax.validation.Valid;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.neptunedreams.auth.JwtTokenUtil;
-import com.neptunedreams.engine.Role;
-import com.neptunedreams.engine.UserEngine;
+import com.neptunedreams.userservice.Role;
+import com.neptunedreams.userservice.UserService;
 import com.neptunedreams.framework.ResponseUtility;
 import com.neptunedreams.model.LoginDto;
 import com.neptunedreams.model.UserDto;
@@ -30,7 +30,7 @@ public class LoginApiController implements LoginApi {
     
     private final UserRepository userRepository;
     
-    private final UserEngine userEngine;
+    private final UserService userService;
     
     @Override
     public Optional<NativeWebRequest> getRequest() {
@@ -43,12 +43,12 @@ public class LoginApiController implements LoginApi {
             final NativeWebRequest request,
             final ObjectMapper objectMapper,
             final UserRepository userRepository,
-            final UserEngine userEngine
+            final UserService userService
     ) {
         this.request = request;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
-        this.userEngine = userEngine;
+        this.userService = userService;
         log.trace("LoginApiController");
         if (log.isDebugEnabled()) {
             log.debug("Expired Token for testing: {}", JwtTokenUtil.instance.generateExpiredTokenForTesting("ADMIN", "ADMIN"));
@@ -58,7 +58,7 @@ public class LoginApiController implements LoginApi {
 
     @Override
     public ResponseEntity<String> login(final LoginDto loginDto) {
-        return ResponseUtility.serveOK(() -> userEngine.loginUser(loginDto));
+        return ResponseUtility.serveOK(() -> userService.loginUser(loginDto));
     }
 
     @SuppressWarnings("HardCodedStringLiteral")
@@ -83,11 +83,11 @@ public class LoginApiController implements LoginApi {
         if (log.isDebugEnabled()) {
             log.debug("Creating userDto {} with password {}", userDto.getUsername(), userDto.getPassword());
         }
-        userEngine.createUser(userDto, role);
+        userService.createUser(userDto, role);
     }
 
     @Override
     public ResponseEntity<Void> addCustomer(@Valid final UserDto userDto) {
-        return ResponseUtility.serveOK(() -> userEngine.createUser(userDto, Role.CUSTOMER));
+        return ResponseUtility.serveOK(() -> userService.createUser(userDto, Role.CUSTOMER));
     }
 }

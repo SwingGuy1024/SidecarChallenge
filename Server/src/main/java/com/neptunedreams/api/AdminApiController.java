@@ -2,9 +2,9 @@ package com.neptunedreams.api;
 
 import java.util.Optional;
 import javax.validation.Valid;
-import com.neptunedreams.engine.DataEngine;
-import com.neptunedreams.engine.Role;
-import com.neptunedreams.engine.UserEngine;
+import com.neptunedreams.service.MenuService;
+import com.neptunedreams.userservice.Role;
+import com.neptunedreams.userservice.UserService;
 import com.neptunedreams.framework.ResponseUtility;
 import com.neptunedreams.model.MenuItemDto;
 import com.neptunedreams.model.MenuItemOptionDto;
@@ -27,20 +27,20 @@ public class AdminApiController implements AdminApi {
 
     private final NativeWebRequest request;
     
-    private final DataEngine dataEngine;
+    private final MenuService menuService;
     
-    private final UserEngine userEngine;
+    private final UserService userService;
 
     @Autowired
     public AdminApiController(
-        final DataEngine dataEngine,
-        final UserEngine userEngine,
+        final MenuService menuService,
+        final UserService userService,
         @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
         final NativeWebRequest request
     ) {
         this.request = request;
-        this.dataEngine = dataEngine;
-        this.userEngine = userEngine;
+        this.menuService = menuService;
+        this.userService = userService;
         log.trace("instantiating AdminApiController");
     }
 
@@ -54,29 +54,29 @@ public class AdminApiController implements AdminApi {
     public ResponseEntity<String> addMenuItemOption(final Integer menuItemId, final MenuItemOptionDto optionDto) {
         log.trace("addMenuItemOption() to id {}: {}", menuItemId, optionDto);
 //        logHeaders(request, "AdminApiController addMenuItemOption");
-        return serveCreatedEntity(() -> dataEngine.addOption(menuItemId, optionDto));
+        return serveCreatedEntity(() -> menuService.addOption(menuItemId, optionDto));
     }
 
     @Override
     public ResponseEntity<String> addMenuItem(final MenuItemDto menuItemDto) {
         log.trace("addMenuItem: {}", menuItemDto);
-        return serveCreatedEntity(() -> dataEngine.addMenuItemFromDto(menuItemDto));
+        return serveCreatedEntity(() -> menuService.addMenuItemFromDto(menuItemDto));
     }
 
     @Override
     public ResponseEntity<String> addNewMenuItemOption(@Valid final MenuItemOptionDto menuItemOptionDto) {
         log.trace("addNewMenuItemOption(): {}", menuItemOptionDto);
-        return serveCreatedEntity(() -> dataEngine.createNewOption(menuItemOptionDto));
+        return serveCreatedEntity(() -> menuService.createNewOption(menuItemOptionDto));
     }
 
     @Override
     public ResponseEntity<Void> deleteOption(final Integer optionId) {
 //        logHeaders(request, "AdminApiController deleteOption");
-        return serveOK(() -> dataEngine.deleteById(optionId));
+        return serveOK(() -> menuService.deleteById(optionId));
     }
 
     @Override
     public ResponseEntity<Void> addAdmin(@Valid final UserDto userDto) {
-        return ResponseUtility.serveOK(() -> userEngine.createUser(userDto, Role.ADMIN));
+        return ResponseUtility.serveOK(() -> userService.createUser(userDto, Role.ADMIN));
     }
 }

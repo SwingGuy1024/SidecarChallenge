@@ -1,4 +1,4 @@
-package com.neptunedreams.engine;
+package com.neptunedreams.userservice;
 
 import java.util.function.Function;
 import javax.persistence.PersistenceException;
@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.AuthorizationServiceException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import static com.neptunedreams.exception.ExceptionUtils.*;
 import static org.apache.logging.log4j.util.Strings.*;
@@ -39,9 +39,9 @@ import static org.apache.logging.log4j.util.Strings.*;
  *
  * @author Miguel Mu\u00f1oz
  */
-@Component
-public class UserEngine {
-  private static final @NonNls Logger log = LoggerFactory.getLogger(UserEngine.class);
+@Service
+public class UserService {
+  private static final @NonNls Logger log = LoggerFactory.getLogger(UserService.class);
 
   private final UserRepository userRepository;
   private final ObjectMapper objectMapper;
@@ -51,7 +51,7 @@ public class UserEngine {
   private static final String USER_PASSWORD_COMBINATION_NOT_FOUND = "User/password Combination not found";
 
   @Autowired
-  public UserEngine(UserRepository userRepository, PasswordEncoder encoder, ObjectMapper objectMapper) {
+  public UserService(UserRepository userRepository, PasswordEncoder encoder, ObjectMapper objectMapper) {
     this.userRepository = userRepository;
     this.encoder = encoder;
     this.objectMapper = objectMapper;
@@ -143,7 +143,7 @@ public class UserEngine {
         // This stream doesn't have a collect() method that takes a Collector!
         .collect(
             StringBuilder::new,                 // Supplier<StringDigit>
-            UserEngine::appendAsChar,           // ObjectIntConsumer<StringBuilder>
+            UserService::appendAsChar,           // ObjectIntConsumer<StringBuilder>
             (b, b2) -> b.append(b2.toString())  // BiConsumer<StringBuilder, StringBuilder>
         ).toString();
   }

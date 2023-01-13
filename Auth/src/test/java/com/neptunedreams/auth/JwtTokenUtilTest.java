@@ -3,7 +3,7 @@ package com.neptunedreams.auth;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import org.junit.Test;
-import com.neptunedreams.engine.Role;
+import com.neptunedreams.userservice.Role;
 import com.neptunedreams.entity.User;
 
 import static com.neptunedreams.auth.JwtTokenUtil.*;

@@ -2,7 +2,7 @@ package com.neptunedreams.api;
 
 import java.util.List;
 import java.util.Optional;
-import com.neptunedreams.engine.DataEngine;
+import com.neptunedreams.service.MenuService;
 import com.neptunedreams.model.MenuItemDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,16 +21,16 @@ public class MenuItemApiController implements MenuItemApi {
 
   private final NativeWebRequest request;
 
-  private final DataEngine dataEngine;
+  private final MenuService menuService;
   
   @Autowired
   public MenuItemApiController(
       @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
       NativeWebRequest request,
-      DataEngine dataEngine
+      MenuService menuService
   ) {
     this.request = request;
-    this.dataEngine = dataEngine;
+    this.menuService = menuService;
   }
 
   @Override
@@ -41,12 +41,12 @@ public class MenuItemApiController implements MenuItemApi {
   @Override
   public ResponseEntity<MenuItemDto> getMenuItem(final Integer id) {
 //    logHeaders(request, "MenuItemApiController.getMenuItem(id)");
-    return serveOK(() -> dataEngine.getMenuItemDto(id));
+    return serveOK(() -> menuService.getMenuItemDto(id));
   }
 
   @Override
   public ResponseEntity<List<MenuItemDto>> getAll() {
 //    logHeaders(request, "MenuItemApiController.getAll()");
-    return serveOK(dataEngine::getAllMenuItems);
+    return serveOK(menuService::getAllMenuItems);
   }
 }

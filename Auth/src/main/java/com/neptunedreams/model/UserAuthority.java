@@ -2,7 +2,7 @@ package com.neptunedreams.model;
 
 import java.util.Collection;
 import java.util.Collections;
-import com.neptunedreams.engine.Role;
+import com.neptunedreams.userservice.Role;
 import org.springframework.security.core.GrantedAuthority;
 
 /**

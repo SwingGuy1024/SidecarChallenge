@@ -13,7 +13,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import com.neptunedreams.OpenAPI2SpringBoot;
-import com.neptunedreams.engine.Role;
+import com.neptunedreams.userservice.Role;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.core.Authentication;

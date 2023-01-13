@@ -1,4 +1,4 @@
-package com.neptunedreams.engine;
+package com.neptunedreams.userservice;
 
 import java.nio.charset.StandardCharsets;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.*;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = OpenAPI2SpringBoot.class)
 @Component
-public class UserEngineTest {
+public class UserServiceTest {
   
   @Autowired
   private ObjectMapper objectMapper;
@@ -45,7 +45,7 @@ public class UserEngineTest {
   private UserRepository userRepository;
 
   @Autowired
-  private UserEngine userEngine;
+  private UserService userService;
   
   @Autowired
   private PasswordEncoder encoder;
@@ -54,25 +54,25 @@ public class UserEngineTest {
   public void testMissingEmailAndUsername() {
     UserDto dto = makeUserDto("", "password", "", "1234", "23445");
     UserRepository localMockRepository = mock(UserRepository.class);
-    UserEngine localMockUserEngine = new UserEngine(localMockRepository, encoder, new ObjectMapper());
-    localMockUserEngine.createUser(dto, Role.ADMIN);
+    UserService localMockUserService = new UserService(localMockRepository, encoder, new ObjectMapper());
+    localMockUserService.createUser(dto, Role.ADMIN);
   }
   
   @Test(expected = BadRequest400Exception.class)
   public void testMissingContactInfo() {
     UserDto dto = makeUserDto("user", "pw", "", "", "1234");
     UserRepository localMockRepository = mock(UserRepository.class);
-    UserEngine localMockUserEngine = new UserEngine(localMockRepository, encoder, new ObjectMapper());
-    localMockUserEngine.createUser(dto, Role.ADMIN);
+    UserService localMockUserService = new UserService(localMockRepository, encoder, new ObjectMapper());
+    localMockUserService.createUser(dto, Role.ADMIN);
   }
   
   @Test
   public void testMissingUsername() {
     UserDto dto = makeUserDto("", "pw", "user1@nowhere.com", "", "");
     UserRepository localMockRepository = mock(UserRepository.class);
-    UserEngine localMockUserEngine = new UserEngine(localMockRepository, encoder, new ObjectMapper());
+    UserService localMockUserService = new UserService(localMockRepository, encoder, new ObjectMapper());
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-    localMockUserEngine.createUser(dto, Role.ADMIN);
+    localMockUserService.createUser(dto, Role.ADMIN);
     verify(localMockRepository).save(captor.capture());
     User captured = captor.getValue();
     assertEquals(captured.getUsername(), "user1@nowhere.com");
@@ -81,69 +81,69 @@ public class UserEngineTest {
   @Test(expected = Conflict409Exception.class)
   public void testUsernameConflict() {
     UserDto dto1 = makeUserDto("UserOne", "Pw1", "User1@nowhere.com", "1", "2");
-    userEngine.createUser(dto1, Role.CUSTOMER);
+    userService.createUser(dto1, Role.CUSTOMER);
     UserDto dto2 = makeUserDto("UserTwo", "pw2", "user2@nowhere.com", "2", "3");
-    userEngine.createUser(dto2, Role.CUSTOMER);
+    userService.createUser(dto2, Role.CUSTOMER);
   }
 
   @Test(expected = Conflict409Exception.class)
   public void testUsernameConflict2() {
     UserDto dto1 = makeUserDto("UserOne", "Pw1", "User1@nowhere.com", "1", "2");
-    userEngine.createUser(dto1, Role.CUSTOMER);
+    userService.createUser(dto1, Role.CUSTOMER);
     UserDto dto2 = makeUserDto("UserTwo", "pw2", "user2@nowhere.com", "3", "1");
-    userEngine.createUser(dto2, Role.CUSTOMER);
+    userService.createUser(dto2, Role.CUSTOMER);
   }
   
   @Test
   public void loginUser() {
     UserDto dto1 = makeUserDto("Alpha", "alpha", "alpha@test.test", "11m", "22Land");
-    userEngine.createUser(dto1, Role.CUSTOMER);
-    String token1 = userEngine.loginUser(makeLoginDto(dto1));
+    userService.createUser(dto1, Role.CUSTOMER);
+    String token1 = userService.loginUser(makeLoginDto(dto1));
     assertTrue(JwtTokenUtil.instance.validateToken(token1));
     assertEquals(Role.CUSTOMER.toString(), JwtTokenUtil.instance.getRoleFromToken(token1));
     
     LoginDto badDto = makeLoginDto("Alpha", "bravo"); 
     try {
-      userEngine.loginUser(badDto);
+      userService.loginUser(badDto);
       fail("Logged in user with bad password");
     } catch (AuthorizationServiceException ignored) { }
     
     LoginDto loginDto2 = makeLoginDto("Bravo", "bravo");
     try {
-      userEngine.loginUser(loginDto2);
+      userService.loginUser(loginDto2);
       fail("Logged in non-existent user: Bravo");
     } catch (AuthorizationServiceException ignored) { }
     
     // DUPLICATE!
     try {
-      userEngine.createUser(dto1, Role.CUSTOMER);
+      userService.createUser(dto1, Role.CUSTOMER);
       fail("Created same user twice!");
     } catch (Conflict409Exception ignored) { }
 
     UserDto dto3 = makeUserDto("Charlie", "charlie", "", "", "33Land");
     try {
-      userEngine.createUser(dto3, Role.CUSTOMER);
+      userService.createUser(dto3, Role.CUSTOMER);
       fail("Created user with no email or mobile phone");
     } catch (BadRequest400Exception ignored) { }
     
     UserDto dto4 = makeUserDto("", "delta", "", "4", "6");
     try {
-      userEngine.createUser(dto4, Role.CUSTOMER);
+      userService.createUser(dto4, Role.CUSTOMER);
       fail("Created user with no username or email");
     } catch (BadRequest400Exception ignored) { }
 
     final String echoEmail = "echo@test.test";
     UserDto dto5 = makeUserDto("", "echo", echoEmail, null, null);
-    userEngine.createUser(dto5, Role.ADMIN);
+    userService.createUser(dto5, Role.ADMIN);
     LoginDto loginDto5 = makeLoginDto(dto5);
     loginDto5.setUsername(echoEmail);
-    String token5 = userEngine.loginUser(loginDto5);
+    String token5 = userService.loginUser(loginDto5);
     String userName5 = JwtTokenUtil.instance.getUsernameFromToken(token5);
     assertEquals(echoEmail, userName5);
 
     try {
       UserDto dto6 = makeUserDto("Foxtrot", "foxtrot", "foxTrot@test.test", "1m1", "33Land");
-      userEngine.createUser(dto6, Role.CUSTOMER);
+      userService.createUser(dto6, Role.CUSTOMER);
     } catch (Conflict409Exception e) {
       e.printStackTrace();
     }
@@ -153,9 +153,9 @@ public class UserEngineTest {
   public void testIsRealUser() {
     // User "phantom" doesn't exist.
     User user = userRepository.getOne("Phantom"); // returns a proxy even if no user is found
-    assertFalse(userEngine.isRealUser(user));
+    assertFalse(userService.isRealUser(user));
     user = userRepository.findByUsername("Phantom"); // Returns null if not found
-    assertFalse(userEngine.isRealUser(user));
+    assertFalse(userService.isRealUser(user));
   }
 
   private User makeUser(String username, String password, String email, String mobilePhone, String landPhone) {
@@ -190,11 +190,11 @@ public class UserEngineTest {
   @Test
   public void testDigitFilter() {
     String s = "1abc2!@#$%^&*()_+3{}|[]“‘«”’»4defghijklmnop5qrstuv6wxyz7ABCDEFGHIJKLMNOP8QRSTUV9WXYZ0,./<>?≤≥\u0660€\u0661‹\u0662›\u0663‡\u0664°\u0665ª·\u0666º‚\u0667¡™£¢∞§¶•\u0668\u0669\u06E0\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9";
-    String filtered = UserEngine.removeNonDigits(s);
+    String filtered = UserService.removeNonDigits(s);
     String expected = "1234567890\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669\u06F0\u06F1\u06F2\u06F3\u06F4\u06F5\u06F6\u06F7\u06F8\u06F9";
     assertEquals(expected, filtered);
     
-    assertNull(UserEngine.removeNonDigits(null));
+    assertNull(UserService.removeNonDigits(null));
   }
   
   @Bean
